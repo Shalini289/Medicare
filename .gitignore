@@ -1,0 +1,55 @@
+# ----------------------------
+# 📦 Node Modules (ALL)
+# ----------------------------
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# ----------------------------
+# 🔐 Environment Variables
+# ----------------------------
+.env
+.env.local
+frontend/.env.local
+backend/.env
+
+# ----------------------------
+# 🧠 Next.js (Frontend)
+# ----------------------------
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# ----------------------------
+# 🗄️ Backend Logs
+# ----------------------------
+backend/logs/
+*.log
+
+# ----------------------------
+# 🗄️ Database
+# ----------------------------
+*.db
+
+# ----------------------------
+# 💻 IDE / Editor
+# ----------------------------
+.vscode/
+.idea/
+
+# ----------------------------
+# 📂 OS Files
+# ----------------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------------
+# 🚀 Deployment
+# ----------------------------
+.vercel
+
+# ----------------------------
+# 📦 Optional Lock Files
+# ----------------------------
+# package-lock.json
+# yarn.lock
