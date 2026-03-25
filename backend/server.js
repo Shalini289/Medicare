@@ -7,8 +7,8 @@ const cors = require("cors");
 const app = express();
 
 
-// ✅ Middleware
-app.use(express.json());
+
+
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -25,6 +25,8 @@ app.use(cors({
   },
   credentials: true
 }));
+
+app.use(express.json());
 
 app.options("/", cors());
 

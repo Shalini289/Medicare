@@ -10,6 +10,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 // CHECK
 router.post("/check", async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+
     const { patientName, symptoms } = req.body;
 
     if (!patientName || !symptoms) {
@@ -18,16 +20,22 @@ router.post("/check", async (req, res) => {
 
     const specialization = detectDoctor(symptoms);
 
+    if (!specialization) {
+      return res.status(400).json({ error: "Invalid symptoms" });
+    }
+
     const count = await Appointment.countDocuments({
       doctorId: specialization
     });
 
-    const waitTime = calculateWaitTime(count);
+    res.json({
+      specialization,
+      appointments: count
+    });
 
-    res.json({ specialization, waitTime });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
