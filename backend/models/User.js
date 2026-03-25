@@ -1,16 +1,30 @@
-const adminMiddleware = (req, res, next) => {
-  try {
-    if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({
-        error: "Admin access only"
-      });
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true
+    },
+
+    password: {
+      type: String,
+      required: true
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user"
     }
+  },
+  { timestamps: true }
+);
 
-    next();
-
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-module.exports = adminMiddleware;
+module.exports = mongoose.model("User", userSchema);
