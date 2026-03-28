@@ -2,35 +2,55 @@ const express = require("express");
 const router = express.Router();
 const Groq = require("groq-sdk");
 
+if (!process.env.GROQ_API_KEY) {
+  console.warn("⚠️ GROQ_API_KEY not set");
+}
+
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-router.post("/chat", async (req, res) => {
+// ✅ FIXED ROUTE → matches frontend
+router.post("/", async (req, res) => {
   try {
     const { message } = req.body;
 
+    // ✅ validation
+    if (!message) {
+      return res.status(400).json({
+        message: "Message is required ❌"
+      });
+    }
+
+    // ✅ API call
     const completion = await groq.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: "llama-3.1-8b-instant",
       messages: [
         {
           role: "system",
           content:
-            "You are a healthcare assistant. Suggest doctor type only."
+            "You are a healthcare assistant. Suggest ONLY doctor specialization like cardiologist, dermatologist, etc."
         },
         {
           role: "user",
           content: message
         }
-      ]
+      ],
+      temperature: 0.7
     });
 
-    res.json({
-      reply: completion.choices[0].message.content
-    });
+    const reply =
+      completion?.choices?.[0]?.message?.content || "No response";
+
+    res.json({ reply });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("GROQ ERROR 👉", err.message);
+
+    res.status(500).json({
+      message: "AI service failed ❌",
+      error: err.message
+    });
   }
 });
 

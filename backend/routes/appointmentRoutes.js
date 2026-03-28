@@ -8,9 +8,14 @@ const calculateWaitTime = require("../utils/queue");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // CHECK
+// CHECK (FINAL)
 router.post("/check", async (req, res) => {
   try {
     console.log("BODY:", req.body);
+
+    if (!req.body) {
+      return res.status(400).json({ error: "No body received" });
+    }
 
     const { patientName, symptoms } = req.body;
 
@@ -18,19 +23,18 @@ router.post("/check", async (req, res) => {
       return res.status(400).json({ error: "Missing fields" });
     }
 
+    // 🔍 detect specialization
     const specialization = detectDoctor(symptoms);
 
-    if (!specialization) {
-      return res.status(400).json({ error: "Invalid symptoms" });
-    }
+    // ⏳ count existing appointments (approx queue)
+    const count = await Appointment.countDocuments();
 
-    const count = await Appointment.countDocuments({
-      doctorId: specialization
-    });
+    const waitTime = calculateWaitTime(count);
 
     res.json({
+      message: "Recommendation generated",
       specialization,
-      appointments: count
+      waitTime
     });
 
   } catch (error) {
@@ -42,35 +46,62 @@ router.post("/check", async (req, res) => {
 // BOOK
 router.post("/book", authMiddleware, async (req, res) => {
   try {
-    const { patientName, symptoms, doctorId, slot } = req.body;
+    const { patientName, symptoms, doctorId, slot, appointmentDate } = req.body;
 
+    // ✅ safety check (prevents crash)
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized ❌" });
+    }
+
+    // ✅ validation
+    if (!patientName || !symptoms || !doctorId || !slot || !appointmentDate) {
+      return res.status(400).json({
+        message: "All fields are required ❌"
+      });
+    }
+
+    // ✅ validate doctorId
     if (!mongoose.Types.ObjectId.isValid(doctorId)) {
-      return res.status(400).json({ error: "Invalid doctorId" });
+      return res.status(400).json({ message: "Invalid doctorId ❌" });
     }
 
-    const exists = await Appointment.findOne({ doctorId, slot });
+    // ✅ prevent double booking (IMPORTANT FIX)
+    const exists = await Appointment.findOne({
+      doctorId,
+      slot,
+      appointmentDate: new Date(appointmentDate)
+    });
+
     if (exists) {
-      return res.status(400).json({ error: "Slot already booked" });
+      return res.status(409).json({
+        message: "Slot already booked ❌"
+      });
     }
 
+    // ✅ create appointment
     const appt = new Appointment({
       patientName,
       symptoms,
       doctorId,
       slot,
-      userId: req.user.id,
-      time: new Date()
+      appointmentDate,
+      userId: req.user.id
     });
 
     await appt.save();
 
-    res.json({ message: "Booked", appt });
+    res.status(201).json({
+      message: "Appointment booked successfully ✅",
+      appt
+    });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      message: "Server error ❌",
+      error: err.message
+    });
   }
 });
-
 // MY APPOINTMENTS
 router.get("/my", authMiddleware, async (req, res) => {
   const data = await Appointment.find({ userId: req.user.id })
