@@ -146,14 +146,24 @@ const css = `
 
   /* Bubble */
   .bubble {
-    max-width:72%;padding:12px 16px;border-radius:16px;
-    font-size:14px;line-height:1.65;word-break:break-word;
-    position:relative;
-  }
+  max-width: 72%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.65;
+
+  /* 🔥 FINAL TEXT FIX */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+
+  position: relative;
+}
   .bubble.user {
-    background:var(--user-bg);color:#fff;
-    border-bottom-right-radius:4px;
-  }
+  background: var(--user-bg);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
   .bubble.bot {
     background:var(--bot-bg);color:var(--text);
     border:1px solid var(--border);
@@ -257,19 +267,25 @@ export default function Chatbot() {
   }, [messages, typing]);
 
   const getBotResponse = async (message) => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      const data = await res.json();
-      return data.reply;
-    } catch (err) {
-      return "Server error ❌";
-    }
-  };
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
 
+    const data = await res.json();
+
+    return data; // 🔥 return full object
+
+  } catch (err) {
+    return {
+      reply: "Server error ❌",
+      specialist: "",
+      urgent: false
+    };
+  }
+};
   const sendMessage = async (text) => {
     const msg = text ?? input;
     if (!msg.trim()) return;
@@ -278,10 +294,69 @@ export default function Chatbot() {
     setInput("");
     setTyping(true);
 
-    const reply = await getBotResponse(msg);
+   const ai = await getBotResponse(msg);
 
-    setTyping(false);
-    setMessages(prev => [...prev, { text: reply, sender: "bot", time: timestamp() }]);
+setTyping(false);
+
+// 💬 AI reply
+setMessages(prev => [
+  ...prev,
+  { text: ai.reply, sender: "bot", time: timestamp() }
+]);
+
+// ⚠️ Urgency detection
+if (ai.urgent) {
+  setMessages(prev => [
+    ...prev,
+    {
+      text: "⚠️ This might be serious. Please consult a doctor immediately.",
+      sender: "bot",
+      time: timestamp()
+    }
+  ]);
+}
+let specialist = ai.specialist || "general_physician";
+// 👨‍⚕️ Fetch doctors
+if (specialist) {
+  try {
+    const spec = ai.specialist
+  ?.toLowerCase()
+  .replace(/\s+/g, "_");
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/doctors/${spec}`
+    );
+
+    const data = await res.json();
+
+console.log("RAW DOCTOR RESPONSE 👉", data);
+
+// ✅ normalize response
+const doctors = Array.isArray(data) ? data : data.doctors || [];
+
+console.log("DOCTORS FINAL 👉", doctors);
+
+if (doctors.length > 0) {
+      const docList = doctors
+        .slice(0, 3)
+        .map(d => `👨‍⚕️ ${d.name} (${d.experience} yrs)`)
+        .join("\n");
+console.log("AI FULL RESPONSE 👉", ai);
+      setMessages(prev => [
+        ...prev,
+        {
+          text: `Here are some recommended doctors:\n${docList}`,
+          sender: "bot",
+          time: timestamp()
+        }
+        
+      ]
+    );
+    console.log("DOCTORS 👉", doctors);}
+  } catch (err) {
+    console.log("Doctor fetch error", err);
+  }
+}
   };
 
   return (
