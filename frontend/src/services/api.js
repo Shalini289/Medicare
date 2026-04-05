@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/$/, "");;
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/$/, "");
 
 export const predictAPI = (data) =>
   axios.post(`${API_URL}/api/predict`, data);

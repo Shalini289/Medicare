@@ -221,26 +221,38 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const strength = getStrength(password);
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    if (!name || !email || !password) { alert("Please fill all fields ❌"); return; }
-    try {
-      setLoading(true);
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      await axios.post(`${API_URL}/api/auth/register`, { name, email, password });
-      setSuccess(true);
-      setTimeout(() => router.push("/login"), 900);
-    } catch (err) {
-      alert(err.response?.data?.message || "User already exists ❌");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleRegister = async () => {
+  if (form.password !== form.confirmPassword) {
+    alert("❌ Passwords do not match");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        password: form.password
+      })
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <>
@@ -294,7 +306,6 @@ export default function Register() {
             <motion.div className="input-wrap"
               initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}>
-              <span className="input-icon">👤</span>
               <input className="field" placeholder="Full name"
                 value={name} onChange={e => setName(e.target.value)} />
             </motion.div>
@@ -303,7 +314,6 @@ export default function Register() {
             <motion.div className="input-wrap"
               initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.38, duration: 0.4 }}>
-              <span className="input-icon">📧</span>
               <input className="field" type="email" placeholder="Email address"
                 value={email} onChange={e => setEmail(e.target.value)} />
             </motion.div>
@@ -312,9 +322,15 @@ export default function Register() {
             <motion.div className="input-wrap"
               initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.46, duration: 0.4 }}>
-              <span className="input-icon">🔑</span>
               <input className="field" type="password" placeholder="Password"
                 value={password} onChange={e => setPassword(e.target.value)} />
+            </motion.div>
+
+             <motion.div className="input-wrap"
+              initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.46, duration: 0.4 }}>
+              <input className="field" type=" Confirm password" placeholder="Confirm Password"
+                value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
             </motion.div>
 
             {/* Strength bar */}
@@ -349,7 +365,7 @@ export default function Register() {
               <span className="btn-inner">
                 {loading
                   ? <><div className="spinner" /> Creating account…</>
-                  : <>🚀 &nbsp;Create Account</>
+                  : <>&nbsp;Create Account</>
                 }
               </span>
             </motion.button>

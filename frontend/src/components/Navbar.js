@@ -219,6 +219,7 @@ const NAV_LINKS = [
   { href: "/",          label: "Home"       },
   { href: "/dashboard", label: "My Bookings" },
   { href: "/admin",     label: "Admin"      },
+  {href: "/doctor",     label: "Doctors"}
 ];
 
 export default function Navbar() {
