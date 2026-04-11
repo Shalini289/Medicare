@@ -1,0 +1,121 @@
+/* ===== LOGIN PAGE WRAPPER ===== */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff0f5, #ffffff);
+  padding: 20px;
+}
+
+/* ===== LOGIN CARD ===== */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  padding: 40px 30px;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(212, 112, 143, 0.15);
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+/* ===== LOGO / TITLE ===== */
+.login-card h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #d4708f;
+  margin-bottom: 10px;
+}
+
+.login-card p {
+  color: #777;
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+/* ===== INPUT GROUP ===== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.3s;
+  background: #fafafa;
+}
+
+.login-form input:focus {
+  border-color: #d4708f;
+  box-shadow: 0 0 0 4px rgba(212, 112, 143, 0.12);
+  background: white;
+}
+
+/* ===== LOGIN BUTTON ===== */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #d4708f, #b85c7b);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(212, 112, 143, 0.25);
+}
+
+/* ===== FOOTER LINKS ===== */
+.login-footer {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.login-footer span {
+  color: #d4708f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-footer span:hover {
+  text-decoration: underline;
+}
+
+/* ===== EXTRA OPTIONS ===== */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 15px;
+}
+
+.login-options a {
+  color: #d4708f;
+  text-decoration: none;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

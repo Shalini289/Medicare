@@ -1,14 +1,15 @@
-const groq = require("../config/groq");
+const Chat = require("../models/Chat");
 
-const symptomCheck = async (req, res) => {
-  const { symptoms } = req.body;
-
-  const ai = await groq.chat.completions.create({
-    model: "llama3-8b-8192",
-    messages: [{ role: "user", content: symptoms }]
+const sendMessage = async (req, res) => {
+  const msg = await Chat.create({
+    sender: req.user.id,
+    receiver: req.body.receiver,
+    message: req.body.message
   });
 
-  res.json({ result: ai.choices[0].message.content });
+  req.app.get("io").emit("receiveMessage", msg);
+
+  res.json(msg);
 };
 
-module.exports = { symptomCheck };
+module.exports = { sendMessage };

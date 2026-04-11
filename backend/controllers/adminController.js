@@ -3,7 +3,6 @@ const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
 const Medicine = require("../models/Medicine");
 const Order = require("../models/Order");
-const Report = require("../models/Report");
 const Hospital = require("../models/Hospital");
 
 //
@@ -16,8 +15,13 @@ const getDashboardStats = async (req, res) => {
     const totalAppointments = await Appointment.countDocuments();
     const totalOrders = await Order.countDocuments();
 
-    const revenueData = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: "$total" } } }
+    const revenueAgg = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          revenue: { $sum: "$total" }
+        }
+      }
     ]);
 
     res.json({
@@ -25,10 +29,11 @@ const getDashboardStats = async (req, res) => {
       totalDoctors,
       totalAppointments,
       totalOrders,
-      revenue: revenueData[0]?.total || 0
+      revenue: revenueAgg[0]?.revenue || 0
     });
+
   } catch (err) {
-    res.status(500).json({ msg: "Dashboard error" });
+    res.status(500).json({ msg: err.message });
   }
 };
 
@@ -36,147 +41,227 @@ const getDashboardStats = async (req, res) => {
 // 👤 USER MANAGEMENT
 //
 const getUsers = async (req, res) => {
-  const users = await User.find().select("-password");
-  res.json(users);
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const deleteUser = async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.json({ msg: "User deleted" });
+  try {
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      msg: "User deleted"
+    });
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 //
 // 🧑‍⚕️ DOCTOR MANAGEMENT
 //
 const getDoctorsAdmin = async (req, res) => {
-  const doctors = await Doctor.find();
-  res.json(doctors);
+  try {
+    const doctors = await Doctor.find();
+    res.json(doctors);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const addDoctor = async (req, res) => {
-  const doctor = await Doctor.create(req.body);
-  res.json(doctor);
+  try {
+    const doctor = await Doctor.create(req.body);
+    res.json(doctor);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+const updateDoctor = async (req, res) => {
+  try {
+    const doctor = await Doctor.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.json(doctor);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const deleteDoctor = async (req, res) => {
-  await Doctor.findByIdAndDelete(req.params.id);
-  res.json({ msg: "Doctor removed" });
+  try {
+    await Doctor.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      msg: "Doctor deleted"
+    });
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 //
-// 📅 APPOINTMENT MANAGEMENT
+// 📅 APPOINTMENTS
 //
 const getAppointmentsAdmin = async (req, res) => {
-  const appts = await Appointment.find()
-    .populate("user", "name")
-    .populate("doctor", "name");
+  try {
+    const appointments = await Appointment.find()
+      .populate("user doctor");
 
-  res.json(appts);
+    res.json(appointments);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const updateAppointmentStatus = async (req, res) => {
-  const appt = await Appointment.findById(req.params.id);
+  try {
+    const appt = await Appointment.findById(req.params.id);
 
-  appt.status = req.body.status;
-  await appt.save();
+    appt.status = req.body.status;
+    await appt.save();
 
-  res.json(appt);
+    res.json(appt);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 //
-// 💊 MEDICINE MANAGEMENT
+// 💊 MEDICINE
 //
-const addMedicine = async (req, res) => {
-  const med = await Medicine.create(req.body);
-  res.json(med);
-};
-
 const getMedicinesAdmin = async (req, res) => {
-  const meds = await Medicine.find();
-  res.json(meds);
+  try {
+    const meds = await Medicine.find();
+    res.json(meds);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+const addMedicine = async (req, res) => {
+  try {
+    const med = await Medicine.create(req.body);
+    res.json(med);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const updateMedicine = async (req, res) => {
-  const med = await Medicine.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
+  try {
+    const med = await Medicine.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
 
-  res.json(med);
+    res.json(med);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const deleteMedicine = async (req, res) => {
-  await Medicine.findByIdAndDelete(req.params.id);
-  res.json({ msg: "Medicine deleted" });
+  try {
+    await Medicine.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      msg: "Medicine deleted"
+    });
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 //
-// 📦 ORDER MANAGEMENT
+// 📦 ORDERS
 //
 const getOrdersAdmin = async (req, res) => {
-  const orders = await Order.find()
-    .populate("user", "name")
-    .populate("items.medicine");
+  try {
+    const orders = await Order.find()
+      .populate("user items.medicine");
 
-  res.json(orders);
+    res.json(orders);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const updateOrderStatus = async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  try {
+    const order = await Order.findById(req.params.id);
 
-  order.status = req.body.status;
-  await order.save();
+    order.status = req.body.status;
+    await order.save();
 
-  res.json(order);
+    res.json(order);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 //
-// 🧾 REPORT MANAGEMENT
+// 🏥 HOSPITAL
 //
-const getReportsAdmin = async (req, res) => {
-  const reports = await Report.find().populate("user", "name");
-  res.json(reports);
-};
-
-//
-// 🏥 HOSPITAL MANAGEMENT
-//
-const addHospital = async (req, res) => {
-  const hospital = await Hospital.create(req.body);
-  res.json(hospital);
-};
-
 const getHospitalsAdmin = async (req, res) => {
-  const hospitals = await Hospital.find();
-  res.json(hospitals);
+  try {
+    const hospitals = await Hospital.find();
+    res.json(hospitals);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+const addHospital = async (req, res) => {
+  try {
+    const hospital = await Hospital.create(req.body);
+    res.json(hospital);
+
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 const updateHospitalBeds = async (req, res) => {
-  const hospital = await Hospital.findByIdAndUpdate(
-    req.params.id,
-    { beds: req.body.beds },
-    { new: true }
-  );
+  try {
+    const hospital = await Hospital.findByIdAndUpdate(
+      req.params.id,
+      { beds: req.body.beds },
+      { new: true }
+    );
 
-  res.json(hospital);
-};
+    res.json(hospital);
 
-//
-// 📊 ANALYTICS (ADVANCED)
-//
-const getMonthlyRevenue = async (req, res) => {
-  const data = await Order.aggregate([
-    {
-      $group: {
-        _id: { $month: "$createdAt" },
-        revenue: { $sum: "$total" }
-      }
-    },
-    { $sort: { "_id": 1 } }
-  ]);
-
-  res.json(data);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 };
 
 module.exports = {
@@ -187,24 +272,21 @@ module.exports = {
 
   getDoctorsAdmin,
   addDoctor,
+  updateDoctor,
   deleteDoctor,
 
   getAppointmentsAdmin,
   updateAppointmentStatus,
 
-  addMedicine,
   getMedicinesAdmin,
+  addMedicine,
   updateMedicine,
   deleteMedicine,
 
   getOrdersAdmin,
   updateOrderStatus,
 
-  getReportsAdmin,
-
-  addHospital,
   getHospitalsAdmin,
-  updateHospitalBeds,
-
-  getMonthlyRevenue
+  addHospital,
+  updateHospitalBeds
 };

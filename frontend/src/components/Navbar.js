@@ -2,10 +2,31 @@
 
 import "../styles/navbar.css";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const router = useRouter();
+
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  // Check token on load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      setLoggedIn(true);
+    }
+  }, []);
+
+  // Logout Function
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    setLoggedIn(false);
+
+    router.push("/login");
+  };
 
   return (
     <nav className="navbar">
@@ -15,7 +36,7 @@ export default function Navbar() {
         MediCare
       </div>
 
-      {/* LINKS */}
+      {/* NAV LINKS */}
       <ul className="nav-links">
         <li onClick={() => router.push("/doctors")}>Doctors</li>
         <li onClick={() => router.push("/pharmacy")}>Pharmacy</li>
@@ -29,19 +50,25 @@ export default function Navbar() {
 
         <NotificationBell />
 
-        <button
-          className="btn-ghost"
-          onClick={() => router.push("/notifications")}
-        >
-          🔔
-        </button>
+        {loggedIn ? (
+          <button
+            className="btn-primary"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn-primary"
+              onClick={() => router.push("/login")}
+            >
+              Login
+            </button>
 
-        <button
-          className="btn-primary"
-          onClick={() => router.push("/login")}
-        >
-          Login
-        </button>
+           
+          </>
+        )}
 
       </div>
 

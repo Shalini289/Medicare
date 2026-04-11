@@ -7,6 +7,7 @@ import "../styles/notification.css";
 import "../styles/health.css";
 import "../styles/hospital.css";
 import "../styles/family.css";
+import "../styles/admin.css";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";

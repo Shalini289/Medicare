@@ -1,11 +1,9 @@
-const extractText = require("../utils/extractText");
-const { analyzeText } = require("./aiService");
+const express = require("express");
+const router = express.Router();
 
-const processReport = async (filePath) => {
-  const text = await extractText(filePath);
-  const analysis = await analyzeText(text);
+const { register, login } = require("../controllers/authController");
 
-  return { text, analysis };
-};
+router.post("/register", register);
+router.post("/login", login);
 
-module.exports = { processReport };
+module.exports = router;

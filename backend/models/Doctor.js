@@ -9,4 +9,6 @@ const doctorSchema = new mongoose.Schema({
   rating: { type: Number, default: 0 }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Doctor", doctorSchema);
+module.exports =
+  mongoose.models.Doctor ||
+  mongoose.model("Doctor", doctorSchema);
