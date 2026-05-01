@@ -16,8 +16,8 @@ export default function Testimonials() {
       <div className="testimonials__grid">
         {TESTIMONIALS.map(({ name, city, text, color }) => (
           <div key={name} className={`testi-card testi-card--${color}`}>
-            <div className="testi-card__stars">★★★★★</div>
-            <p className="testi-card__text">"{text}"</p>
+            <div className="testi-card__stars">5.0 rating</div>
+            <p className="testi-card__text">&ldquo;{text}&rdquo;</p>
             <div className="testi-card__author">
               <div className={`testi-card__av testi-card__av--${color}`}>{name.charAt(0)}</div>
               <div>

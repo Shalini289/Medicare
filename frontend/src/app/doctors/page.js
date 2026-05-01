@@ -1,30 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getDoctors } from "../../services/doctorService";
 import DoctorCard from "../../components/DoctorCard";
 import Loader from "../../components/Loader";
 
 export default function DoctorsPage() {
   const [data, setData] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
   const [spec, setSpec] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  // 📥 Fetch doctors
+  // Fetch doctors
   useEffect(() => {
     getDoctors()
       .then(res => {
         const list = Array.isArray(res) ? res : [];
         setData(list);
-        setFiltered(list);
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // 🔍 Filter + Search
-  useEffect(() => {
+  // Filter and search
+  const filtered = useMemo(() => {
     let result = data;
 
     if (search) {
@@ -39,10 +37,10 @@ export default function DoctorsPage() {
       result = result.filter(d => d.specialization === spec);
     }
 
-    setFiltered(result);
+    return result;
   }, [search, spec, data]);
 
-  // 🎯 Unique specializations
+  // Unique specializations
   const specializations = [
     "all",
     ...new Set(data.map(d => d.specialization))

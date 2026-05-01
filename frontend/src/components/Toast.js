@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export default function Toast({ message, type = "success", duration = 3000, onClose }) {
   const [show, setShow] = useState(true);
 
-  // ⏱ Auto close
+  // Auto close
   useEffect(() => {
     if (!message) return;
 
@@ -15,7 +15,7 @@ export default function Toast({ message, type = "success", duration = 3000, onCl
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [message]);
+  }, [duration, message, onClose]);
 
   if (!message || !show) return null;
 

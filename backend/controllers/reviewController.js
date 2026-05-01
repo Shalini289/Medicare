@@ -85,6 +85,10 @@ const deleteReview = async (req, res) => {
 const markHelpful = async (req, res) => {
   const review = await Review.findById(req.params.id);
 
+  if (!review) {
+    return res.status(404).json({ msg: "Review not found" });
+  }
+
   review.helpful = (review.helpful || 0) + 1;
 
   await review.save();

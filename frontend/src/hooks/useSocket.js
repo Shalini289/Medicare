@@ -10,5 +10,5 @@ export default function useSocket(event, handler) {
     socket.on(event, handler);
 
     return () => socket.disconnect();
-  }, []);
+  }, [event, handler]);
 }

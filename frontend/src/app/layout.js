@@ -14,13 +14,16 @@ import Footer from "../components/Footer";
 
 export const metadata = {
   title: {
-    default: "MediCare — Healthcare that cares for you",
+    default: "MediCare - Healthcare that cares for you",
     template: "%s | MediCare",
   },
   description:
     "Book appointments with top-rated doctors, manage your family's health, and get expert care.",
   keywords: ["healthcare", "doctors", "appointments", "pharmacy", "India"],
   authors: [{ name: "MediCare" }],
+};
+
+export const viewport = {
   themeColor: "#D4708F",
 };
 
@@ -28,18 +31,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="app-body">
-
-        {/* NAVBAR */}
         <Navbar />
 
-        {/* MAIN CONTENT */}
         <main className="main-content">
           {children}
         </main>
 
-        {/* FOOTER */}
         <Footer />
-
       </body>
     </html>
   );

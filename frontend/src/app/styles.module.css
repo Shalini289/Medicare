@@ -1,11 +1,11 @@
-/* 🌌 Background */
+/* Background */
 body {
   margin: 0;
   background: linear-gradient(135deg, #667eea, #764ba2);
   font-family: "Segoe UI", sans-serif;
 }
 
-/* 📦 Container */
+/* Container */
 .container {
   max-width: 700px;
   margin: 40px auto;
@@ -18,7 +18,7 @@ body {
   animation: fadeIn 0.6s ease-in-out;
 }
 
-/* ✨ Title */
+/* Title */
 .title {
   text-align: center;
   margin-bottom: 10px;
@@ -28,7 +28,7 @@ body {
   color: transparent;
 }
 
-/* 📝 Inputs */
+/* Inputs */
 .input {
   width: 100%;
   padding: 12px;
@@ -49,7 +49,7 @@ body {
   background: rgba(255,255,255,0.3);
 }
 
-/* 🔘 Button */
+/* Button */
 .button {
   width: 100%;
   padding: 12px;
@@ -68,7 +68,7 @@ body {
   transform: translateY(-2px) scale(1.02);
 }
 
-/* 📦 Card */
+/* Card */
 .card {
   margin-top: 20px;
   padding: 15px;
@@ -81,7 +81,7 @@ body {
   transform: scale(1.01);
 }
 
-/* 👨‍⚕️ Doctor Card */
+/* Doctor Card */
 .doctorCard {
   margin-top: 12px;
   padding: 15px;
@@ -94,13 +94,13 @@ body {
   transform: translateY(-3px);
 }
 
-/* 🧑‍⚕️ Doctor Name */
+/* Doctor Name */
 .doctorTitle {
   margin: 0;
   font-size: 18px;
 }
 
-/* ⏱️ Slot Buttons */
+/* Slot Buttons */
 .slotBtn {
   margin: 5px;
   padding: 6px 12px;
@@ -116,12 +116,12 @@ body {
   background: #0072ff;
 }
 
-/* ✅ Selected Slot */
+/* Selected Slot */
 .selected {
   background: #28a745 !important;
 }
 
-/* 📌 Sticky Booking Bar */
+/* Sticky Booking Bar */
 .stickyBar {
   position: fixed;
   bottom: 0;
@@ -137,14 +137,14 @@ body {
   z-index: 1000;
 }
 
-/* ⏳ Loader */
+/* Loader */
 .loader {
   text-align: center;
   margin-top: 20px;
   opacity: 0.8;
 }
 
-/* ✨ Animation */
+/* Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;

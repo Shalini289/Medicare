@@ -8,7 +8,7 @@ export default function EmptyState({
     <div className="empty-state">
 
       {/* ICON */}
-      <div className="empty-icon">📭</div>
+      <div className="empty-icon">No data</div>
 
       {/* TITLE */}
       <h3>{title}</h3>

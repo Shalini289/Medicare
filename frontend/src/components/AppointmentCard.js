@@ -1,16 +1,20 @@
-import"../styles/card.css";
-export default function AppointmentCard({ item }) {
+import "../styles/card.css";
+
+export default function AppointmentCard({ item, onCancel, onRebook }) {
+  const isCancelled = item.status === "cancelled";
+
   return (
     <div className="appointment-card">
-
-      {/* TOP */}
       <div className="appointment-top">
         <div>
           <h3 className="doctor-name">
             {item.doctor?.name || "Doctor"}
           </h3>
           <p className="appointment-time">
-            📅 {item.date} • ⏰ {item.time}
+            {item.date} at {item.time}
+          </p>
+          <p className="appointment-meta">
+            {item.doctor?.specialization || "General consultation"}
           </p>
         </div>
 
@@ -19,12 +23,21 @@ export default function AppointmentCard({ item }) {
         </span>
       </div>
 
-      {/* BOTTOM */}
       <div className="appointment-footer">
-        <button className="btn-ghost">View</button>
-        <button className="btn-primary">Rebook</button>
+        <button
+          className="btn-ghost"
+          onClick={() => onCancel(item._id)}
+          disabled={isCancelled}
+        >
+          Cancel
+        </button>
+        <button
+          className="btn-primary"
+          onClick={() => onRebook(item)}
+        >
+          Rebook
+        </button>
       </div>
-
     </div>
   );
 }

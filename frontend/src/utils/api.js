@@ -1,16 +1,26 @@
 const BASE_URL = "http://localhost:5000";
 
-export const api = async (endpoint, options = {}) => {
-  const token = localStorage.getItem("token");
+export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOverride = null) => {
+  const legacyCall = typeof optionsOrMethod === "string";
+  const token = tokenOverride || localStorage.getItem("token");
+  const isFormData = body instanceof FormData || optionsOrMethod?.body instanceof FormData;
+  const options = legacyCall
+    ? {
+        method: optionsOrMethod,
+        body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
+      }
+    : optionsOrMethod;
+
+  const headers = {
+    ...(!isFormData ? { "Content-Type": "application/json" } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  };
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     cache: "no-store",
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...options.headers
-    }
+    headers,
   });
 
   let data = {};

@@ -7,5 +7,5 @@ export const formatTime = (time) => {
 };
 
 export const formatCurrency = (amount) => {
-  return `₹${amount}`;
+  return `Rs ${amount}`;
 };

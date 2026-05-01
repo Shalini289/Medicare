@@ -45,6 +45,22 @@
   color: #777;
 }
 
+.cart-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cart-actions button,
+.cart-clear {
+  border: 1px solid #ead1da;
+  border-radius: 8px;
+  background: #fff;
+  color: #8d3f59;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+
 /* ===== PRICE ===== */
 .cart-price {
   font-weight: 600;
@@ -63,4 +79,9 @@
 .cart-btn {
   width: 100%;
   margin-top: 10px;
+}
+
+.cart-clear {
+  width: 100%;
+  margin-top: 8px;
 }

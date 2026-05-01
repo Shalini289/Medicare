@@ -146,10 +146,18 @@
 /* ===== CARD ===== */
 .booking-card {
   width: 100%;
-  max-width: 420px;
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
+  max-width: 560px;
+  padding: 32px;
+  text-align: left;
+}
+
+.booking-card h2 {
+  font-size: 30px;
+}
+
+.booking-card .sub {
+  color: #6f6670;
+  margin: 6px 0 24px;
 }
 
 /* ===== FIELD ===== */
@@ -165,17 +173,21 @@
 
 .field input {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  padding: 12px;
   margin-top: 5px;
+}
+
+.field select {
+  margin-top: 5px;
+  padding: 12px;
+  width: 100%;
 }
 
 /* ===== SLOTS ===== */
 .slots {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: 10px;
 }
 
@@ -208,6 +220,9 @@
 
 /* ===== BUTTON ===== */
 .booking-card button {
-  width: 100%;
   margin-top: 15px;
+}
+
+.booking-card > .btn-primary {
+  width: 100%;
 }

@@ -2,73 +2,88 @@
 
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import"@/styles/chat.css";
+import { getMessages, sendChatMessage } from "@/services/chatService";
+import "@/styles/chat.css";
 
+const getSenderId = () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    return JSON.parse(atob(token.split(".")[1])).id;
+  } catch {
+    return null;
+  }
+};
 
 export default function ChatPage() {
-  const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-
+  const [senderId, setSenderId] = useState(null);
+  const socketRef = useRef(null);
   const bottomRef = useRef();
 
-  // 🔌 Connect socket
   useEffect(() => {
-    const s = io("http://localhost:5000");
-    setSocket(s);
-
-    s.on("receiveMessage", (msg) => {
-      setMessages(prev => [
-        ...prev,
-        { text: msg.message || msg, type: "received" }
-      ]);
+    queueMicrotask(() => {
+      setSenderId(getSenderId());
+      getMessages()
+        .then((items) => setMessages(Array.isArray(items) ? items : []))
+        .catch(() => setMessages([]));
     });
-
-    return () => s.disconnect();
   }, []);
 
-  // 📜 Auto scroll
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+    socketRef.current = socket;
+
+    socket.on("receiveMessage", (msg) => {
+      setMessages(prev => [...prev, msg]);
+    });
+
+    return () => {
+      socketRef.current = null;
+      socket.disconnect();
+    };
+  }, []);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 📤 Send message
-  const sendMessage = () => {
-    if (!message.trim() || !socket) return;
+  const sendMessage = async () => {
+    if (!message.trim()) return;
 
-    socket.emit("sendMessage", message);
-
-    setMessages(prev => [
-      ...prev,
-      { text: message, type: "sent" }
-    ]);
-
-    setMessage("");
+    try {
+      await sendChatMessage(message);
+      setMessage("");
+    } catch {
+      alert("Message failed");
+    }
   };
 
   return (
     <div className="chat-page">
-
-      {/* HEADER */}
       <div className="chat-header">
         <h3>Doctor Chat</h3>
         <span className="chat-status">Online</span>
       </div>
 
-      {/* MESSAGES */}
       <div className="chat-box">
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`chat-msg ${m.type === "sent" ? "sent" : "received"}`}
-          >
-            {m.text}
-          </div>
-        ))}
+        {messages.map((m, i) => {
+          const mine = (m.sender?._id || m.sender) === senderId;
+
+          return (
+            <div
+              key={m._id || i}
+              className={`chat-msg ${mine ? "sent" : "received"}`}
+            >
+              <span>{m.sender?.name || (mine ? "You" : "Care Team")}</span>
+              {m.message || m.text}
+            </div>
+          );
+        })}
         <div ref={bottomRef}></div>
       </div>
 
-      {/* INPUT */}
       <div className="chat-input">
         <input
           value={message}
@@ -79,7 +94,6 @@ export default function ChatPage() {
 
         <button onClick={sendMessage}>Send</button>
       </div>
-
     </div>
   );
 }

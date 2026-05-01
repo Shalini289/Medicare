@@ -1,30 +1,56 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { bookAppointment } from "@/services/appointmentService";
+import { useCallback, useEffect, useState } from "react";
+import { bookAppointment, getSlots } from "@/services/appointmentService";
+import { api } from "@/utils/api";
+
+const availableSlots = [
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+];
 
 export default function Booking() {
   const doctor = useSearchParams().get("id");
-
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [family, setFamily] = useState([]);
   const [selected, setSelected] = useState("");
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 📥 Fetch family members
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    fetch("http://localhost:5000/api/family", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(res => setFamily(Array.isArray(res) ? res : []));
+  const loadFamily = useCallback(async () => {
+    const res = await api("/api/family");
+    setFamily(Array.isArray(res) ? res : []);
   }, []);
 
-  // 📤 Booking
+  useEffect(() => {
+    queueMicrotask(() => {
+      loadFamily();
+    });
+  }, [loadFamily]);
+
+  useEffect(() => {
+    if (!doctor || !date) {
+      setBookedSlots([]);
+      return;
+    }
+
+    getSlots(doctor, date)
+      .then((slots) => setBookedSlots(Array.isArray(slots) ? slots : []))
+      .catch(() => setBookedSlots([]));
+  }, [date, doctor]);
+
   const handle = async () => {
     if (!date || !time || !selected) {
       return alert("Please fill all fields");
@@ -37,10 +63,10 @@ export default function Booking() {
         doctor,
         date,
         time,
-        patient: selected
+        patient: selected,
       });
 
-      alert("Appointment booked 🎉");
+      alert("Appointment booked successfully");
     } catch {
       alert("Booking failed");
     } finally {
@@ -50,13 +76,10 @@ export default function Booking() {
 
   return (
     <div className="booking-page">
-
       <div className="booking-card glass">
-
         <h2>Book Appointment</h2>
-        <p className="sub">Choose date, time & patient</p>
+        <p className="sub">Choose date, time, and patient</p>
 
-        {/* DATE */}
         <div className="field">
           <label>Date</label>
           <input
@@ -66,17 +89,26 @@ export default function Booking() {
           />
         </div>
 
-        {/* TIME */}
         <div className="field">
-          <label>Time</label>
-          <input
-            type="time"
-            value={time}
-            onChange={(e)=>setTime(e.target.value)}
-          />
+          <label>Time Slot</label>
+          <div className="slots">
+            {availableSlots.map((slot) => {
+              const booked = bookedSlots.includes(slot);
+
+              return (
+                <button
+                  key={slot}
+                  className={`slot ${time === slot ? "selected" : ""} ${booked ? "booked" : ""}`}
+                  disabled={booked}
+                  onClick={() => setTime(slot)}
+                >
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* FAMILY */}
         <div className="field">
           <label>Select Patient</label>
           <select
@@ -93,7 +125,6 @@ export default function Booking() {
           </select>
         </div>
 
-        {/* BUTTON */}
         <button
           className="btn-primary"
           onClick={handle}
@@ -101,9 +132,7 @@ export default function Booking() {
         >
           {loading ? "Booking..." : "Confirm Booking"}
         </button>
-
       </div>
-
     </div>
   );
 }

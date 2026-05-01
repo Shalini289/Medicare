@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "../../../utils/api";
 import Loader from "../../../components/Loader";
@@ -12,11 +12,7 @@ export default function DoctorPage() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDoctor();
-  }, []);
-
-  const fetchDoctor = async () => {
+  const fetchDoctor = useCallback(async () => {
     try {
       const data = await api(`/api/doctors/${id}`);
       setDoctor(data);
@@ -25,7 +21,13 @@ export default function DoctorPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      fetchDoctor();
+    });
+  }, [fetchDoctor]);
 
   if (loading) return <Loader />;
   if (!doctor) return <p className="empty">Doctor not found</p>;
@@ -47,9 +49,9 @@ export default function DoctorPage() {
           <p className="spec">{doctor.specialization}</p>
 
           <div className="meta">
-            <span>⭐ {doctor.rating || 4.5}</span>
+            <span>Rating {doctor.rating || 4.5}</span>
             <span>{doctor.experience} yrs exp</span>
-            <span>₹{doctor.fees}</span>
+            <span>Rs {doctor.fees}</span>
           </div>
 
           <button
@@ -77,7 +79,7 @@ export default function DoctorPage() {
 
         <div className="detail-card">
           <h4>Consultation Fee</h4>
-          <p>₹{doctor.fees}</p>
+          <p>Rs {doctor.fees}</p>
         </div>
 
         <div className="detail-card">

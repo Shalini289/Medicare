@@ -1,175 +1,119 @@
-/* PAGE */
 .notif-page {
-  max-width: 700px;
   margin: auto;
-  padding: 40px 20px;
+  max-width: 760px;
+  padding: 42px 20px;
 }
 
-/* HEADER */
 .notif-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.clear-btn {
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: none;
-  background: #fdecea;
-  color: #c62828;
-  cursor: pointer;
-}
-
-/* EMPTY */
-.notif-empty {
-  text-align: center;
-  margin-top: 30px;
-  color: #777;
-}
-
-/* LIST */
-.notif-list {
-  margin-top: 20px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  justify-content: space-between;
 }
 
-/* CARD */
-.notif-card {
-  padding: 15px;
-  border-radius: 12px;
-  background: white;
+.clear-btn,
+.notif-header button {
+  background: #fff2f6;
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  color: #a64263;
   cursor: pointer;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  transition: 0.2s;
+  padding: 7px 12px;
+}
+
+.notif-empty,
+.empty {
+  color: #777;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.notif-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.notif-card,
+.notif-item {
+  background: #fff;
+  border: 1px solid #f5e5eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(69, 34, 48, 0.05);
+  padding: 14px;
+}
+
+.notif-card {
+  cursor: pointer;
 }
 
 .notif-card:hover {
   transform: translateY(-2px);
 }
 
-/* READ STATE */
 .notif-card.read {
-  opacity: 0.6;
+  opacity: 0.62;
 }
 
-/* TIME */
-.notif-card span {
-  font-size: 12px;
+.notif-card span,
+.notif-item span {
   color: #888;
+  font-size: 12px;
 }
-/* ===== WRAPPER ===== */
+
 .notif-bell {
   position: relative;
 }
 
-/* ===== ICON ===== */
 .bell-icon {
-  position: relative;
-  cursor: pointer;
-  font-size: 20px;
-}
-
-/* ===== BADGE ===== */
-.badge {
-  position: absolute;
-  top: -5px;
-  right: -8px;
-  background: red;
-  color: white;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 50%;
-}
-
-/* ===== DROPDOWN ===== */
-.notif-dropdown {
-  position: absolute;
-  top: 30px;
-  right: 0;
-  width: 260px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  padding: 10px;
-  z-index: 100;
-}
-
-/* HEADER */
-.notif-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  background: #fff;
+  border: 1px solid #ead1da;
+  border-radius: 50%;
+  color: #a64263;
+  cursor: pointer;
+  display: flex;
+  font-weight: 800;
+  height: 38px;
+  justify-content: center;
+  position: relative;
+  width: 38px;
+}
+
+.badge {
+  align-items: center;
+  background: #c62828;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  display: flex;
+  font-size: 10px;
+  height: 19px;
+  justify-content: center;
+  min-width: 19px;
+  padding: 0 5px;
+  position: absolute;
+  right: -6px;
+  top: -6px;
+}
+
+.notif-dropdown {
+  background: #fff;
+  border: 1px solid #f1dfe6;
+  border-radius: 14px;
+  box-shadow: 0 22px 48px rgba(69, 34, 48, 0.14);
+  padding: 12px;
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: min(320px, 86vw);
+  z-index: 1100;
+}
+
+.notif-dropdown .notif-header {
   margin-bottom: 10px;
 }
 
-/* ITEM */
 .notif-item {
-  padding: 8px;
-  border-radius: 8px;
-  background: #fafafa;
   margin-bottom: 8px;
-}
-
-.notif-item span {
-  font-size: 11px;
-  color: #888;
-}
-
-/* EMPTY */
-.empty {
-  text-align: center;
-  color: #777;
-}
-/* ===== CONTAINER ===== */
-.notif-container {
-  max-width: 500px;
-  margin: auto;
-  padding: 15px;
-}
-
-/* ===== HEADER ===== */
-.notif-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.clear-btn {
-  border: none;
-  background: #fdecea;
-  color: #c62828;
-  padding: 5px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* ===== EMPTY ===== */
-.notif-empty {
-  text-align: center;
-  margin-top: 20px;
-  color: #777;
-}
-
-/* ===== LIST ===== */
-.notif-list {
-  margin-top: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* ===== ITEM ===== */
-.notif-item {
-  padding: 12px;
-  border-radius: 10px;
-  background: white;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-}
-
-.notif-item span {
-  font-size: 11px;
-  color: #888;
 }

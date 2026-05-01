@@ -5,8 +5,9 @@ const {
   getHospitals,
   updateBeds
 } = require("../controllers/hospitalController");
+const { protect, admin } = require("../middleware/authMiddleware");
 
 router.get("/", getHospitals);
-router.put("/beds", updateBeds);
+router.put("/beds", protect, admin, updateBeds);
 
 module.exports = router;

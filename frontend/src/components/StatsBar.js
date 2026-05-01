@@ -1,19 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import"../styles/statsBar.css";
+import "../styles/statsBar.css";
+
+const stats = [
+  { value: 850, suffix: "+", label: "Verified doctors" },
+  { value: 50, suffix: "k+", label: "Happy patients" },
+  { value: 30, suffix: "+", label: "Specialisations" },
+  { value: 4.9, suffix: "*", label: "Average rating" },
+];
 
 export default function StatsBar() {
-  const stats = [
-    { value: 850, suffix: "+", label: "Verified doctors" },
-    { value: 50, suffix: "k+", label: "Happy patients" },
-    { value: 30, suffix: "+", label: "Specialisations" },
-    { value: 4.9, suffix: "★", label: "Average rating" },
-  ];
-
   const [counts, setCounts] = useState(stats.map(() => 0));
 
-  // 🔢 Animate numbers
   useEffect(() => {
     const interval = setInterval(() => {
       setCounts((prev) =>
@@ -31,22 +30,18 @@ export default function StatsBar() {
 
   return (
     <section className="stats-bar">
-
       <div className="stats-inner">
         {stats.map((s, i) => (
           <div key={s.label} className="stat-card">
-
             <h2>
               {counts[i]}
               {s.suffix}
             </h2>
 
             <p>{s.label}</p>
-
           </div>
         ))}
       </div>
-
     </section>
   );
 }

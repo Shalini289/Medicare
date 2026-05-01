@@ -45,6 +45,16 @@
   margin-top: 5px;
 }
 
+.med-stock {
+  color: #2e7d32;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.med-stock.empty-stock {
+  color: #c62828;
+}
+
 /* ===== BUTTON ===== */
 .add-btn {
   margin-top: 10px;
@@ -59,4 +69,9 @@
 
 .add-btn:hover {
   opacity: 0.9;
+}
+
+.add-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }

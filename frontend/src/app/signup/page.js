@@ -49,7 +49,7 @@ export default function SignupPage() {
 
       if (!data) throw new Error();
 
-      alert("Signup Successful 🎉");
+      alert("Signup successful");
 
       router.push("/login");
 

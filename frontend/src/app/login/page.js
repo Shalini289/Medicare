@@ -38,7 +38,7 @@ export default function LoginPage() {
 
       localStorage.setItem("token", data.token);
 
-      alert("Login Successful 🎉");
+      alert("Login successful");
 
       router.push("/");
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
         </div>
 
         <div className="login-footer">
-          Don’t have an account?{" "}
+          Do not have an account?{" "}
           <span onClick={()=>router.push("/signup")}>
             Sign Up
           </span>

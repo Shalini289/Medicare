@@ -1,6 +1,12 @@
-const groq = require("../config/groq");
+const createGroqClient = require("../config/groq");
 
 const analyzeWithAI = async (text) => {
+  const groq = createGroqClient();
+
+  if (!groq) {
+    return "AI analysis unavailable because GROQ_API_KEY is not configured. Extracted report text was saved for review.";
+  }
+
   const res = await groq.chat.completions.create({
     model: "llama3-8b-8192",
     messages: [{ role: "user", content: text }]

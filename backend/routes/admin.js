@@ -37,9 +37,6 @@ const {
 //
 // 📊 Dashboard
 //
-router.get("/stats", (req, res) => {
-  res.json({ msg: "Admin stats working" });
-});
 router.get("/stats", protect, admin, getDashboardStats);
 
 //
@@ -61,7 +58,6 @@ router.delete("/doctors/:id", protect, admin, deleteDoctor);
 //
 router.get("/appointments", protect, admin, getAppointmentsAdmin);
 router.put("/appointments/:id", protect, admin, updateAppointmentStatus);
-router.put("/doctors/:id", protect,admin,updateDoctor);
 //
 // 💊 Medicines
 //

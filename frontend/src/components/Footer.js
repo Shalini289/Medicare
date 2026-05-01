@@ -3,16 +3,12 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="footer">
-
       <div className="footer-container">
-
-        {/* BRAND */}
         <div className="footer-brand">
           <h2>MediCare</h2>
           <p>Your trusted healthcare companion</p>
         </div>
 
-        {/* LINKS */}
         <div className="footer-links">
           <div>
             <h4>Services</h4>
@@ -34,14 +30,11 @@ export default function Footer() {
             <Link href="/notifications">Notifications</Link>
           </div>
         </div>
-
       </div>
 
-      {/* BOTTOM */}
       <div className="footer-bottom">
-        © 2026 MediCare • All rights reserved
+        2026 MediCare. All rights reserved.
       </div>
-
     </footer>
   );
 }

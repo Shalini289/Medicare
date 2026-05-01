@@ -87,6 +87,42 @@
   opacity: 0.9;
 }
 
+.order-header p {
+  color: #777;
+  margin-top: 6px;
+}
+
+.order-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.order-tools select {
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  background: white;
+  padding: 10px 12px;
+}
+
+.order-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.order-items span {
+  background: #fff0f5;
+  border-radius: 999px;
+  color: #8d3f59;
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .order-card {

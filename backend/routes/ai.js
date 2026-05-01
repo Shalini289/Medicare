@@ -1,15 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const {
-  uploadReport,
-  getReports
-} = require("../controllers/reportController");
-
+const { symptomCheck } = require("../controllers/aiController");
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../utils/upload");
 
-router.post("/upload", protect, upload.single("file"), uploadReport);
-router.get("/", protect, getReports);
+router.post("/symptoms", protect, symptomCheck);
 
 module.exports = router;

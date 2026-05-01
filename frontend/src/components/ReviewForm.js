@@ -28,7 +28,7 @@ export default function ReviewForm({ doctorId }) {
         }),
       });
 
-      alert("Review added ⭐");
+      alert("Review added");
       setComment("");
       setRating(5);
 
@@ -44,7 +44,7 @@ export default function ReviewForm({ doctorId }) {
 
       <h3>Write a Review</h3>
 
-      {/* ⭐ STAR RATING */}
+      {/* Star rating */}
       <div className="stars">
         {[1,2,3,4,5].map((n) => (
           <span
@@ -52,7 +52,7 @@ export default function ReviewForm({ doctorId }) {
             className={n <= rating ? "active" : ""}
             onClick={() => setRating(n)}
           >
-            ★
+            *
           </span>
         ))}
       </div>

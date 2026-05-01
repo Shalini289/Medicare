@@ -1,32 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/utils/api";
-import "@/styles/family.css"
+import "@/styles/family.css";
+
 export default function FamilyPage() {
   const [members, setMembers] = useState([]);
-
   const [form, setForm] = useState({
     name: "",
     age: "",
-    relation: ""
+    relation: "",
   });
-
   const [editingId, setEditingId] = useState(null);
 
-  useEffect(() => {
-    loadMembers();
-  }, []);
-
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
     try {
       const data = await api("/api/family");
-
       setMembers(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      loadMembers();
+    });
+  }, [loadMembers]);
 
   const submit = async () => {
     if (!form.name || !form.age || !form.relation) {
@@ -37,23 +37,21 @@ export default function FamilyPage() {
       if (editingId) {
         await api(`/api/family/${editingId}`, {
           method: "PUT",
-          body: JSON.stringify(form)
+          body: JSON.stringify(form),
         });
       } else {
         await api("/api/family", {
           method: "POST",
-          body: JSON.stringify(form)
+          body: JSON.stringify(form),
         });
       }
 
       setForm({
         name: "",
         age: "",
-        relation: ""
+        relation: "",
       });
-
       setEditingId(null);
-
       loadMembers();
     } catch (err) {
       console.error(err);
@@ -64,16 +62,15 @@ export default function FamilyPage() {
     setForm({
       name: member.name || "",
       age: member.age || "",
-      relation: member.relation || ""
+      relation: member.relation || "",
     });
-
     setEditingId(member._id);
   };
 
   const remove = async (id) => {
     try {
       await api(`/api/family/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
       });
 
       loadMembers();
@@ -84,7 +81,7 @@ export default function FamilyPage() {
 
   return (
     <div className="family-container">
-      <h2>👨‍👩‍👧 Family Management</h2>
+      <h2>Family Management</h2>
 
       <div className="family-form">
         <input
@@ -126,8 +123,8 @@ export default function FamilyPage() {
           members.map((member) => (
             <div key={member._id} className="family-card">
               <h3>{member.name}</h3>
-              <p> Age: {member.age}</p>
-              <p> Relation: {member.relation}</p>
+              <p>Age: {member.age}</p>
+              <p>Relation: {member.relation}</p>
 
               <div className="family-actions">
                 <button onClick={() => edit(member)}>

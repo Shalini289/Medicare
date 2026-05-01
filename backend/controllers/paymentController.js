@@ -1,19 +1,55 @@
-const Hospital = require("../models/Hospital");
+const crypto = require("crypto");
+const createRazorpayClient = require("../config/razorpay");
 
-const getHospitals = async (req, res) => {
-  res.json(await Hospital.find());
+const createPaymentOrder = async (req, res) => {
+  const amount = Number(req.body.amount || 0);
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ msg: "Valid amount is required" });
+  }
+
+  const razorpay = createRazorpayClient();
+
+  if (!razorpay) {
+    return res.json({
+      id: `mock_order_${Date.now()}`,
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      status: "created",
+      mock: true,
+    });
+  }
+
+  const order = await razorpay.orders.create({
+    amount: Math.round(amount * 100),
+    currency: "INR",
+    receipt: `medicare_${Date.now()}`,
+  });
+
+  res.json(order);
 };
 
-const updateBeds = async (req, res) => {
-  const hospital = await Hospital.findByIdAndUpdate(
-    req.body.id,
-    { beds: req.body.beds },
-    { new: true }
-  );
+const verifyPayment = async (req, res) => {
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = req.body;
 
-  req.app.get("io").emit("bedUpdate", hospital);
+  if (!process.env.RAZORPAY_SECRET || req.body.mock) {
+    return res.json({ verified: true, paymentId: razorpay_payment_id || "mock_payment" });
+  }
 
-  res.json(hospital);
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest("hex");
+
+  if (expectedSignature !== razorpay_signature) {
+    return res.status(400).json({ msg: "Payment verification failed" });
+  }
+
+  res.json({ verified: true, paymentId: razorpay_payment_id });
 };
 
-module.exports = { getHospitals, updateBeds };
+module.exports = { createPaymentOrder, verifyPayment };

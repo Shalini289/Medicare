@@ -1,60 +1,69 @@
 "use client";
-import "@/styles/notification.css"
-import { useEffect, useState } from "react";
+
+import "@/styles/notification.css";
+import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import {
+  clearNotifications,
+  getNotifications,
+  markNotificationRead,
+} from "@/services/notificationService";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
 
-  // 📡 Socket connection
+  const loadNotifications = useCallback(async () => {
+    const items = await getNotifications();
+    setNotifications(Array.isArray(items) ? items : []);
+  }, []);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      loadNotifications().catch(() => setNotifications([]));
+    });
+  }, [loadNotifications]);
+
   useEffect(() => {
     const socket = io("http://localhost:5000");
 
-    socket.on("newAppointment", (data) => {
-      addNotification(`📅 New appointment booked for ${data.patient}`);
+    socket.on("notification", (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
     });
 
     socket.on("bedUpdate", () => {
-      addNotification("🏥 Hospital bed availability updated");
-    });
-
-    socket.on("receiveMessage", () => {
-      addNotification("💬 New message received");
+      setNotifications((prev) => [
+        {
+          _id: `bed-${Date.now()}`,
+          title: "Hospital beds updated",
+          message: "Hospital bed availability changed",
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
     });
 
     return () => socket.disconnect();
   }, []);
 
-  // ➕ Add notification
-  const addNotification = (text) => {
-    const newNotif = {
-      id: Date.now(),
-      text,
-      read: false,
-      time: new Date().toLocaleTimeString(),
-    };
+  const markRead = async (id) => {
+    if (!String(id).startsWith("bed-")) {
+      await markNotificationRead(id);
+    }
 
-    setNotifications((prev) => [newNotif, ...prev]);
-  };
-
-  // ✔ Mark as read
-  const markRead = (id) => {
     setNotifications((prev) =>
       prev.map((n) =>
-        n.id === id ? { ...n, read: true } : n
+        n._id === id ? { ...n, read: true } : n
       )
     );
   };
 
-  // 🗑 Clear all
-  const clearAll = () => {
+  const clearAll = async () => {
+    await clearNotifications();
     setNotifications([]);
   };
 
   return (
     <div className="notif-page">
-
-      {/* HEADER */}
       <div className="notif-header">
         <h1>Notifications</h1>
         <button onClick={clearAll} className="clear-btn">
@@ -62,25 +71,23 @@ export default function NotificationsPage() {
         </button>
       </div>
 
-      {/* EMPTY */}
       {notifications.length === 0 && (
         <p className="notif-empty">No notifications yet</p>
       )}
 
-      {/* LIST */}
       <div className="notif-list">
         {notifications.map((n) => (
           <div
-            key={n.id}
+            key={n._id}
             className={`notif-card ${n.read ? "read" : ""}`}
-            onClick={() => markRead(n.id)}
+            onClick={() => markRead(n._id)}
           >
-            <p>{n.text}</p>
-            <span>{n.time}</span>
+            <strong>{n.title || "Notification"}</strong>
+            <p>{n.message}</p>
+            <span>{n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}</span>
           </div>
         ))}
       </div>
-
     </div>
   );
 }

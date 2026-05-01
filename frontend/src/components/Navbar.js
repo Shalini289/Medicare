@@ -5,74 +5,76 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
 
+const navItems = [
+  { label: "Doctors", href: "/doctors" },
+  { label: "Pharmacy", href: "/pharmacy" },
+  { label: "Orders", href: "/orders" },
+  { label: "Appointments", href: "/profile" },
+  { label: "Chat", href: "/chat" },
+  { label: "Family", href: "/family" },
+];
+
 export default function Navbar() {
   const router = useRouter();
-
   const [loggedIn, setLoggedIn] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  // Check token on load
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      setLoggedIn(true);
-    }
+    queueMicrotask(() => {
+      setLoggedIn(Boolean(localStorage.getItem("token")));
+    });
   }, []);
 
-  // Logout Function
+  const goTo = (href) => {
+    setOpen(false);
+    router.push(href);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
-
     setLoggedIn(false);
-
+    setOpen(false);
     router.push("/login");
   };
 
   return (
     <nav className="navbar">
-
-      {/* LOGO */}
-      <div className="logo" onClick={() => router.push("/")}>
+      <button className="logo" onClick={() => goTo("/")}>
         MediCare
-      </div>
+      </button>
 
-      {/* NAV LINKS */}
-      <ul className="nav-links">
-        <li onClick={() => router.push("/doctors")}>Doctors</li>
-        <li onClick={() => router.push("/pharmacy")}>Pharmacy</li>
-        <li onClick={() => router.push("/orders")}>Orders</li>
-        <li onClick={() => router.push("/profile")}>Appointments</li>
-        <li onClick={() => router.push("/chat")}>Chat</li>
-        <li onClick={() => router.push("/family")}>Family</li>
+      <ul className={`nav-links ${open ? "is-open" : ""}`}>
+        {navItems.map((item) => (
+          <li key={item.href}>
+            <button onClick={() => goTo(item.href)}>{item.label}</button>
+          </li>
+        ))}
       </ul>
 
-      {/* RIGHT SIDE */}
       <div className="nav-right">
-
         <NotificationBell />
 
         {loggedIn ? (
-          <button
-            className="btn-primary"
-            onClick={handleLogout}
-          >
+          <button className="btn-primary nav-auth" onClick={handleLogout}>
             Logout
           </button>
         ) : (
-          <>
-            <button
-              className="btn-primary"
-              onClick={() => router.push("/login")}
-            >
-              Login
-            </button>
-
-           
-          </>
+          <button className="btn-primary nav-auth" onClick={() => goTo("/login")}>
+            Login
+          </button>
         )}
 
+        <button
+          className="menu-toggle"
+          aria-label="Toggle navigation"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </div>
-
     </nav>
   );
 }

@@ -186,6 +186,25 @@ body {
 .pharmacy-layout {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.pharmacy-tools {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pharmacy-tools input,
+.pharmacy-tools select {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.pharmacy-tools input {
+  flex: 1;
 }
 
 .pharmacy-grid {
@@ -194,6 +213,20 @@ body {
 
 .cart {
   flex: 1;
+}
+
+@media (max-width: 860px) {
+  .pharmacy-layout,
+  .pharmacy-tools {
+    flex-direction: column;
+  }
+
+  .pharmacy-grid,
+  .cart,
+  .pharmacy-tools input,
+  .pharmacy-tools select {
+    width: 100%;
+  }
 }
 
 /* REPORT */
@@ -257,6 +290,159 @@ body {
   border-radius: 10px;
   background: white;
   margin-top: 10px;
+}
+
+.symptom-chips,
+.symptom-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.symptom-chips button {
+  border: 1px solid #f0c8d5;
+  border-radius: 999px;
+  background: white;
+  color: #8d3f59;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.symptom-controls input,
+.symptom-controls select,
+.report-tools input {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 11px 12px;
+}
+
+.symptom-controls input {
+  flex: 1;
+}
+
+.symptom-result {
+  background: white;
+  border-radius: 14px;
+  margin-top: 18px;
+  padding: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.symptom-result--high {
+  border: 1px solid #f3b4b4;
+}
+
+.symptom-result__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.symptom-result__head span {
+  background: #fff4e5;
+  border-radius: 999px;
+  color: #a04b00;
+  font-weight: 600;
+  padding: 6px 10px;
+  text-transform: capitalize;
+}
+
+.symptom-result h4 {
+  margin-top: 16px;
+}
+
+.symptom-result ul {
+  margin: 8px 0 0 18px;
+  color: #555;
+}
+
+.symptom-history {
+  margin-top: 24px;
+}
+
+.symptom-history button {
+  align-items: flex-start;
+  background: white;
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 10px;
+  width: 100%;
+}
+
+.reports-header,
+.report-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.reports-header p {
+  color: #777;
+  margin-top: 6px;
+}
+
+.report-box {
+  background: white;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 18px;
+}
+
+.report-file {
+  display: flex;
+  flex-direction: column;
+  color: #555;
+}
+
+.report-tools {
+  margin-top: 18px;
+}
+
+.report-tools input {
+  width: 100%;
+}
+
+.report-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.report-card {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  padding: 18px;
+}
+
+.report-card__head span {
+  color: #777;
+  font-size: 13px;
+}
+
+.report-card__section {
+  margin-top: 14px;
+}
+
+.report-card details {
+  margin-top: 14px;
+}
+
+.report-card summary {
+  color: #8d3f59;
+  cursor: pointer;
+  font-weight: 600;
 }
 .empty-state {
   text-align: center;
@@ -339,4 +525,234 @@ body, html {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+}
+
+/* ===== UI POLISH LAYER ===== */
+:root {
+  --bg: #fff9fb;
+  --surface: #ffffff;
+  --surface-soft: #fff3f7;
+  --text: #28222a;
+  --muted: #6f6670;
+  --border: #f0dbe3;
+  --primary: #c65f80;
+  --primary-dark: #9f3f61;
+  --success: #2e7d32;
+  --warning: #a04b00;
+  --danger: #c62828;
+  --shadow: 0 16px 40px rgba(69, 34, 48, 0.08);
+}
+
+html {
+  background: var(--bg);
+}
+
+body,
+.app-body {
+  background:
+    radial-gradient(circle at top left, rgba(255, 225, 235, 0.8), transparent 34rem),
+    linear-gradient(180deg, #fff9fb 0%, #ffffff 48%, #fffafa 100%);
+  color: var(--text);
+}
+
+.main-content {
+  min-height: 80vh;
+  padding: clamp(28px, 4vw, 52px) clamp(16px, 4vw, 56px);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(198, 95, 128, 0.12);
+  outline: none;
+}
+
+.btn-primary,
+.book-btn,
+.add-btn,
+.login-btn,
+.signup-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-primary:hover,
+.book-btn:hover,
+.add-btn:hover,
+.login-btn:hover,
+.signup-btn:hover {
+  box-shadow: 0 12px 24px rgba(198, 95, 128, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.glass,
+.card,
+.appointment-card,
+.doctor-card,
+.medicine-card,
+.cart,
+.hospital-card,
+.order-card,
+.report-card,
+.auth-card,
+.login-card,
+.signup-card,
+.service-card,
+.stat-card {
+  border: 1px solid rgba(240, 219, 227, 0.9);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.orders-page,
+.profile-page,
+.pharmacy-page,
+.reports-page,
+.hospital-page,
+.doctor-page,
+.health-page,
+.symptom-page,
+.family-container,
+.admin-page {
+  width: min(1180px, 100%);
+}
+
+.section-header {
+  margin: 0 auto 26px;
+  max-width: 680px;
+  text-align: center;
+}
+
+.section-header h2,
+.doctor-header h1,
+.hospital-header h1,
+.reports-header h1,
+.appointment-header h1,
+.order-header h1,
+.symptom-page h1 {
+  color: var(--text);
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.08;
+}
+
+.section-header p,
+.doctor-header p,
+.hospital-header p,
+.reports-header p,
+.appointment-header p,
+.order-header p,
+.symptom-page > p {
+  color: var(--muted);
+}
+
+.section-tag {
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.status,
+.avail,
+.badge-label {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+  text-transform: capitalize;
+}
+
+.status.booked,
+.status.confirmed,
+.status.completed,
+.avail.today {
+  background: #e8f5e9;
+  color: var(--success);
+}
+
+.status.pending,
+.status.paid,
+.avail.tmw {
+  background: #fff4e5;
+  color: var(--warning);
+}
+
+.status.cancelled {
+  background: #fdecea;
+  color: var(--danger);
+}
+
+.doctor-controls,
+.appointment-tools,
+.order-tools,
+.hospital-controls,
+.pharmacy-tools,
+.symptom-controls {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(240, 219, 227, 0.9);
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(69, 34, 48, 0.04);
+  padding: 12px;
+}
+
+@media (max-width: 720px) {
+  .main-content {
+    padding-inline: 14px;
+  }
+
+  .doctor-controls,
+  .appointment-tools,
+  .order-tools,
+  .hospital-controls,
+  .pharmacy-tools,
+  .symptom-controls,
+  .reports-header,
+  .appointment-header,
+  .order-header {
+    flex-direction: column;
+  }
+
+  .doctor-controls input,
+  .doctor-controls select,
+  .appointment-tools input,
+  .appointment-tools select,
+  .hospital-controls select,
+  .pharmacy-tools input,
+  .pharmacy-tools select,
+  .symptom-controls input,
+  .symptom-controls select {
+    width: 100%;
+  }
 }

@@ -8,38 +8,36 @@ export default function ProtectedLayout({ children }) {
   const [status, setStatus] = useState("checking"); // checking | authed | redirecting
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    queueMicrotask(() => {
+      const token = localStorage.getItem("token");
 
-    if (!token) {
-      setStatus("redirecting");
-      router.replace("/login");
-      return;
-    }
-
-    // ✅ Validate JWT
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-
-      if (payload.exp * 1000 < Date.now()) {
-        localStorage.removeItem("token");
+      if (!token) {
         setStatus("redirecting");
         router.replace("/login");
-      } else {
-        setStatus("authed");
+        return;
       }
-    } catch {
-      setStatus("redirecting");
-      router.replace("/login");
-    }
+
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+
+        if (payload.exp * 1000 < Date.now()) {
+          localStorage.removeItem("token");
+          setStatus("redirecting");
+          router.replace("/login");
+        } else {
+          setStatus("authed");
+        }
+      } catch {
+        setStatus("redirecting");
+        router.replace("/login");
+      }
+    });
   }, [router]);
 
-  // ✅ Prevent flicker
   if (status !== "authed") {
     return (
       <div className="auth-gate">
         <div className="auth-gate__card">
-
-          {/* LOGO */}
           <div className="auth-gate__logo">
             <svg viewBox="0 0 32 32" fill="none">
               <circle cx="16" cy="16" r="16" fill="url(#grad)" />
@@ -55,7 +53,6 @@ export default function ProtectedLayout({ children }) {
 
           <h2 className="auth-gate__brand">MediCare</h2>
 
-          {/* SPINNER */}
           <div className="auth-gate__spinner">
             <div className="auth-gate__spinner-ring" />
           </div>
@@ -65,7 +62,6 @@ export default function ProtectedLayout({ children }) {
               ? "Redirecting to login..."
               : "Verifying your session..."}
           </p>
-
         </div>
       </div>
     );

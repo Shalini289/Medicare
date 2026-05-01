@@ -135,6 +135,10 @@ const updateAppointmentStatus = async (req, res) => {
   try {
     const appt = await Appointment.findById(req.params.id);
 
+    if (!appt) {
+      return res.status(404).json({ msg: "Appointment not found" });
+    }
+
     appt.status = req.body.status;
     await appt.save();
 
@@ -216,6 +220,10 @@ const updateOrderStatus = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
 
+    if (!order) {
+      return res.status(404).json({ msg: "Order not found" });
+    }
+
     order.status = req.body.status;
     await order.save();
 
@@ -253,9 +261,15 @@ const updateHospitalBeds = async (req, res) => {
   try {
     const hospital = await Hospital.findByIdAndUpdate(
       req.params.id,
-      { beds: req.body.beds },
+      req.body,
       { new: true }
     );
+
+    if (!hospital) {
+      return res.status(404).json({ msg: "Hospital not found" });
+    }
+
+    req.app.get("io").emit("bedUpdate", hospital);
 
     res.json(hospital);
 

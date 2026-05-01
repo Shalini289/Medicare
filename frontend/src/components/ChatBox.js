@@ -8,7 +8,7 @@ export default function ChatBox() {
 
   const bottomRef = useRef();
 
-  // 📜 Auto scroll
+  // Auto scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [list]);

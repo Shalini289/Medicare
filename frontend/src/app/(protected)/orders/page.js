@@ -1,40 +1,85 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getOrders } from "@/services/pharmacyService";
 import "@/styles/order.css";
+
 export default function Orders() {
   const [orders, setOrders] = useState([]);
+  const [status, setStatus] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  const loadOrders = useCallback(async () => {
+    try {
+      const res = await getOrders();
+      setOrders(Array.isArray(res) ? res : []);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    queueMicrotask(() => {
+      loadOrders();
+    });
+  }, [loadOrders]);
 
-    fetch("http://localhost:5000/api/pharmacy/my-orders", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
-      .then(res => setOrders(Array.isArray(res) ? res : []));
-  }, []);
+  const filteredOrders = useMemo(() => {
+    return status === "all"
+      ? orders
+      : orders.filter((order) => order.status === status);
+  }, [orders, status]);
+
+  const totalSpend = useMemo(() => {
+    return filteredOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  }, [filteredOrders]);
+
+  if (loading) return <p className="center">Loading orders...</p>;
 
   return (
     <div className="orders-page">
+      <div className="order-header">
+        <div>
+          <h1>My Orders</h1>
+          <p>Review pharmacy orders and delivery status.</p>
+        </div>
+      </div>
 
-      <h1>My Orders</h1>
+      <div className="order-tools">
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="all">All Orders</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="delivered">Delivered</option>
+        </select>
 
-      {orders.length === 0 && <p>No orders yet</p>}
+        <strong>Visible total: Rs {totalSpend}</strong>
+      </div>
+
+      {filteredOrders.length === 0 && <p>No orders found</p>}
 
       <div className="orders-list">
-        {orders.map(o => (
+        {filteredOrders.map(o => (
           <div key={o._id} className="order-card">
-            <p>Order ID: {o._id}</p>
-            <p>Total: ₹{o.total}</p>
+            <div className="order-info">
+              <h3>Order #{String(o._id).slice(-6).toUpperCase()}</h3>
+              <p>Total: Rs {o.total}</p>
+              <p>Items: {o.items?.length || 0}</p>
+              <div className="order-items">
+                {o.items?.map((item) => (
+                  <span key={item._id || item.medicine?._id}>
+                    {item.medicine?.name || "Medicine"} x {item.quantity}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-            <span className={`status ${o.status}`}>
+            <span className={`order-status ${o.status}`}>
               {o.status}
             </span>
           </div>
         ))}
       </div>
-
     </div>
   );
 }

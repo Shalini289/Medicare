@@ -1,16 +1,12 @@
 const express = require("express");
 const router = express.Router();
-
 const {
-  getMedicines,
-  placeOrder,
-  getOrders
-} = require("../controllers/pharmacyController");
-
+  createPaymentOrder,
+  verifyPayment,
+} = require("../controllers/paymentController");
 const { protect } = require("../middleware/authMiddleware");
 
-router.get("/", getMedicines);
-router.post("/order", protect, placeOrder);
-router.get("/my-orders", protect, getOrders);
+router.post("/create-order", protect, createPaymentOrder);
+router.post("/verify", protect, verifyPayment);
 
 module.exports = router;

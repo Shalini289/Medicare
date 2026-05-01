@@ -7,6 +7,9 @@ const getDoctors = async (req, res) => {
 
 const getDoctorById = async (req, res) => {
   const doctor = await Doctor.findById(req.params.id);
+  if (!doctor) {
+    return res.status(404).json({ msg: "Doctor not found" });
+  }
   res.json(doctor);
 };
 

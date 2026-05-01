@@ -7,6 +7,7 @@ import Doctors from "../components/Doctors";
 import HowItWorks from "../components/HowItWorks";
 import Testimonials from "../components/Testimonials";
 import BookingBanner from "../components/BookingBanner";
+import CareShortcuts from "../components/CareShortcuts";
 
 export default function Home() {
   return (
@@ -20,8 +21,12 @@ export default function Home() {
         <StatsBar />
       </div>
 
-      {/* SERVICES */}
       <div className="section section-light">
+        <CareShortcuts />
+      </div>
+
+      {/* SERVICES */}
+      <div className="section">
         <Services />
       </div>
 

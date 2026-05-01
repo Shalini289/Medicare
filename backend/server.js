@@ -51,6 +51,7 @@ app.use("/api/family", require("./routes/family"));
 app.use("/api/chat", require("./routes/chat"));
 app.use("/api/hospital", require("./routes/hospital"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/notifications", require("./routes/notifications"));
 
 // 🧪 TEST ROUTE
 app.get("/", (req, res) => {

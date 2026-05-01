@@ -16,6 +16,44 @@
   margin-top: 5px;
 }
 
+.hospital-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hospital-controls select {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: white;
+}
+
+.hospital-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+  font-size: 14px;
+}
+
+.hospital-summary {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.hospital-summary span {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+  padding: 10px 12px;
+  font-weight: 600;
+}
+
 /* ===== GRID ===== */
 .hospital-grid {
   margin-top: 25px;
