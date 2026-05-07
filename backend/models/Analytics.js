@@ -6,4 +6,6 @@ const analyticsSchema = new mongoose.Schema({
   totalAppointments: Number
 });
 
-module.exports = mongoose.model("Analytics", analyticsSchema);
+module.exports =
+  mongoose.models.Analytics ||
+  mongoose.model("Analytics", analyticsSchema);

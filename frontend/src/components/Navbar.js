@@ -6,10 +6,18 @@ import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
 
 const navItems = [
+  { label: "Dashboard", href: "/dashboard" },
   { label: "Doctors", href: "/doctors" },
   { label: "Pharmacy", href: "/pharmacy" },
+  { label: "Lab Tests", href: "/lab-tests" },
   { label: "Orders", href: "/orders" },
   { label: "Appointments", href: "/profile" },
+  { label: "Vitals", href: "/vitals" },
+  { label: "Medical ID", href: "/medical-id" },
+  { label: "Care Plans", href: "/care-plans" },
+  { label: "Vaccines", href: "/vaccinations" },
+  { label: "Reminders", href: "/reminders" },
+  { label: "Prescriptions", href: "/prescriptions" },
   { label: "Chat", href: "/chat" },
   { label: "Family", href: "/family" },
 ];

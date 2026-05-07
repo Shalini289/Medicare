@@ -30,3 +30,20 @@
   margin: 10px 0 0 18px;
   color: #555;
 }
+
+.health-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.health-actions p {
+  color: var(--muted-text);
+}
+
+@media (max-width: 640px) {
+  .health-actions {
+    display: grid;
+  }
+}

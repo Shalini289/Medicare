@@ -1,0 +1,295 @@
+.care-plans-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.care-plans-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 26px;
+}
+
+.care-plans-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.care-plans-hero p,
+.care-plan-card p,
+.care-task-list small {
+  color: var(--muted-text);
+}
+
+.care-plan-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.care-plan-stats span,
+.care-plan-form,
+.care-plan-panel,
+.care-plan-card {
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.care-plan-stats span {
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: var(--muted-text);
+}
+
+.care-plan-stats strong {
+  display: block;
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.care-plans-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.care-plan-form,
+.care-plan-panel {
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.form-title,
+.section-head,
+.form-actions,
+.filter-tabs,
+.care-plan-card__head,
+.care-plan-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-title {
+  margin-bottom: 18px;
+}
+
+.form-title svg {
+  color: var(--primary);
+}
+
+.care-plan-form label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+
+.care-plan-form input,
+.care-plan-form select,
+.care-plan-form textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  font: inherit;
+  background: #fff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.care-task-editor {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.section-head {
+  justify-content: space-between;
+}
+
+.section-head h3 {
+  font-size: 1rem;
+}
+
+.section-head button,
+.care-plan-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  font-weight: 800;
+}
+
+.care-task-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.care-task-line button {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.form-error {
+  margin-bottom: 14px;
+  color: #b42318;
+  font-weight: 800;
+}
+
+.filter-tabs {
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.filter-tabs button {
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: #fff;
+  color: var(--muted-text);
+  text-transform: capitalize;
+}
+
+.filter-tabs .is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.care-plan-list {
+  display: grid;
+  gap: 14px;
+}
+
+.care-plan-card {
+  display: grid;
+  gap: 14px;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.care-plan-card__head {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.care-plan-card__head span {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.care-plan-card h2 {
+  margin: 5px 0 4px;
+  font-size: 1.2rem;
+}
+
+.care-plan-card__head strong {
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), #2f80ed);
+}
+
+.care-task-list {
+  display: grid;
+  gap: 8px;
+}
+
+.care-task-list button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  text-align: left;
+}
+
+.care-task-list button svg {
+  color: #cbd5e1;
+}
+
+.care-task-list button.is-done {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.care-task-list button.is-done svg {
+  color: #16a34a;
+}
+
+.care-plan-actions {
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  padding: 26px;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--muted-text);
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .care-plans-hero,
+  .care-plans-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .care-plans-page {
+    width: min(100% - 22px, 1180px);
+    padding-top: 26px;
+  }
+
+  .care-plan-stats,
+  .form-grid,
+  .care-task-line,
+  .care-plan-card__head {
+    grid-template-columns: 1fr;
+  }
+
+  .care-plan-card__head {
+    display: grid;
+  }
+}

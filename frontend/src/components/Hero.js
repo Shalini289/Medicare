@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import "../styles/hero.css";
 
@@ -37,7 +38,14 @@ export default function Hero() {
         </div>
 
         <div className="hero-image">
-          <img src="/doctor-hero.png" alt="Doctor consultation" />
+          <Image
+            src="/doctor-hero.png"
+            alt="Doctor consultation"
+            width={350}
+            height={350}
+            priority
+            sizes="(max-width: 900px) 250px, 350px"
+          />
         </div>
       </div>
     </section>

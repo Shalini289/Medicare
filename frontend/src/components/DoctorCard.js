@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import "../styles/card.css";
 import "../styles/doctor.css";
@@ -13,9 +14,12 @@ export default function DoctorCard({ doctor }) {
       onClick={() => router.push(`/doctors/${doctor._id}`)}
     >
       <div className="doctor-img-wrap">
-        <img
+        <Image
           src={doctor.image || "/doc.png"}
           alt={doctor.name}
+          width={80}
+          height={80}
+          sizes="80px"
         />
       </div>
 

@@ -279,3 +279,108 @@
 .book-btn:hover {
   opacity: 0.9;
 }
+
+.reviews-section {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 22px;
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.reviews-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.reviews-head p,
+.review-card p {
+  color: var(--muted-text);
+}
+
+.reviews-head strong {
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.review-compose {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.review-compose label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.review-compose select,
+.review-compose textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  font: inherit;
+  background: #fff;
+}
+
+.review-error {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.reviews-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.review-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.review-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.review-card span {
+  color: #f59e0b;
+  letter-spacing: 0;
+}
+
+.review-card button {
+  justify-self: start;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 11px;
+  background: #fff;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .doctor-profile,
+  .reviews-head,
+  .review-card div {
+    display: grid;
+  }
+
+  .meta {
+    flex-wrap: wrap;
+  }
+}

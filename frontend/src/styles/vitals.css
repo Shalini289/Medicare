@@ -1,0 +1,252 @@
+.vitals-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.vitals-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.vitals-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.vitals-hero p,
+.vitals-panel__head p,
+.vital-record p,
+.vital-record small {
+  color: var(--muted-text);
+}
+
+.vital-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.vital-stat,
+.vitals-alerts,
+.vital-form,
+.vitals-panel,
+.vital-record {
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.vital-stat {
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.vital-stat span,
+.vital-stat small {
+  color: var(--muted-text);
+}
+
+.vital-stat strong {
+  display: block;
+  margin: 7px 0 2px;
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.vitals-alerts {
+  display: flex;
+  gap: 14px;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 20px;
+  background: #fff7ed;
+}
+
+.vitals-alerts svg {
+  color: #c2410c;
+  margin-top: 4px;
+}
+
+.vitals-alerts h2 {
+  font-size: 1.1rem;
+}
+
+.vitals-alerts div div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.vitals-alerts span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #ffedd5;
+  color: #9a3412;
+  font-weight: 800;
+}
+
+.vitals-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.vital-form,
+.vitals-panel {
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.form-title,
+.vitals-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.form-title {
+  justify-content: flex-start;
+}
+
+.form-title svg {
+  color: var(--primary);
+}
+
+.vital-form label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+
+.vital-form input,
+.vital-form textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  font: inherit;
+  background: #fff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.form-error {
+  margin-bottom: 14px;
+  color: #b42318;
+  font-weight: 800;
+}
+
+.trend-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(28px, 1fr));
+  align-items: end;
+  gap: 10px;
+  min-height: 130px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #f8fafc;
+  margin-bottom: 18px;
+}
+
+.trend-strip div {
+  display: grid;
+  align-items: end;
+  gap: 8px;
+  height: 92px;
+  text-align: center;
+}
+
+.trend-strip span {
+  width: 100%;
+  min-height: 18px;
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(180deg, var(--primary), #2f80ed);
+}
+
+.trend-strip small {
+  color: var(--muted-text);
+  font-size: 0.78rem;
+}
+
+.vital-records {
+  display: grid;
+  gap: 12px;
+}
+
+.vital-record {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.vital-record strong,
+.vital-record small,
+.vital-record em {
+  display: block;
+}
+
+.vital-record em {
+  margin-top: 8px;
+  color: var(--text);
+  font-style: normal;
+}
+
+.vital-record button {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.empty-state {
+  padding: 26px;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--muted-text);
+  text-align: center;
+}
+
+@media (max-width: 1080px) {
+  .vital-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .vitals-hero,
+  .vitals-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .vitals-page {
+    width: min(100% - 22px, 1180px);
+    padding-top: 26px;
+  }
+
+  .vital-summary,
+  .form-grid,
+  .vital-record {
+    grid-template-columns: 1fr;
+  }
+}

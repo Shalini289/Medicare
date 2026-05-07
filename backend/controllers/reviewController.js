@@ -1,64 +1,59 @@
 const Review = require("../models/Review");
 const Doctor = require("../models/Doctor");
 
-//
-// ⭐ ADD REVIEW
-//
-const addReview = async (req, res) => {
-  try {
-    const { doctor, rating, comment } = req.body;
+const getUserId = (req) => req.user.id || req.user._id;
 
-    // ❌ prevent duplicate review
-    const exists = await Review.findOne({
-      user: req.user.id,
-      doctor
-    });
+const updateDoctorRating = async (doctorId) => {
+  const reviews = await Review.find({ doctor: doctorId });
 
-    if (exists) {
-      return res.status(400).json({ msg: "Already reviewed" });
-    }
+  const rating = reviews.length
+    ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length
+    : 0;
 
-    const review = await Review.create({
-      user: req.user.id,
-      doctor,
-      rating,
-      comment
-    });
-
-    //
-    // 🔄 UPDATE DOCTOR RATING
-    //
-    const reviews = await Review.find({ doctor });
-
-    const avg =
-      reviews.reduce((acc, r) => acc + r.rating, 0) /
-      reviews.length;
-
-    await Doctor.findByIdAndUpdate(doctor, {
-      rating: avg.toFixed(1)
-    });
-
-    res.json(review);
-
-  } catch (err) {
-    res.status(500).json({ msg: "Review failed" });
-  }
+  await Doctor.findByIdAndUpdate(doctorId, {
+    rating: Number(rating.toFixed(1)),
+  });
 };
 
-//
-// 📥 GET REVIEWS BY DOCTOR
-//
+const addReview = async (req, res) => {
+  const { doctor, rating, comment } = req.body;
+
+  if (!doctor || !rating) {
+    return res.status(400).json({ msg: "Doctor and rating are required" });
+  }
+
+  const exists = await Review.findOne({
+    user: getUserId(req),
+    doctor,
+  });
+
+  if (exists) {
+    return res.status(400).json({ msg: "Already reviewed" });
+  }
+
+  const review = await Review.create({
+    user: getUserId(req),
+    doctor,
+    rating,
+    comment,
+  });
+
+  await updateDoctorRating(doctor);
+
+  const populated = await review.populate("user", "name");
+  res.status(201).json(populated);
+};
+
 const getReviews = async (req, res) => {
   const reviews = await Review.find({
-    doctor: req.params.doctorId
-  }).populate("user", "name");
+    doctor: req.params.doctorId,
+  })
+    .sort({ createdAt: -1 })
+    .populate("user", "name");
 
   res.json(reviews);
 };
 
-//
-// ❌ DELETE REVIEW (USER OR ADMIN)
-//
 const deleteReview = async (req, res) => {
   const review = await Review.findById(req.params.id);
 
@@ -66,44 +61,40 @@ const deleteReview = async (req, res) => {
     return res.status(404).json({ msg: "Review not found" });
   }
 
-  // only owner or admin
   if (
-    review.user.toString() !== req.user.id &&
+    review.user.toString() !== String(getUserId(req)) &&
     req.user.role !== "admin"
   ) {
     return res.status(403).json({ msg: "Not allowed" });
   }
 
+  const doctorId = review.doctor;
   await review.deleteOne();
+  await updateDoctorRating(doctorId);
 
   res.json({ msg: "Review deleted" });
 };
 
-//
-// 👍 MARK REVIEW AS HELPFUL (BONUS)
-//
 const markHelpful = async (req, res) => {
-  const review = await Review.findById(req.params.id);
+  const review = await Review.findByIdAndUpdate(
+    req.params.id,
+    { $inc: { helpful: 1 } },
+    { new: true }
+  ).populate("user", "name");
 
   if (!review) {
     return res.status(404).json({ msg: "Review not found" });
   }
 
-  review.helpful = (review.helpful || 0) + 1;
-
-  await review.save();
-
   res.json(review);
 };
 
-//
-// 📊 GET TOP REVIEWS (ADMIN / UI)
-//
 const getTopReviews = async (req, res) => {
   const reviews = await Review.find()
-    .sort({ rating: -1 })
+    .sort({ rating: -1, helpful: -1 })
     .limit(10)
-    .populate("doctor", "name");
+    .populate("doctor", "name specialization")
+    .populate("user", "name");
 
   res.json(reviews);
 };
@@ -113,5 +104,5 @@ module.exports = {
   getReviews,
   deleteReview,
   markHelpful,
-  getTopReviews
+  getTopReviews,
 };

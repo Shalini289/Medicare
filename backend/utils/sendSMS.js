@@ -1,11 +1,21 @@
 const twilio = require("twilio");
 
-const client = twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH
+const isConfigured = Boolean(
+  process.env.TWILIO_SID &&
+  process.env.TWILIO_AUTH &&
+  process.env.TWILIO_PHONE
 );
 
+const client = isConfigured
+  ? twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH)
+  : null;
+
 const sendSMS = async (to, msg) => {
+  if (!client) {
+    console.log(`SMS skipped: ${msg}`);
+    return;
+  }
+
   await client.messages.create({
     body: msg,
     from: process.env.TWILIO_PHONE,

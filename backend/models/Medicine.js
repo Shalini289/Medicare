@@ -8,4 +8,6 @@ const medicineSchema = new mongoose.Schema({
   image: String
 });
 
-module.exports = mongoose.model("Medicine", medicineSchema);
+module.exports =
+  mongoose.models.Medicine ||
+  mongoose.model("Medicine", medicineSchema);

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import "../styles/medicineCard.css";
 
 export default function MedicineCard({ med, add }) {
@@ -6,7 +7,13 @@ export default function MedicineCard({ med, add }) {
   return (
     <div className="medicine-card">
       <div className="med-img">
-        <img src={med.image || "/medicine.png"} alt={med.name} />
+        <Image
+          src={med.image || "/medicine.png"}
+          alt={med.name}
+          width={80}
+          height={80}
+          sizes="80px"
+        />
       </div>
 
       <div className="med-info">

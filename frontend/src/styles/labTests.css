@@ -1,0 +1,268 @@
+.lab-page {
+  width: min(1240px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.lab-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 26px;
+}
+
+.lab-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.lab-hero p,
+.lab-card p,
+.lab-card li,
+.lab-booking p,
+.selected-tests p {
+  color: var(--muted-text);
+}
+
+.lab-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.lab-stats span,
+.lab-card,
+.lab-booking-form,
+.lab-history,
+.lab-booking {
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.lab-stats span {
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: var(--muted-text);
+}
+
+.lab-stats strong {
+  display: block;
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.lab-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 390px);
+  gap: 22px;
+  align-items: start;
+}
+
+.lab-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.lab-tools input,
+.lab-tools select,
+.lab-booking-form input,
+.lab-booking-form select,
+.lab-booking-form textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  font: inherit;
+  background: #fff;
+}
+
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.lab-card {
+  display: grid;
+  gap: 14px;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.lab-card.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 18px 40px rgba(212, 112, 143, 0.18);
+}
+
+.lab-card__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 12%, white);
+  color: var(--primary);
+}
+
+.lab-card span,
+.lab-booking span {
+  color: var(--primary);
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.lab-card h2 {
+  margin: 4px 0 6px;
+  font-size: 1.1rem;
+}
+
+.lab-card ul {
+  display: grid;
+  gap: 6px;
+  margin-left: 18px;
+}
+
+.lab-card__footer,
+.booking-total,
+.selected-tests div,
+.lab-booking {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lab-card__footer button,
+.selected-tests button,
+.lab-booking button {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #fff;
+  font-weight: 800;
+}
+
+.lab-booking-panel {
+  display: grid;
+  gap: 16px;
+  position: sticky;
+  top: 86px;
+}
+
+.lab-booking-form,
+.lab-history {
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.form-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.form-title svg {
+  color: var(--primary);
+}
+
+.lab-booking-form label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+
+.selected-tests {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.selected-tests div {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.booking-total {
+  margin: 14px 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.form-error,
+.form-success {
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-weight: 800;
+}
+
+.form-error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.form-success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.lab-history h2 {
+  margin-bottom: 12px;
+  font-size: 1.15rem;
+}
+
+.lab-booking {
+  align-items: flex-start;
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+.lab-booking h3 {
+  margin: 5px 0;
+  font-size: 1rem;
+}
+
+.empty-state {
+  padding: 26px;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--muted-text);
+  text-align: center;
+}
+
+@media (max-width: 1020px) {
+  .lab-hero,
+  .lab-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-booking-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .lab-page {
+    width: min(100% - 22px, 1240px);
+    padding-top: 26px;
+  }
+
+  .lab-stats,
+  .lab-tools,
+  .lab-grid,
+  .lab-booking {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-booking {
+    display: grid;
+  }
+}
