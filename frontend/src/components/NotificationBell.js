@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { getApiUrl } from "@/utils/runtimeConfig";
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
@@ -19,7 +20,10 @@ export default function NotificationBell() {
   }, []);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const apiUrl = getApiUrl();
+    if (!apiUrl) return;
+
+    const socket = io(apiUrl);
 
     socket.on("slotBooked", () => {
       add("New appointment booked");

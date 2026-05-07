@@ -2,10 +2,14 @@
 
 import { useEffect } from "react";
 import { io } from "socket.io-client";
+import { getApiUrl } from "@/utils/runtimeConfig";
 
 export default function useSocket(event, handler) {
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL);
+    const apiUrl = getApiUrl();
+    if (!apiUrl) return;
+
+    const socket = io(apiUrl);
 
     socket.on(event, handler);
 

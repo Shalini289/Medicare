@@ -1,8 +1,20 @@
-const BASE_URL = "http://localhost:5000";
+const getBaseUrl = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+
+  if (apiUrl) return apiUrl;
+
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return "http://localhost:5000";
+  }
+
+  return "";
+};
 
 export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOverride = null) => {
   const legacyCall = typeof optionsOrMethod === "string";
-  const token = tokenOverride || localStorage.getItem("token");
+  const token =
+    tokenOverride ||
+    (typeof window !== "undefined" ? localStorage.getItem("token") : null);
   const isFormData = body instanceof FormData || optionsOrMethod?.body instanceof FormData;
   const options = legacyCall
     ? {
@@ -17,7 +29,7 @@ export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOver
     ...options.headers,
   };
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  const res = await fetch(`${getBaseUrl()}${endpoint}`, {
     cache: "no-store",
     ...options,
     headers,
