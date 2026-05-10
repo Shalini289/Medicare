@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { login } from "@/services/authService";
 import "../../styles/login.css";
 
 export default function LoginPage() {
@@ -22,28 +23,14 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (!data.token) {
-        throw new Error("Login failed");
-      }
-
-      localStorage.setItem("token", data.token);
+      await login(form);
 
       alert("Login successful");
 
-      router.push("/");
+      router.push("/dashboard");
 
     } catch (err) {
-      alert("Invalid Credentials");
+      alert(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }

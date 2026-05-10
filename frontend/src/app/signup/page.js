@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { register } from "@/services/authService";
 import "../../styles/signup.css";
 
 export default function SignupPage() {
@@ -33,28 +34,18 @@ export default function SignupPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-        }),
+      await register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
       });
-
-      const data = await res.json();
-
-      if (!data) throw new Error();
 
       alert("Signup successful");
 
       router.push("/login");
 
-    } catch {
-      alert("Signup Failed");
+    } catch (err) {
+      alert(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }

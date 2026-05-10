@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { addDoctorReview } from "@/services/reviewService";
 
 export default function ReviewForm({ doctorId }) {
   const [rating, setRating] = useState(5);
@@ -13,27 +14,18 @@ export default function ReviewForm({ doctorId }) {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
-
-      await fetch("/api/review", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          doctor: doctorId,
-          rating,
-          comment,
-        }),
+      await addDoctorReview({
+        doctor: doctorId,
+        rating,
+        comment,
       });
 
       alert("Review added");
       setComment("");
       setRating(5);
 
-    } catch {
-      alert("Failed to submit review");
+    } catch (err) {
+      alert(err.message || "Failed to submit review");
     } finally {
       setLoading(false);
     }

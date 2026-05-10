@@ -7,7 +7,7 @@ const getBaseUrl = () => {
     return "http://localhost:5000";
   }
 
-  return "";
+  return null;
 };
 
 export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOverride = null) => {
@@ -29,7 +29,13 @@ export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOver
     ...options.headers,
   };
 
-  const res = await fetch(`${getBaseUrl()}${endpoint}`, {
+  const baseUrl = getBaseUrl();
+
+  if (!baseUrl) {
+    throw new Error("Backend API URL is not configured. Set NEXT_PUBLIC_API_URL in Vercel.");
+  }
+
+  const res = await fetch(`${baseUrl}${endpoint}`, {
     cache: "no-store",
     ...options,
     headers,

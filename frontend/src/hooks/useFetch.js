@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { api } from "@/utils/api";
 
 export default function useFetch(url) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(url)
-      .then(res => res.json())
-      .then(res => {
+    const load = url.startsWith("/api/")
+      ? api(url)
+      : fetch(url).then((res) => res.json());
+
+    load
+      .then((res) => {
         setData(res);
+        setLoading(false);
+      })
+      .catch(() => {
+        setData([]);
         setLoading(false);
       });
   }, [url]);
