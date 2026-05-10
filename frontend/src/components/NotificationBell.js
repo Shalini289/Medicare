@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { FaBell } from "react-icons/fa";
 import { io } from "socket.io-client";
 import { getApiUrl } from "@/utils/runtimeConfig";
 
@@ -49,7 +50,7 @@ export default function NotificationBell() {
         aria-label="Notifications"
         onClick={() => setOpen(!open)}
       >
-        N
+        <FaBell aria-hidden="true" />
         {notifications.length > 0 && (
           <span className="badge">
             {notifications.length}

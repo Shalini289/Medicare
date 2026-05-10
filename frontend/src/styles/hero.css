@@ -40,6 +40,7 @@
 /* ===== IMAGE ===== */
 .hero-image img {
   width: 350px;
+  height: auto;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -51,6 +52,7 @@
 
   .hero-image img {
     width: 250px;
+    height: auto;
   }
 
   .hero-actions {

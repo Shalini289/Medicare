@@ -25,7 +25,7 @@ export default function Booking() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [family, setFamily] = useState([]);
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState("self");
   const [bookedSlots, setBookedSlots] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -52,8 +52,8 @@ export default function Booking() {
   }, [date, doctor]);
 
   const handle = async () => {
-    if (!date || !time || !selected) {
-      return alert("Please fill all fields");
+    if (!date || !time) {
+      return alert("Please choose a date and time slot");
     }
 
     try {
@@ -115,7 +115,7 @@ export default function Booking() {
             value={selected}
             onChange={(e)=>setSelected(e.target.value)}
           >
-            <option value="">Choose patient</option>
+            <option value="self">Myself</option>
 
             {family.map(f => (
               <option key={f._id} value={f._id}>
@@ -123,6 +123,11 @@ export default function Booking() {
               </option>
             ))}
           </select>
+          {family.length === 0 && (
+            <p className="field-hint">
+              Add family members from Family Health to book for someone else.
+            </p>
+          )}
         </div>
 
         <button

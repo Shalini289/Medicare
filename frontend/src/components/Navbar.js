@@ -9,23 +9,45 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Doctors", href: "/doctors" },
   { label: "Pharmacy", href: "/pharmacy" },
-  { label: "Lab Tests", href: "/lab-tests" },
-  { label: "Orders", href: "/orders" },
-  { label: "Appointments", href: "/profile" },
-  { label: "Vitals", href: "/vitals" },
-  { label: "Medical ID", href: "/medical-id" },
-  { label: "Care Plans", href: "/care-plans" },
-  { label: "Vaccines", href: "/vaccinations" },
-  { label: "Reminders", href: "/reminders" },
-  { label: "Prescriptions", href: "/prescriptions" },
   { label: "Chat", href: "/chat" },
-  { label: "Family", href: "/family" },
+];
+
+const navGroups = [
+  {
+    label: "Services",
+    items: [
+      { label: "Lab Tests", href: "/lab-tests" },
+      { label: "Hospital Beds", href: "/hospital" },
+      { label: "Symptom Checker", href: "/symptoms" },
+    ],
+  },
+  {
+    label: "Health",
+    items: [
+      { label: "Vitals", href: "/vitals" },
+      { label: "Medical ID", href: "/medical-id" },
+      { label: "Care Plans", href: "/care-plans" },
+      { label: "Vaccines", href: "/vaccinations" },
+      { label: "Reminders", href: "/reminders" },
+      { label: "Prescriptions", href: "/prescriptions" },
+      { label: "Family", href: "/family" },
+    ],
+  },
+  {
+    label: "Records",
+    items: [
+      { label: "Appointments", href: "/profile" },
+      { label: "Orders", href: "/orders" },
+      { label: "Reports", href: "/reports" },
+    ],
+  },
 ];
 
 export default function Navbar() {
   const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeGroup, setActiveGroup] = useState(null);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -35,6 +57,7 @@ export default function Navbar() {
 
   const goTo = (href) => {
     setOpen(false);
+    setActiveGroup(null);
     router.push(href);
   };
 
@@ -42,7 +65,12 @@ export default function Navbar() {
     localStorage.removeItem("token");
     setLoggedIn(false);
     setOpen(false);
+    setActiveGroup(null);
     router.push("/login");
+  };
+
+  const toggleGroup = (label) => {
+    setActiveGroup((current) => current === label ? null : label);
   };
 
   return (
@@ -55,6 +83,27 @@ export default function Navbar() {
         {navItems.map((item) => (
           <li key={item.href}>
             <button onClick={() => goTo(item.href)}>{item.label}</button>
+          </li>
+        ))}
+
+        {navGroups.map((group) => (
+          <li className="nav-menu-group" key={group.label}>
+            <button
+              className="nav-group-trigger"
+              aria-expanded={activeGroup === group.label}
+              onClick={() => toggleGroup(group.label)}
+            >
+              {group.label}
+              <span aria-hidden="true">▾</span>
+            </button>
+
+            <div className={`nav-submenu ${activeGroup === group.label ? "is-open" : ""}`}>
+              {group.items.map((item) => (
+                <button key={item.href} onClick={() => goTo(item.href)}>
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </li>
         ))}
       </ul>
@@ -76,7 +125,10 @@ export default function Navbar() {
           className="menu-toggle"
           aria-label="Toggle navigation"
           aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => {
+            setOpen((value) => !value);
+            setActiveGroup(null);
+          }}
         >
           <span />
           <span />

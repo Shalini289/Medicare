@@ -44,8 +44,20 @@ body {
 }
 
 /* ===== SMOOTH TRANSITIONS ===== */
-* {
-  transition: all 0.2s ease-in-out;
+a,
+button,
+input,
+select,
+textarea,
+.card,
+.glass {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 /* ===== PAGE WRAPPER ===== */
 .home-wrapper {
@@ -534,13 +546,16 @@ body, html {
   --surface-soft: #fff3f7;
   --text: #28222a;
   --muted: #6f6670;
+  --muted-text: #6f6670;
   --border: #f0dbe3;
+  --border-color: #f0dbe3;
   --primary: #c65f80;
   --primary-dark: #9f3f61;
   --success: #2e7d32;
   --warning: #a04b00;
   --danger: #c62828;
   --shadow: 0 16px 40px rgba(69, 34, 48, 0.08);
+  --soft-shadow: 0 16px 40px rgba(69, 34, 48, 0.08);
 }
 
 html {
@@ -565,6 +580,29 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none !important;
 }
 
 input,
@@ -644,6 +682,7 @@ textarea:focus {
 .symptom-page,
 .family-container,
 .admin-page {
+  margin-inline: auto;
   width: min(1180px, 100%);
 }
 
@@ -729,7 +768,7 @@ textarea:focus {
 
 @media (max-width: 720px) {
   .main-content {
-    padding-inline: 14px;
+    padding: 24px 14px 40px;
   }
 
   .doctor-controls,
@@ -754,5 +793,97 @@ textarea:focus {
   .symptom-controls input,
   .symptom-controls select {
     width: 100%;
+  }
+}
+
+/* ===== PROJECT-WIDE UI STABILITY ===== */
+.center {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  text-align: center;
+}
+
+.card,
+.glass,
+.doctor-card,
+.medicine-card,
+.order-card,
+.report-card,
+.hospital-card,
+.appointment-card,
+.cart {
+  background: var(--surface);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.book-btn,
+.add-btn {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.btn-secondary {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 12px 18px;
+}
+
+.empty,
+.empty-state {
+  color: var(--muted-text);
+}
+
+.form-error {
+  background: #fef3f2;
+  border-radius: 8px;
+  color: #b42318;
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+.form-success {
+  background: #ecfdf3;
+  border-radius: 8px;
+  color: #027a48;
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    line-height: 1.08;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .book-btn,
+  .add-btn {
+    width: 100%;
+  }
+
+  .reports-header,
+  .report-card__head,
+  .symptom-result__head,
+  .notif-header {
+    display: grid;
+  }
+
+  .report-box,
+  .symptom-controls,
+  .symptom-chips {
+    display: grid;
   }
 }
