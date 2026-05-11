@@ -10,21 +10,26 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [resetUrl, setResetUrl] = useState("");
 
   const submit = async () => {
-    if (!email) return alert("Enter your email");
+    if (!email.trim()) {
+      setError("Enter your email address.");
+      return;
+    }
 
     try {
       setLoading(true);
       setMessage("");
+      setError("");
       setResetUrl("");
 
-      const res = await forgotPassword({ email });
+      const res = await forgotPassword({ email: email.trim().toLowerCase() });
       setMessage(res.msg || "If an account exists, a reset link has been sent.");
       if (res.resetUrl) setResetUrl(res.resetUrl);
     } catch (err) {
-      alert(err.message || "Could not send reset link");
+      setError(err.message || "Could not send reset link");
     } finally {
       setLoading(false);
     }
@@ -45,12 +50,20 @@ export default function ForgotPasswordPage() {
         <h2>Forgot Password</h2>
         <p>Enter your account email and we will send a reset link.</p>
 
+        {error && <p className="auth-error">{error}</p>}
+
         <div className="login-form">
           <input
             type="email"
             placeholder="Email address"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setError("");
+              setMessage("");
+              setResetUrl("");
+            }}
+            onKeyDown={(event) => event.key === "Enter" && submit()}
           />
 
           <button className="login-btn" onClick={submit} disabled={loading}>
@@ -60,9 +73,12 @@ export default function ForgotPasswordPage() {
 
         {message && <p className="auth-message">{message}</p>}
         {resetUrl && (
-          <button className="dev-reset-link" onClick={openResetLink}>
-            Open development reset link
-          </button>
+          <div className="reset-link-box">
+            <small>{resetUrl}</small>
+            <button className="dev-reset-link" onClick={openResetLink}>
+              Open reset link
+            </button>
+          </div>
         )}
 
         <div className="login-footer">

@@ -1,10 +1,36 @@
 const Appointment = require("../models/Appointment");
+const Doctor = require("../models/Doctor");
 const Notification = require("../models/Notification");
+const mongoose = require("mongoose");
 
 const bookAppointment = async (req, res) => {
   try {
+    const { doctor, date, time, patient } = req.body;
+
+    if (!doctor || !mongoose.isValidObjectId(doctor)) {
+      return res.status(400).json({ msg: "Please select a valid doctor" });
+    }
+
+    if (!date || !time) {
+      return res.status(400).json({ msg: "Please choose a date and time slot" });
+    }
+
+    const doctorExists = await Doctor.exists({ _id: doctor });
+    if (!doctorExists) {
+      return res.status(404).json({ msg: "Doctor not found" });
+    }
+
+    const patientValue =
+      patient && patient !== "self" && mongoose.isValidObjectId(patient)
+        ? patient
+        : req.user.id;
+
     const appointment = await Appointment.create({
       ...req.body,
+      doctor,
+      date,
+      time,
+      patient: patientValue,
       user: req.user.id
     });
 
@@ -18,8 +44,12 @@ const bookAppointment = async (req, res) => {
     });
 
     res.json(appointment);
-  } catch {
-    res.status(400).json({ msg: "Slot already booked" });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ msg: "This slot is already booked" });
+    }
+
+    res.status(400).json({ msg: err.message || "Appointment could not be booked" });
   }
 };
 
@@ -33,7 +63,7 @@ const getMyAppointments = async (req, res) => {
 const getSlots = async (req, res) => {
   const { doctorId, date } = req.params;
 
-  const booked = await Appointment.find({ doctor: doctorId, date });
+  const booked = await Appointment.find({ doctor: doctorId, date, status: "booked" });
 
   res.json(booked.map(b => b.time));
 };

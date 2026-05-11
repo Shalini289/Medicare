@@ -6,6 +6,7 @@ export const getToken = () => {
 
 export const setToken = (token) => {
   localStorage.setItem("token", token);
+  window.dispatchEvent(new Event("authchange"));
 };
 
 export const getCurrentUser = () => {
@@ -22,5 +23,6 @@ export const getCurrentUser = () => {
 
 export const logout = () => {
   localStorage.removeItem("token");
+  window.dispatchEvent(new Event("authchange"));
   window.location.href = "/login";
 };

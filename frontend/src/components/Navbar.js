@@ -1,9 +1,10 @@
 "use client";
 
 import "../styles/navbar.css";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
+import { getToken } from "@/utils/auth";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -50,15 +51,25 @@ const navGroups = [
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      setLoggedIn(Boolean(localStorage.getItem("token")));
-    });
-  }, []);
+    const syncAuthState = () => {
+      setLoggedIn(Boolean(getToken()));
+    };
+
+    syncAuthState();
+    window.addEventListener("authchange", syncAuthState);
+    window.addEventListener("storage", syncAuthState);
+
+    return () => {
+      window.removeEventListener("authchange", syncAuthState);
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, [pathname]);
 
   const goTo = (href) => {
     setOpen(false);
@@ -68,6 +79,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("authchange"));
     setLoggedIn(false);
     setOpen(false);
     setActiveGroup(null);
@@ -114,7 +126,7 @@ export default function Navbar() {
       </ul>
 
       <div className="nav-right">
-        <NotificationBell />
+        {loggedIn && <NotificationBell />}
 
         {loggedIn ? (
           <button className="btn-primary nav-auth" onClick={handleLogout}>

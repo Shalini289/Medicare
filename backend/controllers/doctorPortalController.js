@@ -276,6 +276,8 @@ exports.createPatientPrescription = async (req, res) => {
 
   const prescription = await Prescription.create({
     user: req.body.patientId,
+    doctor: doctorId,
+    issuedBy: req.user.id,
     prescriptionCode: createPrescriptionCode(),
     doctorName: req.body.doctorName?.trim() || doctor?.name || "",
     diagnosis: req.body.diagnosis?.trim() || "",

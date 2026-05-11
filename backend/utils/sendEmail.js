@@ -6,22 +6,28 @@ const sendEmail = async (to, subject, text) => {
     return false;
   }
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASS
+      }
+    });
 
-  await transporter.sendMail({
-    from: process.env.EMAIL,
-    to,
-    subject,
-    text
-  });
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to,
+      subject,
+      text
+    });
 
-  return true;
+    return true;
+  } catch (err) {
+    console.error(`Email failed for ${to}: ${err.message}`);
+    console.log(`Development fallback email for ${to}: ${subject}\n${text}`);
+    return false;
+  }
 };
 
 module.exports = sendEmail;

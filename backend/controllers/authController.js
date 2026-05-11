@@ -134,13 +134,17 @@ const issueTwoFactorChallenge = async (user) => {
 };
 
 const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const cleanEmail = req.body.email?.trim().toLowerCase();
 
-  if (!email) {
+  if (!cleanEmail) {
     return res.status(400).json({ msg: "Email is required" });
   }
 
-  const user = await User.findOne({ email });
+  if (!emailPattern.test(cleanEmail)) {
+    return res.status(400).json({ msg: "Enter a valid email address" });
+  }
+
+  const user = await User.findOne({ email: cleanEmail });
 
   if (!user) {
     return res.json({ msg: "If an account exists, a reset link has been sent." });
@@ -149,7 +153,12 @@ const forgotPassword = async (req, res) => {
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
-  const frontendUrl = (process.env.FRONTEND_URL || process.env.CLIENT_URL || "http://localhost:3000").replace(/\/$/, "");
+  const frontendUrl = (
+    process.env.FRONTEND_URL ||
+    process.env.CLIENT_URL ||
+    req.get("origin") ||
+    "http://localhost:3000"
+  ).replace(/\/$/, "");
   const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
   const sent = await sendEmail(
     user.email,
@@ -160,7 +169,7 @@ const forgotPassword = async (req, res) => {
   res.json({
     msg: sent
       ? "Password reset link sent to your email."
-      : "Email is not configured. Use the development reset link.",
+      : "Email could not be sent. Use the reset link shown below.",
     resetUrl: sent ? undefined : resetUrl,
   });
 };
@@ -168,8 +177,14 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   const { password } = req.body;
 
-  if (!password || password.length < 6) {
-    return res.status(400).json({ msg: "Password must be at least 6 characters" });
+  if (
+    !password ||
+    password.length < 8 ||
+    !/[A-Z]/.test(password) ||
+    !/[a-z]/.test(password) ||
+    !/[0-9]/.test(password)
+  ) {
+    return res.status(400).json({ msg: "Password must be 8+ characters and include uppercase, lowercase, and a number" });
   }
 
   const hashedToken = crypto

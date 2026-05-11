@@ -1,6 +1,7 @@
 const Medicine = require("../models/Medicine");
 const Order = require("../models/Order");
 const Notification = require("../models/Notification");
+const demoMedicines = require("../data/medicines");
 
 const getExpiryStatus = (expiryDate) => {
   if (!expiryDate) return "unknown";
@@ -26,12 +27,38 @@ const enrichMedicine = (medicine) => {
   };
 };
 
+const seedDemoMedicinesIfEmpty = async () => {
+  const count = await Medicine.countDocuments();
+
+  if (count > 0) {
+    return;
+  }
+
+  await Medicine.bulkWrite(
+    demoMedicines.map((medicine) => ({
+      updateOne: {
+        filter: {
+          barcode: medicine.barcode,
+        },
+        update: {
+          $set: medicine,
+        },
+        upsert: true,
+      },
+    }))
+  );
+};
+
 const getMedicines = async (req, res) => {
+  await seedDemoMedicinesIfEmpty();
+
   const medicines = await Medicine.find().sort({ name: 1 });
   res.json(medicines.map(enrichMedicine));
 };
 
 const getPharmacyAlerts = async (req, res) => {
+  await seedDemoMedicinesIfEmpty();
+
   const medicines = await Medicine.find().sort({ expiryDate: 1, stock: 1 });
   const enriched = medicines.map(enrichMedicine);
 

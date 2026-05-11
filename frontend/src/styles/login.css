@@ -132,6 +132,47 @@
   width: 100%;
 }
 
+.reset-link-box {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.reset-link-box small {
+  display: block;
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff8fb;
+  color: #6f6670;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.reset-password-rules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reset-password-rules li {
+  border-radius: 999px;
+  padding: 7px 9px;
+  background: #f8fafc;
+  color: #777;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.reset-password-rules li.met {
+  background: #e6f7ec;
+  color: #2e7d32;
+}
+
 /* ===== EXTRA OPTIONS ===== */
 .login-options {
   display: flex;

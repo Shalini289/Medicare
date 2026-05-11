@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaCalendarAlt, FaFilePrescription, FaMicrophone, FaSave, FaUserInjured, FaVideo } from "react-icons/fa";
+import { FaCalendarAlt, FaFilePrescription, FaMicrophone, FaSave, FaTrash, FaUserInjured, FaVideo } from "react-icons/fa";
 import { getDoctors, getMyDoctorProfile } from "@/services/doctorService";
 import {
   createDoctorNote,
@@ -453,11 +453,36 @@ export default function DoctorPortalPage() {
           <div className="medicine-stack">
             {prescriptionForm.medicines.map((medicine, index) => (
               <div className="medicine-row" key={index}>
-                <input value={medicine.name} onChange={(event) => changeMedicine(index, "name", event.target.value)} placeholder="Medicine" />
-                <input value={medicine.dosage} onChange={(event) => changeMedicine(index, "dosage", event.target.value)} placeholder="Dose" />
-                <input value={medicine.frequency} onChange={(event) => changeMedicine(index, "frequency", event.target.value)} placeholder="Frequency" />
-                <input value={medicine.duration} onChange={(event) => changeMedicine(index, "duration", event.target.value)} placeholder="Duration" />
-                <button type="button" onClick={() => removeMedicine(index)}>Remove</button>
+                <label>
+                  Medicine
+                  <input value={medicine.name} onChange={(event) => changeMedicine(index, "name", event.target.value)} placeholder="Medicine name" />
+                </label>
+                <label>
+                  Dose
+                  <input value={medicine.dosage} onChange={(event) => changeMedicine(index, "dosage", event.target.value)} placeholder="500mg" />
+                </label>
+                <label>
+                  Frequency
+                  <input value={medicine.frequency} onChange={(event) => changeMedicine(index, "frequency", event.target.value)} placeholder="Daily" />
+                </label>
+                <label>
+                  Duration
+                  <input value={medicine.duration} onChange={(event) => changeMedicine(index, "duration", event.target.value)} placeholder="5 days" />
+                </label>
+                <label className="medicine-instructions">
+                  Instructions
+                  <input value={medicine.instructions} onChange={(event) => changeMedicine(index, "instructions", event.target.value)} placeholder="After meals" />
+                </label>
+                <button
+                  className="medicine-remove"
+                  type="button"
+                  onClick={() => removeMedicine(index)}
+                  disabled={prescriptionForm.medicines.length === 1}
+                  title={prescriptionForm.medicines.length === 1 ? "At least one medicine is required" : "Remove medicine"}
+                >
+                  <FaTrash aria-hidden="true" />
+                  Remove
+                </button>
               </div>
             ))}
           </div>

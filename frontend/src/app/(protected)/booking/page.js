@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { bookAppointment, getSlots } from "@/services/appointmentService";
+import { getDoctors } from "@/services/doctorService";
 import { api } from "@/utils/api";
 
 const availableSlots = [
@@ -21,13 +22,19 @@ const availableSlots = [
 ];
 
 export default function Booking() {
-  const doctor = useSearchParams().get("id");
+  const params = useSearchParams();
+  const doctorFromUrl = params.get("id");
+  const [doctors, setDoctors] = useState([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [family, setFamily] = useState([]);
   const [selected, setSelected] = useState("self");
   const [bookedSlots, setBookedSlots] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const loadFamily = useCallback(async () => {
     const res = await api("/api/family");
@@ -41,34 +48,66 @@ export default function Booking() {
   }, [loadFamily]);
 
   useEffect(() => {
-    if (!doctor || !date) {
+    queueMicrotask(() => {
+      getDoctors()
+        .then((items) => {
+          const list = Array.isArray(items) ? items : [];
+          const initialDoctor = list.some((item) => item._id === doctorFromUrl)
+            ? doctorFromUrl
+            : list[0]?._id || "";
+
+          setDoctors(list);
+          setSelectedDoctorId(initialDoctor);
+        })
+        .catch(() => {
+          setDoctors([]);
+          setError("Doctors could not be loaded right now.");
+        })
+        .finally(() => setLoadingDoctors(false));
+    });
+  }, [doctorFromUrl]);
+
+  useEffect(() => {
+    if (!selectedDoctorId || !date) {
       setBookedSlots([]);
       return;
     }
 
-    getSlots(doctor, date)
+    getSlots(selectedDoctorId, date)
       .then((slots) => setBookedSlots(Array.isArray(slots) ? slots : []))
       .catch(() => setBookedSlots([]));
-  }, [date, doctor]);
+  }, [date, selectedDoctorId]);
 
   const handle = async () => {
+    setError("");
+    setMessage("");
+
+    if (!selectedDoctorId) {
+      setError("Please select a doctor.");
+      return;
+    }
+
     if (!date || !time) {
-      return alert("Please choose a date and time slot");
+      setError("Please choose a date and time slot.");
+      return;
     }
 
     try {
       setLoading(true);
 
       await bookAppointment({
-        doctor,
+        doctor: selectedDoctorId,
         date,
         time,
         patient: selected,
       });
 
-      alert("Appointment booked successfully");
-    } catch {
-      alert("Booking failed");
+      setMessage("Appointment booked successfully.");
+      setTime("");
+      const slots = await getSlots(selectedDoctorId, date);
+      setBookedSlots(Array.isArray(slots) ? slots : []);
+    } catch (err) {
+      setError(err.message || "Booking failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -80,12 +119,42 @@ export default function Booking() {
         <h2>Book Appointment</h2>
         <p className="sub">Choose date, time, and patient</p>
 
+        {error && <p className="booking-alert error">{error}</p>}
+        {message && <p className="booking-alert success">{message}</p>}
+
+        <div className="field">
+          <label>Doctor</label>
+          <select
+            value={selectedDoctorId}
+            onChange={(e) => {
+              setSelectedDoctorId(e.target.value);
+              setTime("");
+              setError("");
+              setMessage("");
+            }}
+            disabled={loadingDoctors}
+          >
+            <option value="">{loadingDoctors ? "Loading doctors..." : "Choose doctor"}</option>
+            {doctors.map((doctor) => (
+              <option key={doctor._id} value={doctor._id}>
+                {doctor.name} - {doctor.specialization}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="field">
           <label>Date</label>
           <input
             type="date"
             value={date}
-            onChange={(e)=>setDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+            onChange={(e) => {
+              setDate(e.target.value);
+              setTime("");
+              setError("");
+              setMessage("");
+            }}
           />
         </div>
 
@@ -100,7 +169,11 @@ export default function Booking() {
                   key={slot}
                   className={`slot ${time === slot ? "selected" : ""} ${booked ? "booked" : ""}`}
                   disabled={booked}
-                  onClick={() => setTime(slot)}
+                  onClick={() => {
+                    setTime(slot);
+                    setError("");
+                    setMessage("");
+                  }}
                 >
                   {slot}
                 </button>
@@ -133,7 +206,7 @@ export default function Booking() {
         <button
           className="btn-primary"
           onClick={handle}
-          disabled={loading}
+          disabled={loading || !selectedDoctorId || !date || !time}
         >
           {loading ? "Booking..." : "Confirm Booking"}
         </button>

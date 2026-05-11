@@ -35,6 +35,7 @@ const normalizePrescription = (body) => ({
 
 exports.getPrescriptions = async (req, res) => {
   const prescriptions = await Prescription.find({ user: getUserId(req) })
+    .populate("doctor", "name specialization hospital")
     .sort({ issuedDate: -1, createdAt: -1 });
 
   res.json(prescriptions);
