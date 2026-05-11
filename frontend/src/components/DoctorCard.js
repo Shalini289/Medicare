@@ -57,6 +57,16 @@ export default function DoctorCard({ doctor }) {
       >
         Message Doctor
       </button>
+
+      <button
+        className="message-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/video-call?doctor=${doctor._id}`);
+        }}
+      >
+        Start Video Call
+      </button>
     </div>
   );
 }

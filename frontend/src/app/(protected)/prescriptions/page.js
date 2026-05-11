@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaEdit, FaFilePrescription, FaPlus, FaTrash } from "react-icons/fa";
+import { FaEdit, FaFilePrescription, FaPlus, FaPrint, FaTrash } from "react-icons/fa";
 import {
   createPrescription,
   deletePrescription,
@@ -23,7 +23,11 @@ const blankForm = {
   doctorName: "",
   diagnosis: "",
   issuedDate: new Date().toISOString().slice(0, 10),
+  validUntil: "",
+  followUpDate: "",
   status: "active",
+  patientInstructions: "",
+  digitalSignature: "",
   notes: "",
   medicines: [{ ...blankMedicine }],
 };
@@ -128,7 +132,11 @@ export default function PrescriptionsPage() {
       doctorName: prescription.doctorName || "",
       diagnosis: prescription.diagnosis || "",
       issuedDate: prescription.issuedDate ? prescription.issuedDate.slice(0, 10) : blankForm.issuedDate,
+      validUntil: prescription.validUntil ? prescription.validUntil.slice(0, 10) : "",
+      followUpDate: prescription.followUpDate ? prescription.followUpDate.slice(0, 10) : "",
       status: prescription.status || "active",
+      patientInstructions: prescription.patientInstructions || "",
+      digitalSignature: prescription.digitalSignature || "",
       notes: prescription.notes || "",
       medicines: prescription.medicines?.length
         ? prescription.medicines.map((item) => ({
@@ -189,6 +197,28 @@ export default function PrescriptionsPage() {
                 type="date"
                 name="issuedDate"
                 value={form.issuedDate}
+                onChange={updateField}
+              />
+            </label>
+          </div>
+
+          <div className="form-grid">
+            <label>
+              Valid until
+              <input
+                type="date"
+                name="validUntil"
+                value={form.validUntil}
+                onChange={updateField}
+              />
+            </label>
+
+            <label>
+              Follow-up date
+              <input
+                type="date"
+                name="followUpDate"
+                value={form.followUpDate}
                 onChange={updateField}
               />
             </label>
@@ -257,6 +287,27 @@ export default function PrescriptionsPage() {
           </div>
 
           <label>
+            Patient instructions
+            <textarea
+              name="patientInstructions"
+              value={form.patientInstructions}
+              onChange={updateField}
+              placeholder="Take after meals, avoid driving, drink fluids"
+              rows="3"
+            />
+          </label>
+
+          <label>
+            Digital signature
+            <input
+              name="digitalSignature"
+              value={form.digitalSignature}
+              onChange={updateField}
+              placeholder="Dr. Sharma, Reg. No. 12345"
+            />
+          </label>
+
+          <label>
             Notes
             <textarea
               name="notes"
@@ -304,6 +355,7 @@ export default function PrescriptionsPage() {
                     <div>
                       <span className="status-pill">{prescription.status}</span>
                       <h3>{prescription.diagnosis || "Prescription"}</h3>
+                      <strong className="rx-code">{prescription.prescriptionCode || "Digital Rx"}</strong>
                       <p>
                         {[prescription.doctorName, prescription.issuedDate && new Date(prescription.issuedDate).toLocaleDateString()]
                           .filter(Boolean)
@@ -314,6 +366,9 @@ export default function PrescriptionsPage() {
                     <div className="prescription-actions">
                       <button title="Edit prescription" onClick={() => editPrescription(prescription)}>
                         <FaEdit aria-hidden="true" />
+                      </button>
+                      <button title="Print digital prescription" onClick={() => window.print()}>
+                        <FaPrint aria-hidden="true" />
                       </button>
                       <button title="Delete prescription" onClick={() => removePrescription(prescription._id)}>
                         <FaTrash aria-hidden="true" />
@@ -339,6 +394,22 @@ export default function PrescriptionsPage() {
                       </div>
                     ))}
                   </div>
+
+                  <div className="rx-meta">
+                    {prescription.validUntil && (
+                      <span>Valid until {new Date(prescription.validUntil).toLocaleDateString()}</span>
+                    )}
+                    {prescription.followUpDate && (
+                      <span>Follow-up {new Date(prescription.followUpDate).toLocaleDateString()}</span>
+                    )}
+                    {prescription.digitalSignature && (
+                      <span>Signed by {prescription.digitalSignature}</span>
+                    )}
+                  </div>
+
+                  {prescription.patientInstructions && (
+                    <p className="prescription-instructions">{prescription.patientInstructions}</p>
+                  )}
 
                   {prescription.notes && <p className="prescription-notes">{prescription.notes}</p>}
                 </article>

@@ -65,6 +65,23 @@
   min-width: 0;
 }
 
+.admin-message {
+  border-radius: 10px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+}
+
+.admin-message.error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.admin-message.success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
 .admin-heading h1 {
   color: #28222a;
   font-size: clamp(30px, 4vw, 42px);

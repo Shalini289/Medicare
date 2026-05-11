@@ -14,11 +14,22 @@ const emptyContact = {
   phone: "",
 };
 
+const emptyHistory = {
+  type: "visit",
+  title: "",
+  doctorName: "",
+  facility: "",
+  date: new Date().toISOString().slice(0, 10),
+  notes: "",
+  attachmentsText: "",
+};
+
 const emptyForm = {
   bloodGroup: "",
   allergiesText: "",
   conditionsText: "",
   currentMedicationsText: "",
+  medicalHistory: [{ ...emptyHistory }],
   emergencyContacts: [{ ...emptyContact }],
   insurance: {
     provider: "",
@@ -53,6 +64,17 @@ export default function MedicalIdPage() {
       allergiesText: listText(profile.allergies),
       conditionsText: listText(profile.conditions),
       currentMedicationsText: listText(profile.currentMedications),
+      medicalHistory: profile.medicalHistory?.length
+        ? profile.medicalHistory.map((entry) => ({
+            type: entry.type || "visit",
+            title: entry.title || "",
+            doctorName: entry.doctorName || "",
+            facility: entry.facility || "",
+            date: entry.date ? entry.date.slice(0, 10) : emptyHistory.date,
+            notes: entry.notes || "",
+            attachmentsText: listText(entry.attachments),
+          }))
+        : [{ ...emptyHistory }],
       emergencyContacts: profile.emergencyContacts?.length
         ? profile.emergencyContacts.map((contact) => ({
             name: contact.name || "",
@@ -140,6 +162,29 @@ export default function MedicalIdPage() {
     }));
   };
 
+  const updateHistory = (index, field, value) => {
+    setForm((current) => ({
+      ...current,
+      medicalHistory: current.medicalHistory.map((entry, itemIndex) =>
+        itemIndex === index ? { ...entry, [field]: value } : entry
+      ),
+    }));
+  };
+
+  const addHistory = () => {
+    setForm((current) => ({
+      ...current,
+      medicalHistory: [...current.medicalHistory, { ...emptyHistory }],
+    }));
+  };
+
+  const removeHistory = (index) => {
+    setForm((current) => ({
+      ...current,
+      medicalHistory: current.medicalHistory.filter((_, itemIndex) => itemIndex !== index),
+    }));
+  };
+
   const submitProfile = async (event) => {
     event.preventDefault();
     setSaving(true);
@@ -152,6 +197,10 @@ export default function MedicalIdPage() {
         allergies: splitText(form.allergiesText),
         conditions: splitText(form.conditionsText),
         currentMedications: splitText(form.currentMedicationsText),
+        medicalHistory: form.medicalHistory.map((entry) => ({
+          ...entry,
+          attachments: splitText(entry.attachmentsText),
+        })),
         emergencyContacts: form.emergencyContacts,
         insurance: {
           ...form.insurance,
@@ -292,6 +341,78 @@ export default function MedicalIdPage() {
                 placeholder="Metformin 500mg, Vitamin D"
               />
             </label>
+          </div>
+
+          <div className="form-section">
+            <div className="section-head">
+              <h2>Medical history</h2>
+              <button type="button" onClick={addHistory}>
+                <FaPlus aria-hidden="true" /> Add event
+              </button>
+            </div>
+
+            {form.medicalHistory.map((entry, index) => (
+              <div className="history-line" key={`${index}-${entry.title}`}>
+                <div className="form-grid">
+                  <label>
+                    Type
+                    <select
+                      value={entry.type}
+                      onChange={(event) => updateHistory(index, "type", event.target.value)}
+                    >
+                      {["visit", "diagnosis", "procedure", "surgery", "admission", "lab", "imaging", "vaccination", "other"].map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    Date
+                    <input
+                      type="date"
+                      value={entry.date}
+                      onChange={(event) => updateHistory(index, "date", event.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <input
+                  value={entry.title}
+                  onChange={(event) => updateHistory(index, "title", event.target.value)}
+                  placeholder="Event title, diagnosis, or procedure"
+                />
+
+                <div className="form-grid">
+                  <input
+                    value={entry.doctorName}
+                    onChange={(event) => updateHistory(index, "doctorName", event.target.value)}
+                    placeholder="Doctor"
+                  />
+                  <input
+                    value={entry.facility}
+                    onChange={(event) => updateHistory(index, "facility", event.target.value)}
+                    placeholder="Hospital or clinic"
+                  />
+                </div>
+
+                <textarea
+                  value={entry.notes}
+                  onChange={(event) => updateHistory(index, "notes", event.target.value)}
+                  rows="3"
+                  placeholder="Symptoms, treatment, findings, discharge summary"
+                />
+
+                <input
+                  value={entry.attachmentsText}
+                  onChange={(event) => updateHistory(index, "attachmentsText", event.target.value)}
+                  placeholder="Attachment links or report names, comma separated"
+                />
+
+                <button type="button" className="history-remove" onClick={() => removeHistory(index)}>
+                  <FaTrash aria-hidden="true" /> Remove event
+                </button>
+              </div>
+            ))}
           </div>
 
           <div className="form-section">

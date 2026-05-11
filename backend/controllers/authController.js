@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 
 const toSafeUser = (user) => ({
@@ -59,6 +60,34 @@ const register = async (req, res) => {
   const user = await User.create({ name: cleanName, email: cleanEmail, password });
 
   res.json({ token: generateToken(user), user: toSafeUser(user) });
+};
+
+const createTwoFactorCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
+const hashTwoFactorCode = (code) =>
+  crypto.createHash("sha256").update(code).digest("hex");
+
+const issueTwoFactorChallenge = async (user) => {
+  const code = createTwoFactorCode();
+
+  user.twoFactorCodeHash = hashTwoFactorCode(code);
+  user.twoFactorExpire = Date.now() + 1000 * 60 * 10;
+  await user.save({ validateBeforeSave: false });
+
+  const sent = await sendEmail(
+    user.email,
+    "MediCare login verification code",
+    `Your MediCare verification code is ${code}. It expires in 10 minutes.`
+  );
+
+  return {
+    tempToken: jwt.sign(
+      { id: user._id, purpose: "2fa" },
+      process.env.JWT_SECRET,
+      { expiresIn: "10m" }
+    ),
+    devCode: sent ? undefined : code,
+  };
 };
 
 const forgotPassword = async (req, res) => {
@@ -125,13 +154,87 @@ const resetPassword = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email?.trim().toLowerCase() });
 
   if (user && await user.matchPassword(password)) {
+    if (user.twoFactorEnabled) {
+      const challenge = await issueTwoFactorChallenge(user);
+      return res.json({
+        requiresTwoFactor: true,
+        tempToken: challenge.tempToken,
+        devCode: challenge.devCode,
+        msg: "Verification code sent",
+      });
+    }
+
     res.json({ token: generateToken(user), user: toSafeUser(user) });
   } else {
     res.status(400).json({ msg: "Invalid credentials" });
   }
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+const verifyTwoFactorLogin = async (req, res) => {
+  const { tempToken, code } = req.body;
+
+  if (!tempToken || !code) {
+    return res.status(400).json({ msg: "Verification code is required" });
+  }
+
+  let decoded;
+
+  try {
+    decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({ msg: "Verification session expired" });
+  }
+
+  if (decoded.purpose !== "2fa") {
+    return res.status(401).json({ msg: "Invalid verification session" });
+  }
+
+  const user = await User.findById(decoded.id);
+
+  if (!user || !user.twoFactorCodeHash || user.twoFactorExpire < Date.now()) {
+    return res.status(400).json({ msg: "Verification code expired" });
+  }
+
+  if (user.twoFactorCodeHash !== hashTwoFactorCode(code)) {
+    return res.status(400).json({ msg: "Invalid verification code" });
+  }
+
+  user.twoFactorCodeHash = undefined;
+  user.twoFactorExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.json({ token: generateToken(user), user: toSafeUser(user) });
+};
+
+const getTwoFactorSettings = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  res.json({ enabled: Boolean(user?.twoFactorEnabled), email: user?.email || "" });
+};
+
+const updateTwoFactorSettings = async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  user.twoFactorEnabled = Boolean(req.body.enabled);
+  user.twoFactorCodeHash = undefined;
+  user.twoFactorExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.json({ enabled: user.twoFactorEnabled });
+};
+
+module.exports = {
+  register,
+  login,
+  verifyTwoFactorLogin,
+  getTwoFactorSettings,
+  updateTwoFactorSettings,
+  forgotPassword,
+  resetPassword,
+};

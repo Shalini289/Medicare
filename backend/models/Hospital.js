@@ -8,8 +8,14 @@ const hospitalSchema = new mongoose.Schema({
     ICU: Number,
     oxygen: Number,
     general: Number
+  },
+
+  occupiedBeds: {
+    ICU: { type: Number, default: 0 },
+    oxygen: { type: Number, default: 0 },
+    general: { type: Number, default: 0 }
   }
-});
+}, { timestamps: true });
 
 module.exports =
   mongoose.models.Hospital ||

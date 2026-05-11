@@ -2,9 +2,12 @@ const mongoose = require("mongoose");
 
 const prescriptionSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  prescriptionCode: { type: String, trim: true, unique: true, sparse: true },
   doctorName: { type: String, default: "", trim: true },
   diagnosis: { type: String, default: "", trim: true },
   issuedDate: { type: Date, default: Date.now },
+  validUntil: Date,
+  followUpDate: Date,
   status: {
     type: String,
     enum: ["active", "completed", "archived"],
@@ -19,6 +22,8 @@ const prescriptionSchema = new mongoose.Schema({
       instructions: { type: String, default: "", trim: true },
     },
   ],
+  patientInstructions: { type: String, default: "", trim: true },
+  digitalSignature: { type: String, default: "", trim: true },
   notes: { type: String, default: "", trim: true },
 }, { timestamps: true });
 

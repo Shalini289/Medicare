@@ -111,6 +111,15 @@
   padding: 12px;
 }
 
+.auth-error {
+  background: #fef3f2;
+  border-radius: 10px;
+  color: #b42318 !important;
+  margin: 16px 0 !important;
+  padding: 12px;
+  font-weight: 800;
+}
+
 .dev-reset-link {
   background: #fff8fb;
   border: 1px solid #f0c8d5;

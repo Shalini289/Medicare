@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FaBell,
   FaCalendarCheck,
@@ -30,6 +30,17 @@ const formatVital = (vital) => {
   return `BP ${bp} | Pulse ${vital.pulse || "--"} | SpO2 ${vital.oxygen || "--"}%`;
 };
 
+const vitalChartItems = (vital) => {
+  if (!vital) return [];
+
+  return [
+    { label: "Systolic", value: vital.systolic || 0, max: 180, unit: "mmHg" },
+    { label: "Pulse", value: vital.pulse || 0, max: 140, unit: "bpm" },
+    { label: "Oxygen", value: vital.oxygen || 0, max: 100, unit: "%" },
+    { label: "Sugar", value: vital.bloodSugar || 0, max: 240, unit: "mg/dL" },
+  ].filter((item) => item.value > 0);
+};
+
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +65,31 @@ export default function DashboardPage() {
     });
   }, [loadDashboard]);
 
+  const appointment = dashboard?.upcomingAppointment;
+  const latestVital = dashboard?.latestVital;
+  const stats = useMemo(() => dashboard?.stats || [], [dashboard]);
+
+  const activityChart = useMemo(() => {
+    const values = stats.map((stat) => Number(stat.value || 0));
+    const max = Math.max(...values, 1);
+
+    return stats.map((stat) => ({
+      ...stat,
+      percent: Math.max((Number(stat.value || 0) / max) * 100, Number(stat.value || 0) > 0 ? 8 : 0),
+    }));
+  }, [stats]);
+
+  const careScore = Math.min(
+    100,
+    Math.round(
+      ((dashboard?.medicalProfileCompletion || 0) +
+        Math.min((dashboard?.completedVaccines || 0) * 10, 40) +
+        Math.min((dashboard?.stats?.find((item) => item.label === "Care plans")?.value || 0) * 15, 30)) / 1.7
+    )
+  );
+
+  const chartVitals = vitalChartItems(latestVital);
+
   if (loading) {
     return <main className="dashboard-hub"><p className="empty-state">Loading dashboard...</p></main>;
   }
@@ -61,9 +97,6 @@ export default function DashboardPage() {
   if (error) {
     return <main className="dashboard-hub"><p className="form-error">{error}</p></main>;
   }
-
-  const appointment = dashboard?.upcomingAppointment;
-  const latestVital = dashboard?.latestVital;
 
   return (
     <main className="dashboard-hub">
@@ -80,12 +113,78 @@ export default function DashboardPage() {
       </section>
 
       <section className="dashboard-stats">
-        {dashboard?.stats?.map((stat) => (
+        {stats.map((stat) => (
           <Link className="dashboard-stat" href={stat.href} key={stat.label}>
             <span>{stat.label}</span>
             <strong>{stat.value}</strong>
           </Link>
         ))}
+      </section>
+
+      <section className="dashboard-charts" aria-label="Health dashboard charts">
+        <div className="dashboard-card chart-card activity-chart-card">
+          <div className="card-title">
+            <FaHeartbeat aria-hidden="true" />
+            <h2>Activity overview</h2>
+          </div>
+
+          <div className="bar-chart">
+            {activityChart.map((item) => (
+              <Link href={item.href} className="bar-row" key={item.label}>
+                <span>{item.label}</span>
+                <div className="bar-track">
+                  <i style={{ width: `${item.percent}%` }} />
+                </div>
+                <strong>{item.value}</strong>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="dashboard-card chart-card">
+          <div className="card-title">
+            <FaIdCard aria-hidden="true" />
+            <h2>Care readiness</h2>
+          </div>
+
+          <div className="donut-wrap">
+            <div
+              className="donut-chart"
+              style={{ "--value": `${careScore * 3.6}deg` }}
+              aria-label={`Care readiness ${careScore}%`}
+            >
+              <strong>{careScore}%</strong>
+            </div>
+            <div>
+              <p>Medical ID, completed vaccines, and active care plans combined.</p>
+              <Link href="/medical-id">Improve readiness</Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="dashboard-card chart-card">
+          <div className="card-title">
+            <FaStethoscope aria-hidden="true" />
+            <h2>Vitals snapshot</h2>
+          </div>
+
+          {chartVitals.length ? (
+            <div className="vital-chart">
+              {chartVitals.map((item) => (
+                <div className="vital-bar" key={item.label}>
+                  <div>
+                    <span style={{ height: `${Math.min((item.value / item.max) * 100, 100)}%` }} />
+                  </div>
+                  <strong>{item.value}</strong>
+                  <small>{item.label}</small>
+                  <em>{item.unit}</em>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="empty-state">Add vitals to unlock your chart.</p>
+          )}
+        </div>
       </section>
 
       <section className="dashboard-grid">

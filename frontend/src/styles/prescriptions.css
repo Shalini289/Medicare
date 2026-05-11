@@ -201,6 +201,13 @@
   margin: 8px 0 4px;
 }
 
+.rx-code {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: var(--primary);
+  letter-spacing: 0;
+}
+
 .prescription-card p,
 .prescription-card small {
   color: var(--muted-text);
@@ -250,6 +257,31 @@
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid var(--border-color);
+}
+
+.rx-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.rx-meta span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.prescription-instructions {
+  margin-top: 14px;
+  border-radius: 8px;
+  padding: 12px;
+  background: #eef6ff;
+  color: #1d4ed8;
+  font-weight: 700;
 }
 
 .empty-state {

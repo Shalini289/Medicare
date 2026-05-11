@@ -111,6 +111,13 @@ export default function DoctorPage() {
             >
               Message Doctor
             </button>
+
+            <button
+              className="btn-secondary"
+              onClick={() => router.push(`/video-call?doctor=${doctor._id}`)}
+            >
+              Start Video Call
+            </button>
           </div>
         </div>
 

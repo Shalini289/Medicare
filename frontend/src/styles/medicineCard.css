@@ -55,6 +55,33 @@
   color: #c62828;
 }
 
+.med-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.med-tags span {
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.med-tags .warn {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.med-tags .danger {
+  background: #fef3f2;
+  color: #b42318;
+}
+
 /* ===== BUTTON ===== */
 .add-btn {
   margin-top: 10px;

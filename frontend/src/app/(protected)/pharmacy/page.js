@@ -1,21 +1,34 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getMedicines, placeOrder } from "@/services/pharmacyService";
+import {
+  getMedicineByBarcode,
+  getMedicines,
+  getPharmacyAlerts,
+  placeOrder,
+} from "@/services/pharmacyService";
 import { createPaymentOrder } from "@/services/paymentService";
 import MedicineCard from "@/components/MedicineCard";
 import Cart from "@/components/Cart";
+import "@/styles/pharmacy.css";
 
 export default function Pharmacy() {
   const [data, setData] = useState([]);
+  const [alerts, setAlerts] = useState({ lowStock: [], expiringSoon: [] });
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState("");
+  const [barcode, setBarcode] = useState("");
   const [sort, setSort] = useState("name");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    getMedicines().then(res =>
-      setData(Array.isArray(res) ? res : [])
-    );
+    Promise.all([
+      getMedicines(),
+      getPharmacyAlerts().catch(() => ({ lowStock: [], expiringSoon: [] })),
+    ]).then(([res, alertData]) => {
+      setData(Array.isArray(res) ? res : []);
+      setAlerts(alertData || { lowStock: [], expiringSoon: [] });
+    });
   }, []);
 
   useEffect(() => {
@@ -48,7 +61,7 @@ export default function Pharmacy() {
     const query = search.trim().toLowerCase();
     const filtered = query
       ? data.filter((med) =>
-          [med.name, med.description, med.category]
+          [med.name, med.description, med.category, med.barcode, med.batchNumber, med.supplier]
             .filter(Boolean)
             .some((value) => value.toLowerCase().includes(query))
         )
@@ -62,6 +75,11 @@ export default function Pharmacy() {
   }, [data, search, sort]);
 
   const add = (med) => {
+    if (med.expiryStatus === "expired") {
+      setMessage(`${med.name} is expired and cannot be ordered.`);
+      return;
+    }
+
     setCart(prev => {
       const exists = prev.find(i => i._id === med._id);
 
@@ -97,6 +115,18 @@ export default function Pharmacy() {
     setCart([]);
   };
 
+  const scanBarcode = async () => {
+    if (!barcode.trim()) return;
+
+    try {
+      const medicine = await getMedicineByBarcode(barcode.trim());
+      setSearch(medicine.name);
+      setMessage(`${medicine.name} found by barcode.`);
+    } catch (err) {
+      setMessage(err.message || "No medicine found for this barcode.");
+    }
+  };
+
   const checkout = async () => {
     const orderItems = cart.map((item) => ({
       medicine: item._id,
@@ -122,6 +152,19 @@ export default function Pharmacy() {
     <div className="pharmacy-page">
       <h1>Pharmacy</h1>
 
+      <div className="pharmacy-alerts">
+        <div>
+          <strong>{alerts.lowStock?.length || 0}</strong>
+          <span>Low stock alerts</span>
+        </div>
+        <div>
+          <strong>{alerts.expiringSoon?.length || 0}</strong>
+          <span>Expiry alerts</span>
+        </div>
+      </div>
+
+      {message && <p className="pharmacy-message">{message}</p>}
+
       <div className="pharmacy-tools">
         <input
           type="search"
@@ -135,6 +178,16 @@ export default function Pharmacy() {
           <option value="price-low">Price: Low to High</option>
           <option value="price-high">Price: High to Low</option>
         </select>
+      </div>
+
+      <div className="barcode-tools">
+        <input
+          value={barcode}
+          onChange={(e) => setBarcode(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && scanBarcode()}
+          placeholder="Scan or enter barcode"
+        />
+        <button onClick={scanBarcode}>Find by Barcode</button>
       </div>
 
       <div className="pharmacy-layout">

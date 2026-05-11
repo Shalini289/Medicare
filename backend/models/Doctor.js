@@ -10,7 +10,20 @@ const doctorSchema = new mongoose.Schema({
   fees: Number,
   rating: { type: Number, default: 0 },
   availability: String,
-  availableToday: { type: Boolean, default: true }
+  availableToday: { type: Boolean, default: true },
+  availabilitySchedule: [
+    {
+      day: { type: String, trim: true },
+      startTime: { type: String, trim: true },
+      endTime: { type: String, trim: true },
+      mode: {
+        type: String,
+        enum: ["clinic", "video", "both"],
+        default: "both",
+      },
+    },
+  ],
+  slotDurationMinutes: { type: Number, default: 30 }
 }, { timestamps: true });
 
 module.exports =

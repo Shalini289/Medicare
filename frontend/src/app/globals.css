@@ -886,4 +886,39 @@ textarea:focus {
   .symptom-chips {
     display: grid;
   }
+
+  .main-content {
+    padding-inline: 12px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-width: 0;
+  }
+
+  .admin-form,
+  .doctor-form-grid,
+  .form-grid,
+  .contact-line,
+  .medicine-line,
+  .emergency-contact-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-card,
+  .doctor-profile,
+  .order-card,
+  .prescription-card__head {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .cart,
+  .dashboard-card,
+  .doctor-card,
+  .medicine-card,
+  .order-card {
+    border-radius: 10px;
+  }
 }

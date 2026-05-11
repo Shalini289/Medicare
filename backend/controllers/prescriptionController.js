@@ -3,6 +3,12 @@ const Notification = require("../models/Notification");
 
 const getUserId = (req) => req.user.id || req.user._id;
 
+const createPrescriptionCode = () => {
+  const timePart = Date.now().toString(36).toUpperCase();
+  const randomPart = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `RX-${timePart}-${randomPart}`;
+};
+
 const cleanMedicines = (medicines = []) =>
   medicines
     .map((item) => ({
@@ -18,8 +24,12 @@ const normalizePrescription = (body) => ({
   doctorName: body.doctorName?.trim() || "",
   diagnosis: body.diagnosis?.trim() || "",
   issuedDate: body.issuedDate || new Date(),
+  validUntil: body.validUntil || undefined,
+  followUpDate: body.followUpDate || undefined,
   status: body.status || "active",
   medicines: cleanMedicines(body.medicines),
+  patientInstructions: body.patientInstructions?.trim() || "",
+  digitalSignature: body.digitalSignature?.trim() || "",
   notes: body.notes?.trim() || "",
 });
 
@@ -39,6 +49,8 @@ exports.createPrescription = async (req, res) => {
 
   const prescription = await Prescription.create({
     ...data,
+    prescriptionCode: createPrescriptionCode(),
+    digitalSignature: data.digitalSignature || data.doctorName || "MediCare Digital Prescription",
     user: getUserId(req),
   });
 

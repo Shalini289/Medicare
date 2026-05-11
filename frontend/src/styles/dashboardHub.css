@@ -32,6 +32,14 @@
   margin-bottom: 22px;
 }
 
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr) minmax(280px, 0.9fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 22px;
+}
+
 .dashboard-stat,
 .dashboard-card {
   border: 1px solid var(--border-color);
@@ -62,6 +70,15 @@
   display: grid;
   gap: 16px;
   padding: 20px;
+}
+
+.chart-card {
+  min-width: 0;
+  align-content: start;
+}
+
+.activity-chart-card {
+  min-height: 280px;
 }
 
 .priority-card,
@@ -155,6 +172,118 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.bar-chart {
+  display: grid;
+  gap: 10px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.8fr) minmax(0, 1.4fr) 44px;
+  gap: 10px;
+  align-items: center;
+}
+
+.bar-row span {
+  color: var(--muted-text);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.bar-row strong {
+  text-align: right;
+}
+
+.bar-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+.bar-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), #2f80ed);
+}
+
+.donut-wrap {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.donut-chart {
+  width: 132px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #fff 0 55%, transparent 56%),
+    conic-gradient(var(--primary) var(--value), #edf2f7 0);
+}
+
+.donut-chart strong {
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.donut-wrap a {
+  display: inline-flex;
+  margin-top: 10px;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+}
+
+.vital-chart {
+  min-height: 210px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.vital-bar {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+}
+
+.vital-bar div {
+  width: 100%;
+  height: 138px;
+  display: flex;
+  align-items: end;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f1f5f9;
+}
+
+.vital-bar div span {
+  width: 100%;
+  min-height: 6px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #2f80ed, var(--primary));
+}
+
+.vital-bar strong {
+  font-size: 1rem;
+}
+
+.vital-bar small,
+.vital-bar em {
+  color: var(--muted-text);
+  font-size: 0.76rem;
+  font-style: normal;
+}
+
 .empty-state,
 .form-error {
   padding: 18px;
@@ -178,6 +307,14 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .dashboard-charts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .activity-chart-card {
+    grid-column: 1 / -1;
+  }
+
   .dashboard-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -191,13 +328,61 @@
 
   .dashboard-hero,
   .dashboard-stats,
+  .dashboard-charts,
   .dashboard-grid,
   .module-grid {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-hero .btn-primary,
+  .appointment-preview a,
+  .vitals-preview a,
+  .medical-id-preview a,
+  .notifications-preview > a,
+  .donut-wrap a {
+    width: 100%;
+  }
+
+  .activity-chart-card {
+    grid-column: auto;
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr 42px;
+  }
+
+  .bar-track {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .donut-wrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .vital-chart {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .priority-card,
   .module-card {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-stat,
+  .dashboard-card {
+    padding: 16px;
+  }
+
+  .vital-chart {
+    gap: 10px;
+  }
+
+  .vital-bar div {
+    height: 112px;
   }
 }

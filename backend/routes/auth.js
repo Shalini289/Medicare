@@ -4,12 +4,19 @@ const router = express.Router();
 const {
   register,
   login,
+  verifyTwoFactorLogin,
+  getTwoFactorSettings,
+  updateTwoFactorSettings,
   forgotPassword,
   resetPassword,
 } = require("../controllers/authController");
+const { protect } = require("../middleware/authMiddleware");
 
 router.post("/register", register);
 router.post("/login", login);
+router.post("/2fa/verify", verifyTwoFactorLogin);
+router.get("/2fa/settings", protect, getTwoFactorSettings);
+router.put("/2fa/settings", protect, updateTwoFactorSettings);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 

@@ -1,0 +1,207 @@
+.blood-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.blood-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
+.blood-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.blood-hero p,
+.donor-card p,
+.blood-stat span {
+  color: var(--muted-text);
+}
+
+.blood-stat,
+.blood-panel,
+.donor-results {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.blood-stat {
+  min-width: 160px;
+  padding: 16px;
+  text-align: center;
+}
+
+.blood-stat strong {
+  display: block;
+  color: #b42318;
+  font-size: 2rem;
+}
+
+.blood-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.blood-panel,
+.donor-results {
+  padding: 22px;
+}
+
+.blood-panel {
+  display: grid;
+  gap: 22px;
+  position: sticky;
+  top: 86px;
+}
+
+.blood-filters,
+.donor-form {
+  display: grid;
+  gap: 13px;
+}
+
+.blood-filters label,
+.donor-form label {
+  display: grid;
+  gap: 7px;
+  font-weight: 800;
+}
+
+.blood-filters input,
+.blood-filters select,
+.donor-form input,
+.donor-form select,
+.donor-form textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  background: #fff;
+  font: inherit;
+}
+
+.blood-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.blood-check {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.blood-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.blood-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.blood-actions button {
+  flex: 1;
+}
+
+.blood-alert {
+  border-radius: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  font-weight: 800;
+}
+
+.blood-alert.error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.blood-alert.success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.donor-results {
+  display: grid;
+  gap: 14px;
+}
+
+.donor-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.donor-blood {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #b42318;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.donor-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.donor-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #b42318;
+  color: #fff;
+  font-weight: 800;
+}
+
+.donor-actions a:last-child {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 900px) {
+  .blood-hero,
+  .blood-layout,
+  .donor-card {
+    grid-template-columns: 1fr;
+  }
+
+  .blood-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 620px) {
+  .blood-page {
+    width: min(100% - 22px, 1180px);
+    padding-top: 26px;
+  }
+
+  .blood-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,81 +2,98 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getDashboardStats,
-
-  getUsers,
-  deleteUser,
-
-  getDoctorsAdmin,
+  addAmbulance,
+  addDepartment,
   addDoctor,
-  updateDoctor,
-  deleteDoctor,
-
-  getAppointmentsAdmin,
-  updateAppointmentStatus,
-
-  getMedicinesAdmin,
-  addMedicine,
-  updateMedicine,
-  deleteMedicine,
-
-  getOrdersAdmin,
-  updateOrderStatus,
-
-  getHospitalsAdmin,
   addHospital,
-  updateHospitalBeds
-
+  addInsuranceClaim,
+  addInvoice,
+  addMedicine,
+  addStaff,
+  deleteAmbulance,
+  deleteDepartment,
+  deleteDoctor,
+  deleteInsuranceClaim,
+  deleteInvoice,
+  deleteMedicine,
+  deleteStaff,
+  deleteUser,
+  getAmbulancesAdmin,
+  getAppointmentsAdmin,
+  getDashboardStats,
+  getDepartmentsAdmin,
+  getDoctorsAdmin,
+  getHospitalsAdmin,
+  getInsuranceClaimsAdmin,
+  getInvoicesAdmin,
+  getMedicinesAdmin,
+  getOrdersAdmin,
+  getStaffAdmin,
+  getUsers,
+  updateAmbulance,
+  updateAppointmentStatus,
+  updateDepartment,
+  updateDoctor,
+  updateHospitalBeds,
+  updateInsuranceClaim,
+  updateInvoice,
+  updateMedicine,
+  updateOrderStatus,
+  updateStaff,
 } = require("../controllers/adminController");
 
-const {
-  protect,
-  admin
-} = require("../middleware/authMiddleware");
+const { protect, admin } = require("../middleware/authMiddleware");
 
-//
-// 📊 Dashboard
-//
-router.get("/stats", protect, admin, getDashboardStats);
+router.use(protect, admin);
 
-//
-// 👤 Users
-//
-router.get("/users", protect, admin, getUsers);
-router.delete("/users/:id", protect, admin, deleteUser);
+router.get("/stats", getDashboardStats);
 
-//
-// 🧑‍⚕️ Doctors
-//
-router.get("/doctors", protect, admin, getDoctorsAdmin);
-router.post("/doctors", protect, admin, addDoctor);
-router.put("/doctors/:id", protect, admin, updateDoctor);
-router.delete("/doctors/:id", protect, admin, deleteDoctor);
+router.get("/users", getUsers);
+router.delete("/users/:id", deleteUser);
 
-//
-// 📅 Appointments
-//
-router.get("/appointments", protect, admin, getAppointmentsAdmin);
-router.put("/appointments/:id", protect, admin, updateAppointmentStatus);
-//
-// 💊 Medicines
-//
-router.get("/medicines", protect, admin, getMedicinesAdmin);
-router.post("/medicines", protect, admin, addMedicine);
-router.put("/medicines/:id", protect, admin, updateMedicine);
-router.delete("/medicines/:id", protect, admin, deleteMedicine);
+router.get("/doctors", getDoctorsAdmin);
+router.post("/doctors", addDoctor);
+router.put("/doctors/:id", updateDoctor);
+router.delete("/doctors/:id", deleteDoctor);
 
-//
-// 📦 Orders
-//
-router.get("/orders", protect, admin, getOrdersAdmin);
-router.put("/orders/:id", protect, admin, updateOrderStatus);
+router.get("/appointments", getAppointmentsAdmin);
+router.put("/appointments/:id", updateAppointmentStatus);
 
-//
-// 🏥 Hospitals
-//
-router.get("/hospitals", protect, admin, getHospitalsAdmin);
-router.post("/hospitals", protect, admin, addHospital);
-router.put("/hospitals/:id", protect, admin, updateHospitalBeds);
+router.get("/medicines", getMedicinesAdmin);
+router.post("/medicines", addMedicine);
+router.put("/medicines/:id", updateMedicine);
+router.delete("/medicines/:id", deleteMedicine);
+
+router.get("/orders", getOrdersAdmin);
+router.put("/orders/:id", updateOrderStatus);
+
+router.get("/hospitals", getHospitalsAdmin);
+router.post("/hospitals", addHospital);
+router.put("/hospitals/:id", updateHospitalBeds);
+
+router.get("/staff", getStaffAdmin);
+router.post("/staff", addStaff);
+router.put("/staff/:id", updateStaff);
+router.delete("/staff/:id", deleteStaff);
+
+router.get("/invoices", getInvoicesAdmin);
+router.post("/invoices", addInvoice);
+router.put("/invoices/:id", updateInvoice);
+router.delete("/invoices/:id", deleteInvoice);
+
+router.get("/insurance-claims", getInsuranceClaimsAdmin);
+router.post("/insurance-claims", addInsuranceClaim);
+router.put("/insurance-claims/:id", updateInsuranceClaim);
+router.delete("/insurance-claims/:id", deleteInsuranceClaim);
+
+router.get("/ambulances", getAmbulancesAdmin);
+router.post("/ambulances", addAmbulance);
+router.put("/ambulances/:id", updateAmbulance);
+router.delete("/ambulances/:id", deleteAmbulance);
+
+router.get("/departments", getDepartmentsAdmin);
+router.post("/departments", addDepartment);
+router.put("/departments/:id", updateDepartment);
+router.delete("/departments/:id", deleteDepartment);
 
 module.exports = router;

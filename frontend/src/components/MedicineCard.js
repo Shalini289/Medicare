@@ -3,6 +3,9 @@ import "../styles/medicineCard.css";
 
 export default function MedicineCard({ med, add }) {
   const outOfStock = Number(med.stock || 0) <= 0;
+  const lowStock = med.stockStatus === "low";
+  const expired = med.expiryStatus === "expired";
+  const expiringSoon = med.expiryStatus === "expiring-soon";
 
   return (
     <div className="medicine-card">
@@ -30,14 +33,21 @@ export default function MedicineCard({ med, add }) {
         <p className={`med-stock ${outOfStock ? "empty-stock" : ""}`}>
           {outOfStock ? "Out of stock" : `${med.stock || 0} in stock`}
         </p>
+
+        <div className="med-tags">
+          {med.barcode && <span>Barcode {med.barcode}</span>}
+          {lowStock && <span className="warn">Low stock</span>}
+          {expired && <span className="danger">Expired</span>}
+          {expiringSoon && <span className="warn">Expiring soon</span>}
+        </div>
       </div>
 
       <button
         className="add-btn"
         onClick={() => add(med)}
-        disabled={outOfStock}
+        disabled={outOfStock || expired}
       >
-        {outOfStock ? "Unavailable" : "Add to Cart"}
+        {outOfStock || expired ? "Unavailable" : "Add to Cart"}
       </button>
     </div>
   );

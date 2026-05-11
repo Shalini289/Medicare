@@ -20,10 +20,7 @@ export const updateOrder = (id, data) =>
   api(`/api/admin/orders/${id}`, "PUT", data, getToken());
 
 export const updateDoctor = (id, data) =>
-  api(`/api/admin/doctors/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data)
-  });
+  api(`/api/admin/doctors/${id}`, "PUT", data, getToken());
 
 export const getAppointmentsAdmin = () =>
   api("/api/admin/appointments", "GET", null, getToken());
@@ -51,3 +48,63 @@ export const addHospital = (data) =>
 
 export const updateHospital = (id, data) =>
   api(`/api/admin/hospitals/${id}`, "PUT", data, getToken());
+
+export const getStaffAdmin = () =>
+  api("/api/admin/staff", "GET", null, getToken());
+
+export const addStaff = (data) =>
+  api("/api/admin/staff", "POST", data, getToken());
+
+export const updateStaff = (id, data) =>
+  api(`/api/admin/staff/${id}`, "PUT", data, getToken());
+
+export const deleteStaff = (id) =>
+  api(`/api/admin/staff/${id}`, "DELETE", null, getToken());
+
+export const getInvoicesAdmin = () =>
+  api("/api/admin/invoices", "GET", null, getToken());
+
+export const addInvoice = (data) =>
+  api("/api/admin/invoices", "POST", data, getToken());
+
+export const updateInvoice = (id, data) =>
+  api(`/api/admin/invoices/${id}`, "PUT", data, getToken());
+
+export const deleteInvoice = (id) =>
+  api(`/api/admin/invoices/${id}`, "DELETE", null, getToken());
+
+export const getInsuranceClaimsAdmin = () =>
+  api("/api/admin/insurance-claims", "GET", null, getToken());
+
+export const addInsuranceClaim = (data) =>
+  api("/api/admin/insurance-claims", "POST", data, getToken());
+
+export const updateInsuranceClaim = (id, data) =>
+  api(`/api/admin/insurance-claims/${id}`, "PUT", data, getToken());
+
+export const deleteInsuranceClaim = (id) =>
+  api(`/api/admin/insurance-claims/${id}`, "DELETE", null, getToken());
+
+export const getAmbulancesAdmin = () =>
+  api("/api/admin/ambulances", "GET", null, getToken());
+
+export const addAmbulance = (data) =>
+  api("/api/admin/ambulances", "POST", data, getToken());
+
+export const updateAmbulance = (id, data) =>
+  api(`/api/admin/ambulances/${id}`, "PUT", data, getToken());
+
+export const deleteAmbulance = (id) =>
+  api(`/api/admin/ambulances/${id}`, "DELETE", null, getToken());
+
+export const getDepartmentsAdmin = () =>
+  api("/api/admin/departments", "GET", null, getToken());
+
+export const addDepartment = (data) =>
+  api("/api/admin/departments", "POST", data, getToken());
+
+export const updateDepartment = (id, data) =>
+  api(`/api/admin/departments/${id}`, "PUT", data, getToken());
+
+export const deleteDepartment = (id) =>
+  api(`/api/admin/departments/${id}`, "DELETE", null, getToken());

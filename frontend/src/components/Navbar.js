@@ -10,6 +10,8 @@ const navItems = [
   { label: "Doctors", href: "/doctors" },
   { label: "Pharmacy", href: "/pharmacy" },
   { label: "Chat", href: "/chat" },
+  { label: "Video Call", href: "/video-call" },
+  { label: "Doctor Portal", href: "/doctor" },
 ];
 
 const navGroups = [
@@ -25,7 +27,9 @@ const navGroups = [
     label: "Health",
     items: [
       { label: "Vitals", href: "/vitals" },
-      { label: "Medical ID", href: "/medical-id" },
+      { label: "Medical History", href: "/medical-id" },
+      { label: "Emergency Contacts", href: "/emergency-contacts" },
+      { label: "Blood Donors", href: "/blood-donors" },
       { label: "Care Plans", href: "/care-plans" },
       { label: "Vaccines", href: "/vaccinations" },
       { label: "Reminders", href: "/reminders" },
@@ -39,6 +43,7 @@ const navGroups = [
       { label: "Appointments", href: "/profile" },
       { label: "Orders", href: "/orders" },
       { label: "Reports", href: "/reports" },
+      { label: "Security", href: "/security" },
     ],
   },
 ];
