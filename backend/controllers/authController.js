@@ -40,7 +40,7 @@ const validateRegisterInput = ({ name = "", email = "", password = "", role = "u
     return "Password must be 8+ characters and include uppercase, lowercase, and a number";
   }
 
-  if (!["user", "doctor"].includes(role)) {
+  if (!["user", "doctor", "pharmacy"].includes(role)) {
     return "Select a valid account type";
   }
 
@@ -53,7 +53,7 @@ const validateRegisterInput = ({ name = "", email = "", password = "", role = "u
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
-  const role = req.body.role === "doctor" ? "doctor" : "user";
+  const role = ["doctor", "pharmacy"].includes(req.body.role) ? req.body.role : "user";
 
   const validationError = validateRegisterInput({
     name,

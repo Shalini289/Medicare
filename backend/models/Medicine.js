@@ -4,6 +4,8 @@ const medicineSchema = new mongoose.Schema({
   name: String,
   price: Number,
   stock: Number,
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   category: { type: String, default: "", trim: true },
   supplier: { type: String, default: "", trim: true },
   reorderLevel: { type: Number, default: 10 },

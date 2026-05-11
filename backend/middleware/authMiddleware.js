@@ -25,4 +25,9 @@ const admin = (req, res, next) => {
   else res.status(403).json({ msg: "Admin only" });
 };
 
-module.exports = { protect, admin };
+const pharmacyStaff = (req, res, next) => {
+  if (["pharmacy", "admin"].includes(req.user.role)) next();
+  else res.status(403).json({ msg: "Pharmacy staff only" });
+};
+
+module.exports = { protect, admin, pharmacyStaff };

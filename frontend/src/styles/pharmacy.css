@@ -89,11 +89,132 @@
   gap: 16px;
 }
 
+.pharmacy-manager,
+.pharmacy-inventory,
+.pharmacy-orders {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 22px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: var(--soft-shadow);
+}
+
+.pharmacy-manager h2,
+.pharmacy-inventory h2,
+.pharmacy-orders h2 {
+  font-size: 22px;
+}
+
+.pharmacy-manager p {
+  color: var(--muted-text);
+}
+
+.medicine-admin-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.medicine-admin-form input,
+.medicine-admin-form textarea,
+.inventory-row select,
+.order-row select {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  background: #fff;
+  font: inherit;
+}
+
+.medicine-admin-form textarea {
+  grid-column: 1 / -1;
+  resize: vertical;
+}
+
+.medicine-admin-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.medicine-admin-actions button,
+.inventory-row button {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.medicine-admin-actions button[type="button"] {
+  background: #475569;
+}
+
+.inventory-list,
+.order-list {
+  display: grid;
+  gap: 10px;
+}
+
+.inventory-row,
+.order-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 13px;
+  background: #f8fafc;
+}
+
+.inventory-row div,
+.order-row div {
+  display: grid;
+  gap: 4px;
+}
+
+.inventory-row span,
+.order-row span,
+.inventory-row small,
+.order-row small {
+  color: var(--muted-text);
+}
+
+.inventory-row > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.inventory-row button.danger {
+  background: #dc2626;
+}
+
 @media (max-width: 900px) {
   .pharmacy-layout,
   .pharmacy-tools,
   .barcode-tools,
-  .pharmacy-alerts {
+  .pharmacy-alerts,
+  .medicine-admin-form,
+  .inventory-row,
+  .order-row {
     grid-template-columns: 1fr;
+  }
+
+  .inventory-row > div:last-child {
+    justify-content: stretch;
+  }
+
+  .inventory-row button {
+    flex: 1;
   }
 }

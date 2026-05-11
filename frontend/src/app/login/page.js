@@ -25,7 +25,17 @@ export default function LoginPage() {
 
   const goAfterLogin = () => {
     const user = getCurrentUser();
-    router.push(user?.role === "doctor" ? "/doctor" : "/dashboard");
+    if (user?.role === "doctor") {
+      router.push("/doctor");
+      return;
+    }
+
+    if (user?.role === "pharmacy") {
+      router.push("/pharmacy");
+      return;
+    }
+
+    router.push("/dashboard");
   };
 
   const handleLogin = async () => {
