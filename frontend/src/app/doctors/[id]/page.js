@@ -89,6 +89,7 @@ export default function DoctorPage() {
         <div className="doctor-info">
           <h1>{doctor.name}</h1>
           <p className="spec">{doctor.specialization}</p>
+          {doctor.hospital && <p className="hospital">{doctor.hospital}</p>}
 
           <div className="meta">
             <span>Rating {doctor.rating || 4.5}</span>
@@ -96,12 +97,21 @@ export default function DoctorPage() {
             <span>Rs {doctor.fees}</span>
           </div>
 
-          <button
-            className="btn-primary"
-            onClick={() => router.push(`/booking?id=${doctor._id}`)}
-          >
-            Book Appointment
-          </button>
+          <div className="doctor-actions">
+            <button
+              className="btn-primary"
+              onClick={() => router.push(`/booking?id=${doctor._id}`)}
+            >
+              Book Appointment
+            </button>
+
+            <button
+              className="btn-secondary"
+              onClick={() => router.push(`/chat?doctor=${doctor._id}`)}
+            >
+              Message Doctor
+            </button>
+          </div>
         </div>
 
       </div>
@@ -127,6 +137,11 @@ export default function DoctorPage() {
         <div className="detail-card">
           <h4>Specialization</h4>
           <p>{doctor.specialization}</p>
+        </div>
+
+        <div className="detail-card">
+          <h4>Availability</h4>
+          <p>{doctor.availableToday ? "Available today" : doctor.availability || "Next available soon"}</p>
         </div>
       </div>
 

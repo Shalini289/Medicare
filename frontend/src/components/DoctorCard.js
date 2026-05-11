@@ -26,11 +26,16 @@ export default function DoctorCard({ doctor }) {
       <div className="doctor-content">
         <h3>{doctor.name}</h3>
         <p className="spec">{doctor.specialization}</p>
+        {doctor.hospital && <p className="hospital">{doctor.hospital}</p>}
 
         <div className="meta">
           <span>Rating {doctor.rating || "4.5"}</span>
           <span>{doctor.experience || 5} yrs</span>
         </div>
+
+        <span className={`avail ${doctor.availableToday ? "today" : "tmw"}`}>
+          {doctor.availableToday ? "Available today" : doctor.availability || "Next available"}
+        </span>
       </div>
 
       <button
@@ -41,6 +46,16 @@ export default function DoctorCard({ doctor }) {
         }}
       >
         Book Appointment
+      </button>
+
+      <button
+        className="message-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/chat?doctor=${doctor._id}`);
+        }}
+      >
+        Message Doctor
       </button>
     </div>
   );

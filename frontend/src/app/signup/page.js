@@ -5,6 +5,48 @@ import { useRouter } from "next/navigation";
 import { register } from "@/services/authService";
 import "../../styles/signup.css";
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const validateSignup = (values) => {
+  const nextErrors = {};
+  const name = values.name.trim();
+  const email = values.email.trim();
+
+  if (!name) {
+    nextErrors.name = "Full name is required.";
+  } else if (name.length < 2) {
+    nextErrors.name = "Name must be at least 2 characters.";
+  } else if (!/^[a-zA-Z\s.'-]+$/.test(name)) {
+    nextErrors.name = "Name can only include letters, spaces, dots, apostrophes, or hyphens.";
+  }
+
+  if (!email) {
+    nextErrors.email = "Email address is required.";
+  } else if (!emailPattern.test(email)) {
+    nextErrors.email = "Enter a valid email address.";
+  }
+
+  if (!values.password) {
+    nextErrors.password = "Password is required.";
+  } else if (values.password.length < 8) {
+    nextErrors.password = "Password must be at least 8 characters.";
+  } else if (!/[A-Z]/.test(values.password)) {
+    nextErrors.password = "Add at least one uppercase letter.";
+  } else if (!/[a-z]/.test(values.password)) {
+    nextErrors.password = "Add at least one lowercase letter.";
+  } else if (!/[0-9]/.test(values.password)) {
+    nextErrors.password = "Add at least one number.";
+  }
+
+  if (!values.confirmPassword) {
+    nextErrors.confirmPassword = "Please confirm your password.";
+  } else if (values.password !== values.confirmPassword) {
+    nextErrors.confirmPassword = "Passwords do not match.";
+  }
+
+  return nextErrors;
+};
+
 export default function SignupPage() {
   const router = useRouter();
 
@@ -16,36 +58,40 @@ export default function SignupPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
 
-  const handleSignup = async () => {
-    if (
-      !form.name ||
-      !form.email ||
-      !form.password ||
-      !form.confirmPassword
-    ) {
-      return alert("Please fill all fields");
-    }
+  const updateField = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setServerError("");
 
-    if (form.password !== form.confirmPassword) {
-      return alert("Passwords do not match");
+    if (errors[field]) {
+      setErrors((current) => ({ ...current, [field]: "" }));
     }
+  };
+
+  const handleSignup = async (event) => {
+    event.preventDefault();
+
+    const nextErrors = validateSignup(form);
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) return;
 
     try {
       setLoading(true);
+      setServerError("");
 
       await register({
-        name: form.name,
-        email: form.email,
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
         password: form.password,
       });
-
-      alert("Signup successful");
 
       router.push("/login");
 
     } catch (err) {
-      alert(err.message || "Signup failed");
+      setServerError(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -60,52 +106,101 @@ export default function SignupPage() {
 
         <p>Join MediCare and manage your healthcare easily</p>
 
-        <div className="signup-form">
+        {serverError && <div className="signup-alert">{serverError}</div>}
 
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={form.name}
-            onChange={(e)=>
-              setForm({...form,name:e.target.value})
-            }
-          />
+        <form className="signup-form" onSubmit={handleSignup} noValidate>
+          <label className="signup-field">
+            <span>Full Name</span>
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={form.name}
+              autoComplete="name"
+              aria-invalid={Boolean(errors.name)}
+              onChange={(e) => updateField("name", e.target.value)}
+              onBlur={() =>
+                setErrors((current) => ({
+                  ...current,
+                  name: validateSignup(form).name || "",
+                }))
+              }
+            />
+            {errors.name && <small>{errors.name}</small>}
+          </label>
 
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={form.email}
-            onChange={(e)=>
-              setForm({...form,email:e.target.value})
-            }
-          />
+          <label className="signup-field">
+            <span>Email Address</span>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={form.email}
+              autoComplete="email"
+              aria-invalid={Boolean(errors.email)}
+              onChange={(e) => updateField("email", e.target.value)}
+              onBlur={() =>
+                setErrors((current) => ({
+                  ...current,
+                  email: validateSignup(form).email || "",
+                }))
+              }
+            />
+            {errors.email && <small>{errors.email}</small>}
+          </label>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={(e)=>
-              setForm({...form,password:e.target.value})
-            }
-          />
+          <label className="signup-field">
+            <span>Password</span>
+            <input
+              type="password"
+              placeholder="Create a strong password"
+              value={form.password}
+              autoComplete="new-password"
+              aria-invalid={Boolean(errors.password)}
+              onChange={(e) => updateField("password", e.target.value)}
+              onBlur={() =>
+                setErrors((current) => ({
+                  ...current,
+                  ...validateSignup(form),
+                }))
+              }
+            />
+            {errors.password && <small>{errors.password}</small>}
+          </label>
 
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={form.confirmPassword}
-            onChange={(e)=>
-              setForm({...form,confirmPassword:e.target.value})
-            }
-          />
+          <label className="signup-field">
+            <span>Confirm Password</span>
+            <input
+              type="password"
+              placeholder="Confirm your password"
+              value={form.confirmPassword}
+              autoComplete="new-password"
+              aria-invalid={Boolean(errors.confirmPassword)}
+              onChange={(e) => updateField("confirmPassword", e.target.value)}
+              onBlur={() =>
+                setErrors((current) => ({
+                  ...current,
+                  confirmPassword: validateSignup(form).confirmPassword || "",
+                }))
+              }
+            />
+            {errors.confirmPassword && <small>{errors.confirmPassword}</small>}
+          </label>
+
+          <ul className="password-rules" aria-label="Password requirements">
+            <li className={form.password.length >= 8 ? "met" : ""}>8+ characters</li>
+            <li className={/[A-Z]/.test(form.password) ? "met" : ""}>Uppercase letter</li>
+            <li className={/[a-z]/.test(form.password) ? "met" : ""}>Lowercase letter</li>
+            <li className={/[0-9]/.test(form.password) ? "met" : ""}>Number</li>
+          </ul>
 
           <button
             className="signup-btn"
-            onClick={handleSignup}
+            type="submit"
+            disabled={loading}
           >
             {loading ? "Creating..." : "Sign Up"}
           </button>
 
-        </div>
+        </form>
 
         <div className="signup-footer">
           Already have an account?{" "}

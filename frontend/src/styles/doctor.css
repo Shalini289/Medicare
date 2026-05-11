@@ -280,6 +280,50 @@
   opacity: 0.9;
 }
 
+.message-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-color);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.message-btn:hover {
+  border-color: rgba(212, 112, 143, 0.48);
+  color: #b95c78;
+}
+
+.doctor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.doctor-actions .btn-primary,
+.doctor-actions .btn-secondary {
+  width: auto;
+}
+
+.btn-secondary {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  color: var(--text-color);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  border-color: rgba(212, 112, 143, 0.48);
+  color: #b95c78;
+}
+
 .reviews-section {
   border: 1px solid var(--border-color);
   border-radius: 8px;

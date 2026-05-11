@@ -1,8 +1,38 @@
 const Doctor = require("../models/Doctor");
+const doctors = require("../data/doctors");
+
+const seedDemoDoctorsIfEmpty = async () => {
+  const count = await Doctor.countDocuments();
+
+  if (count > 0) {
+    return;
+  }
+
+  await Doctor.bulkWrite(
+    doctors.map((doctor) => ({
+      updateOne: {
+        filter: {
+          name: doctor.name,
+          specialization: doctor.specialization
+        },
+        update: {
+          $set: doctor
+        },
+        upsert: true
+      }
+    }))
+  );
+};
 
 const getDoctors = async (req, res) => {
-  const doctors = await Doctor.find();
-  res.json(doctors);
+  await seedDemoDoctorsIfEmpty();
+
+  const doctorsList = await Doctor.find().sort({
+    specialization: 1,
+    name: 1
+  });
+
+  res.json(doctorsList);
 };
 
 const getDoctorById = async (req, res) => {

@@ -90,8 +90,37 @@
   cursor: pointer;
 }
 
+.text-link {
+  background: transparent;
+  border: 0;
+  color: #d4708f;
+  cursor: pointer;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
 .login-footer span:hover {
   text-decoration: underline;
+}
+
+.auth-message {
+  background: #ecfdf3;
+  border-radius: 10px;
+  color: #027a48 !important;
+  margin: 16px 0 0 !important;
+  padding: 12px;
+}
+
+.dev-reset-link {
+  background: #fff8fb;
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  color: #9f3f61;
+  cursor: pointer;
+  font-weight: 800;
+  margin-top: 12px;
+  padding: 10px 12px;
+  width: 100%;
 }
 
 /* ===== EXTRA OPTIONS ===== */

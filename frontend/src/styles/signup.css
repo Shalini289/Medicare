@@ -38,7 +38,19 @@
 .signup-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
+  text-align: left;
+}
+
+.signup-field {
+  display: grid;
+  gap: 7px;
+}
+
+.signup-field span {
+  color: #333;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .signup-form input {
@@ -58,6 +70,53 @@
   background: white;
 }
 
+.signup-form input[aria-invalid="true"] {
+  border-color: #dc2626;
+  background: #fff7f7;
+}
+
+.signup-field small {
+  color: #b42318;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.signup-alert {
+  margin-bottom: 18px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 11px 13px;
+  background: #fff1f2;
+  color: #b42318;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.password-rules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.password-rules li {
+  border-radius: 999px;
+  padding: 7px 9px;
+  background: #f8fafc;
+  color: #777;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.password-rules li.met {
+  background: #e6f7ec;
+  color: #2e7d32;
+}
+
 /* ===== BUTTON ===== */
 .signup-btn {
   width: 100%;
@@ -75,6 +134,12 @@
 .signup-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(212, 112, 143, 0.25);
+}
+
+.signup-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
 }
 
 /* ===== FOOTER ===== */
@@ -103,5 +168,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-card {
+    padding: 30px 20px;
+    border-radius: 16px;
+  }
+
+  .password-rules {
+    grid-template-columns: 1fr;
   }
 }

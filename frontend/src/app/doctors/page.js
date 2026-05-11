@@ -18,6 +18,9 @@ export default function DoctorsPage() {
         const list = Array.isArray(res) ? res : [];
         setData(list);
       })
+      .catch(() => {
+        setData([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

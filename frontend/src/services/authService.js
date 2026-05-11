@@ -10,3 +10,9 @@ export const login = async (data) => {
 export const register = async (data) => {
   return api("/api/auth/register", "POST", data);
 };
+
+export const forgotPassword = async (data) =>
+  api("/api/auth/forgot-password", "POST", data);
+
+export const resetPassword = async (token, data) =>
+  api(`/api/auth/reset-password/${token}`, "POST", data);
