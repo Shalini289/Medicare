@@ -43,6 +43,20 @@ const getDoctorById = async (req, res) => {
   res.json(doctor);
 };
 
+const getMyDoctorProfile = async (req, res) => {
+  if (req.user.role !== "doctor") {
+    return res.status(403).json({ msg: "Doctor account required" });
+  }
+
+  const doctor = await Doctor.findOne({ user: req.user.id });
+
+  if (!doctor) {
+    return res.status(404).json({ msg: "Doctor profile not found" });
+  }
+
+  res.json(doctor);
+};
+
 const addDoctor = async (req, res) => {
   const doctor = await Doctor.create(req.body);
   res.json(doctor);
@@ -56,6 +70,7 @@ const deleteDoctor = async (req, res) => {
 module.exports = {
   getDoctors,
   getDoctorById,
+  getMyDoctorProfile,
   addDoctor,
   deleteDoctor
 };

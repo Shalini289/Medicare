@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Doctor = require("../models/Doctor");
 const generateToken = require("../utils/generateToken");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
@@ -14,7 +15,7 @@ const toSafeUser = (user) => ({
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const validateRegisterInput = ({ name = "", email = "", password = "" }) => {
+const validateRegisterInput = ({ name = "", email = "", password = "", role = "user", specialization = "" }) => {
   const cleanName = name.trim();
   const cleanEmail = email.trim().toLowerCase();
 
@@ -39,13 +40,28 @@ const validateRegisterInput = ({ name = "", email = "", password = "" }) => {
     return "Password must be 8+ characters and include uppercase, lowercase, and a number";
   }
 
+  if (!["user", "doctor"].includes(role)) {
+    return "Select a valid account type";
+  }
+
+  if (role === "doctor" && !specialization.trim()) {
+    return "Specialization is required for doctor accounts";
+  }
+
   return "";
 };
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
+  const role = req.body.role === "doctor" ? "doctor" : "user";
 
-  const validationError = validateRegisterInput({ name, email, password });
+  const validationError = validateRegisterInput({
+    name,
+    email,
+    password,
+    role,
+    specialization: req.body.specialization,
+  });
 
   if (validationError) {
     return res.status(400).json({ msg: validationError });
@@ -57,7 +73,34 @@ const register = async (req, res) => {
   const exists = await User.findOne({ email: cleanEmail });
   if (exists) return res.status(400).json({ msg: "User exists" });
 
-  const user = await User.create({ name: cleanName, email: cleanEmail, password });
+  const user = await User.create({
+    name: cleanName,
+    email: cleanEmail,
+    password,
+    phone: req.body.phone?.trim() || "",
+    role,
+  });
+
+  if (role === "doctor") {
+    await Doctor.create({
+      user: user._id,
+      name: cleanName,
+      specialization: req.body.specialization.trim(),
+      hospital: req.body.hospital?.trim() || "MediCare Online Clinic",
+      about: req.body.about?.trim() || `${cleanName} is available for patient chat, video calls, appointments, and digital prescriptions.`,
+      experience: Number(req.body.experience) || 0,
+      fees: Number(req.body.fees) || 0,
+      image: req.body.image || "/doctor-hero.png",
+      rating: 0,
+      availability: req.body.availability?.trim() || "Online consultation",
+      availableToday: true,
+      availabilitySchedule: [
+        { day: "Monday", startTime: "09:00", endTime: "17:00", mode: "video" },
+        { day: "Wednesday", startTime: "09:00", endTime: "17:00", mode: "video" },
+        { day: "Friday", startTime: "09:00", endTime: "17:00", mode: "video" },
+      ],
+    });
+  }
 
   res.json({ token: generateToken(user), user: toSafeUser(user) });
 };

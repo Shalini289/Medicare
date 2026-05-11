@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaCalendarAlt, FaFilePrescription, FaMicrophone, FaSave, FaUserInjured } from "react-icons/fa";
-import { getDoctors } from "@/services/doctorService";
+import { FaCalendarAlt, FaFilePrescription, FaMicrophone, FaSave, FaUserInjured, FaVideo } from "react-icons/fa";
+import { getDoctors, getMyDoctorProfile } from "@/services/doctorService";
 import {
   createDoctorNote,
   createDoctorPrescription,
@@ -110,12 +110,20 @@ export default function DoctorPortalPage() {
   useEffect(() => {
     queueMicrotask(() => {
       getDoctors()
-        .then((items) => {
+        .then(async (items) => {
           const list = Array.isArray(items) ? items : [];
           setDoctors(list);
-          const firstDoctor = list[0]?._id || "";
-          setDoctorId(firstDoctor);
-          return loadDashboard(firstDoctor);
+          let initialDoctor = list[0]?._id || "";
+
+          try {
+            const ownDoctor = await getMyDoctorProfile();
+            initialDoctor = ownDoctor?._id || initialDoctor;
+          } catch {
+            initialDoctor = list[0]?._id || "";
+          }
+
+          setDoctorId(initialDoctor);
+          return loadDashboard(initialDoctor);
         })
         .catch((err) => {
           setError(err.message || "Could not load doctors");
@@ -303,6 +311,11 @@ export default function DoctorPortalPage() {
             </option>
           ))}
         </select>
+
+        <a className="doctor-video-link" href={`/video-call?doctor=${doctorId}&role=doctor`} aria-disabled={!doctorId}>
+          <FaVideo aria-hidden="true" />
+          Join video room
+        </a>
       </section>
 
       {error && <p className="doctor-alert error">{error}</p>}

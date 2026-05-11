@@ -34,6 +34,26 @@
   font: inherit;
 }
 
+.doctor-video-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.doctor-video-link[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.58;
+}
+
 .doctor-alert,
 .doctor-section,
 .doctor-stat-grid div {

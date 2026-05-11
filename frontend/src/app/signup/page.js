@@ -44,6 +44,10 @@ const validateSignup = (values) => {
     nextErrors.confirmPassword = "Passwords do not match.";
   }
 
+  if (values.role === "doctor" && !values.specialization.trim()) {
+    nextErrors.specialization = "Specialization is required for doctor accounts.";
+  }
+
   return nextErrors;
 };
 
@@ -55,6 +59,11 @@ export default function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
+    specialization: "",
+    hospital: "",
+    experience: "",
+    fees: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -86,6 +95,11 @@ export default function SignupPage() {
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
         password: form.password,
+        role: form.role,
+        specialization: form.specialization.trim(),
+        hospital: form.hospital.trim(),
+        experience: form.experience,
+        fees: form.fees,
       });
 
       router.push("/login");
@@ -146,6 +160,73 @@ export default function SignupPage() {
             />
             {errors.email && <small>{errors.email}</small>}
           </label>
+
+          <label className="signup-field">
+            <span>Account Type</span>
+            <select
+              value={form.role}
+              onChange={(e) => updateField("role", e.target.value)}
+            >
+              <option value="user">Patient</option>
+              <option value="doctor">Doctor</option>
+            </select>
+          </label>
+
+          {form.role === "doctor" && (
+            <div className="doctor-signup-fields">
+              <label className="signup-field">
+                <span>Specialization</span>
+                <input
+                  type="text"
+                  placeholder="Cardiology, Dermatology, General Physician..."
+                  value={form.specialization}
+                  aria-invalid={Boolean(errors.specialization)}
+                  onChange={(e) => updateField("specialization", e.target.value)}
+                  onBlur={() =>
+                    setErrors((current) => ({
+                      ...current,
+                      specialization: validateSignup(form).specialization || "",
+                    }))
+                  }
+                />
+                {errors.specialization && <small>{errors.specialization}</small>}
+              </label>
+
+              <label className="signup-field">
+                <span>Hospital or Clinic</span>
+                <input
+                  type="text"
+                  placeholder="Clinic or hospital name"
+                  value={form.hospital}
+                  onChange={(e) => updateField("hospital", e.target.value)}
+                />
+              </label>
+
+              <div className="signup-field-grid">
+                <label className="signup-field">
+                  <span>Experience</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Years"
+                    value={form.experience}
+                    onChange={(e) => updateField("experience", e.target.value)}
+                  />
+                </label>
+
+                <label className="signup-field">
+                  <span>Fees</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Consultation fee"
+                    value={form.fees}
+                    onChange={(e) => updateField("fees", e.target.value)}
+                  />
+                </label>
+              </div>
+            </div>
+          )}
 
           <label className="signup-field">
             <span>Password</span>

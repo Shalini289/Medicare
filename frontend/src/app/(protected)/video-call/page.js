@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { getDoctors } from "@/services/doctorService";
+import { getDoctors, getMyDoctorProfile } from "@/services/doctorService";
 import "@/styles/video-call.css";
 
 const peerConfig = {
@@ -31,6 +31,33 @@ const getUserName = () => {
   }
 };
 
+const getUserRole = () => {
+  if (typeof window === "undefined") return "patient";
+
+  const roleFromUrl = new URLSearchParams(window.location.search).get("role");
+  if (["doctor", "patient"].includes(roleFromUrl)) return roleFromUrl;
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return "patient";
+    return JSON.parse(atob(token.split(".")[1])).role || "patient";
+  } catch {
+    return "patient";
+  }
+};
+
+const getMediaErrorMessage = (err) => {
+  if (typeof window !== "undefined" && window.location.protocol !== "https:" && window.location.hostname !== "localhost") {
+    return "Camera access requires HTTPS. Open this page over HTTPS or use localhost for development.";
+  }
+
+  if (err?.name === "NotAllowedError") return "Camera or microphone permission was blocked. Allow access and try again.";
+  if (err?.name === "NotFoundError") return "No camera or microphone was found on this device.";
+  if (err?.name === "NotReadableError") return "Your camera or microphone is already in use by another app.";
+
+  return err?.message || "Could not start the video call.";
+};
+
 export default function VideoCallPage() {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
@@ -40,6 +67,8 @@ export default function VideoCallPage() {
   const [connecting, setConnecting] = useState(false);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
+  const [remoteConnected, setRemoteConnected] = useState(false);
+  const [participantCount, setParticipantCount] = useState(0);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -48,10 +77,17 @@ export default function VideoCallPage() {
   const peerRef = useRef(null);
   const socketRef = useRef(null);
   const targetPeerRef = useRef(null);
+  const pendingIceCandidatesRef = useRef([]);
 
   const selectedDoctor = useMemo(
     () => doctors.find((doctor) => doctor._id === selectedDoctorId),
     [doctors, selectedDoctorId]
+  );
+
+  const callRole = useMemo(() => getUserRole(), []);
+  const roomId = useMemo(
+    () => (selectedDoctorId ? `doctor:${selectedDoctorId}` : ""),
+    [selectedDoctorId]
   );
 
   const closePeer = useCallback(() => {
@@ -64,6 +100,8 @@ export default function VideoCallPage() {
 
     targetPeerRef.current = null;
     remoteStreamRef.current = null;
+    pendingIceCandidatesRef.current = [];
+    setRemoteConnected(false);
 
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
@@ -88,8 +126,22 @@ export default function VideoCallPage() {
     setConnecting(false);
     setMicOn(true);
     setCameraOn(true);
+    setParticipantCount(0);
     setStatus("Call ended.");
   }, [closePeer]);
+
+  const addPendingIceCandidates = useCallback(async () => {
+    const peer = peerRef.current;
+
+    if (!peer?.remoteDescription) return;
+
+    const candidates = pendingIceCandidatesRef.current;
+    pendingIceCandidatesRef.current = [];
+
+    for (const candidate of candidates) {
+      await peer.addIceCandidate(new RTCIceCandidate(candidate));
+    }
+  }, []);
 
   const createPeer = useCallback((target) => {
     closePeer();
@@ -110,6 +162,7 @@ export default function VideoCallPage() {
         remoteVideoRef.current.srcObject = remoteStream;
       }
 
+      setRemoteConnected(true);
       setStatus("Connected with the other participant.");
     };
 
@@ -124,10 +177,12 @@ export default function VideoCallPage() {
 
     peer.onconnectionstatechange = () => {
       if (peer.connectionState === "connected") {
+        setRemoteConnected(true);
         setStatus("Video call connected.");
       }
 
-      if (["failed", "disconnected", "closed"].includes(peer.connectionState)) {
+      if (["failed", "disconnected"].includes(peer.connectionState)) {
+        setRemoteConnected(false);
         setStatus("The other participant disconnected.");
       }
     };
@@ -138,12 +193,25 @@ export default function VideoCallPage() {
   useEffect(() => {
     queueMicrotask(() => {
       getDoctors()
-        .then((items) => {
+        .then(async (items) => {
           const list = Array.isArray(items) ? items : [];
           const doctorFromUrl = new URLSearchParams(window.location.search).get("doctor");
-          const initialDoctor = list.some((doctor) => doctor._id === doctorFromUrl)
+          let initialDoctor = list.some((doctor) => doctor._id === doctorFromUrl)
             ? doctorFromUrl
-            : list[0]?._id || "";
+            : "";
+
+          if (!initialDoctor && getUserRole() === "doctor") {
+            try {
+              const profile = await getMyDoctorProfile();
+              initialDoctor = profile?._id || "";
+            } catch {
+              initialDoctor = "";
+            }
+          }
+
+          if (!initialDoctor) {
+            initialDoctor = list[0]?._id || "";
+          }
 
           setDoctors(list);
           setSelectedDoctorId(initialDoctor);
@@ -168,72 +236,108 @@ export default function VideoCallPage() {
     socketRef.current = socket;
 
     socket.on("connect", () => {
+      setError("");
       setStatus("Waiting for the other participant to join...");
       socket.emit("joinVideoRoom", {
-        roomId: `doctor:${selectedDoctorId}`,
+        roomId,
         user: {
           name: getUserName(),
-          role: "patient",
+          role: callRole,
         },
       });
     });
 
     socket.on("videoRoomUsers", async ({ users = [] }) => {
+      setParticipantCount(users.length + 1);
       const peerId = users[0];
       if (!peerId) return;
 
-      targetPeerRef.current = peerId;
-      const peer = createPeer(peerId);
-      const offer = await peer.createOffer();
-      await peer.setLocalDescription(offer);
+      try {
+        targetPeerRef.current = peerId;
+        const peer = createPeer(peerId);
+        const offer = await peer.createOffer();
+        await peer.setLocalDescription(offer);
 
-      socket.emit("videoOffer", {
-        target: peerId,
-        description: offer,
-      });
+        socket.emit("videoOffer", {
+          target: peerId,
+          description: offer,
+        });
+      } catch {
+        setError("Could not create the video connection. Please retry the call.");
+      }
     });
 
     socket.on("videoOffer", async ({ from, description }) => {
-      targetPeerRef.current = from;
-      const peer = createPeer(from);
+      try {
+        targetPeerRef.current = from;
+        const peer = createPeer(from);
 
-      await peer.setRemoteDescription(new RTCSessionDescription(description));
-      const answer = await peer.createAnswer();
-      await peer.setLocalDescription(answer);
+        await peer.setRemoteDescription(new RTCSessionDescription(description));
+        await addPendingIceCandidates();
+        const answer = await peer.createAnswer();
+        await peer.setLocalDescription(answer);
 
-      socket.emit("videoAnswer", {
-        target: from,
-        description: answer,
-      });
+        socket.emit("videoAnswer", {
+          target: from,
+          description: answer,
+        });
+      } catch {
+        setError("Could not answer the video call. Please refresh and try again.");
+      }
     });
 
     socket.on("videoAnswer", async ({ from, description }) => {
-      targetPeerRef.current = from;
+      try {
+        targetPeerRef.current = from;
 
-      if (!peerRef.current) return;
-      await peerRef.current.setRemoteDescription(new RTCSessionDescription(description));
+        if (!peerRef.current) return;
+        await peerRef.current.setRemoteDescription(new RTCSessionDescription(description));
+        await addPendingIceCandidates();
+      } catch {
+        setError("Could not complete the video connection. Please retry the call.");
+      }
     });
 
     socket.on("iceCandidate", async ({ from, candidate }) => {
       targetPeerRef.current = from;
 
       if (!peerRef.current || !candidate) return;
-      await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+
+      try {
+        if (!peerRef.current.remoteDescription) {
+          pendingIceCandidatesRef.current.push(candidate);
+          return;
+        }
+
+        await peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch {
+        setError("A network candidate failed. The call may need to be restarted.");
+      }
     });
 
-    socket.on("videoUserJoined", () => {
+    socket.on("videoUserJoined", ({ user } = {}) => {
+      setParticipantCount((count) => Math.max(count, 2));
       setStatus("Participant joined. Connecting video...");
+      if (user?.role === callRole) {
+        setStatus("Another user joined this room. Waiting for doctor and patient to connect...");
+      }
     });
 
     socket.on("videoUserLeft", () => {
       closePeer();
+      setParticipantCount(1);
       setStatus("The other participant left the call.");
     });
 
-    socket.on("connect_error", () => {
-      setError("Could not connect to the video server.");
+    socket.on("disconnect", () => {
+      setParticipantCount(0);
+      setStatus("Disconnected from the video server.");
     });
-  }, [closePeer, createPeer, selectedDoctorId]);
+
+    socket.on("connect_error", (err) => {
+      setError(err?.message ? `Could not connect to the video server: ${err.message}` : "Could not connect to the video server.");
+    });
+  }, [addPendingIceCandidates, callRole, closePeer, createPeer, roomId]);
 
   const startCall = async () => {
     if (!selectedDoctorId) {
@@ -266,7 +370,7 @@ export default function VideoCallPage() {
       setCameraOn(true);
       setupSocket();
     } catch (err) {
-      setError(err.message || "Could not start the video call.");
+      setError(getMediaErrorMessage(err));
       cleanupCall();
     } finally {
       setConnecting(false);
@@ -298,7 +402,8 @@ export default function VideoCallPage() {
   const copyInviteLink = async () => {
     if (!selectedDoctorId || typeof window === "undefined") return;
 
-    const url = `${window.location.origin}/video-call?doctor=${selectedDoctorId}`;
+    const inviteRole = callRole === "doctor" ? "patient" : "doctor";
+    const url = `${window.location.origin}/video-call?doctor=${selectedDoctorId}&role=${inviteRole}`;
 
     try {
       await navigator.clipboard.writeText(url);
@@ -314,6 +419,9 @@ export default function VideoCallPage() {
         <div>
           <h1>Video Call</h1>
           <p>{selectedDoctor ? `Connect with ${selectedDoctor.name}` : "Select a doctor to start a secure call"}</p>
+          <span className="video-room-meta">
+            Joining as {callRole} {participantCount ? `- ${participantCount} participant${participantCount > 1 ? "s" : ""} online` : ""}
+          </span>
         </div>
 
         <select
@@ -336,7 +444,7 @@ export default function VideoCallPage() {
       <section className="video-grid">
         <div className="video-tile">
           <video ref={remoteVideoRef} autoPlay playsInline />
-          {!remoteStreamRef.current && (
+          {!remoteConnected && (
             <div className="video-placeholder">
               <strong>{selectedDoctor?.name || "Doctor"}</strong>
               <span>{joined ? "Waiting to join..." : "Remote video"}</span>

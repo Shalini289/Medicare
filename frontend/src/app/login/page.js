@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login, verifyTwoFactorLogin } from "@/services/authService";
+import { getCurrentUser } from "@/utils/auth";
 import "../../styles/login.css";
 
 export default function LoginPage() {
@@ -21,6 +22,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   const [loading, setLoading] = useState(false);
+
+  const goAfterLogin = () => {
+    const user = getCurrentUser();
+    router.push(user?.role === "doctor" ? "/doctor" : "/dashboard");
+  };
 
   const handleLogin = async () => {
     if (!form.email || !form.password) {
@@ -42,7 +48,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/dashboard");
+      goAfterLogin();
 
     } catch (err) {
       setError(err.message || "Invalid credentials");
@@ -66,7 +72,7 @@ export default function LoginPage() {
         code: twoFactor.code.trim(),
       });
 
-      router.push("/dashboard");
+      goAfterLogin();
 
     } catch (err) {
       setError(err.message || "Verification failed");

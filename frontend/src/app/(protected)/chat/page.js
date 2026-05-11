@@ -2,19 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { getMessages, sendChatMessage } from "@/services/chatService";
-import { getDoctors } from "@/services/doctorService";
+import { getChatThreads, getMessages, sendChatMessage } from "@/services/chatService";
+import { getCurrentUser } from "@/utils/auth";
 import "@/styles/chat.css";
-
-const getSenderId = () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    return JSON.parse(atob(token.split(".")[1])).id;
-  } catch {
-    return null;
-  }
-};
 
 const getSocketUrl = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
@@ -29,54 +19,65 @@ const getSocketUrl = () => {
 };
 
 const getMessageDoctorId = (msg) => msg.doctor?._id || msg.doctor || null;
+const getMessageParticipantId = (msg, currentUserId) => {
+  const senderId = msg.sender?._id || msg.sender;
+  const receiverId = msg.receiver?._id || msg.receiver;
+
+  return senderId === currentUserId ? receiverId : senderId;
+};
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState("");
-  const [senderId, setSenderId] = useState(null);
-  const [loadingDoctors, setLoadingDoctors] = useState(true);
+  const [threads, setThreads] = useState([]);
+  const [selectedThreadId, setSelectedThreadId] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState("");
   const socketRef = useRef(null);
   const bottomRef = useRef();
-  const selectedDoctorRef = useRef("");
+  const selectedThreadRef = useRef("");
+  const currentUserRef = useRef(null);
 
-  const selectedDoctor = useMemo(
-    () => doctors.find((doctor) => doctor._id === selectedDoctorId),
-    [doctors, selectedDoctorId]
+  const selectedThread = useMemo(
+    () => threads.find((thread) => thread._id === selectedThreadId),
+    [threads, selectedThreadId]
   );
 
+  const isDoctor = currentUser?.role === "doctor";
+
   useEffect(() => {
-    selectedDoctorRef.current = selectedDoctorId;
-  }, [selectedDoctorId]);
+    selectedThreadRef.current = selectedThreadId;
+  }, [selectedThreadId]);
 
   useEffect(() => {
     queueMicrotask(() => {
-      setSenderId(getSenderId());
+      const user = getCurrentUser();
+      setCurrentUser(user);
+      currentUserRef.current = user;
 
-      getDoctors()
+      getChatThreads()
         .then((items) => {
           const list = Array.isArray(items) ? items : [];
-          const doctorFromUrl = new URLSearchParams(window.location.search).get("doctor");
-          const initialDoctor = list.some((doctor) => doctor._id === doctorFromUrl)
-            ? doctorFromUrl
+          const threadFromUrl = new URLSearchParams(window.location.search).get(user?.role === "doctor" ? "patient" : "doctor");
+          const initialThread = list.some((thread) => thread._id === threadFromUrl)
+            ? threadFromUrl
             : list[0]?._id || "";
 
-          setDoctors(list);
-          setSelectedDoctorId(initialDoctor);
+          setThreads(list);
+          setSelectedThreadId(initialThread);
         })
         .catch(() => {
-          setDoctors([]);
-          setError("Doctors could not be loaded right now.");
+          setThreads([]);
+          setError("Conversations could not be loaded right now.");
         })
-        .finally(() => setLoadingDoctors(false));
+        .finally(() => setLoadingThreads(false));
     });
   }, []);
 
   useEffect(() => {
-    if (!selectedDoctorId) {
+    if (!selectedThreadId || !currentUser) {
       return;
     }
 
@@ -88,7 +89,7 @@ export default function ChatPage() {
       setLoadingMessages(true);
       setError("");
 
-      getMessages(selectedDoctorId)
+      getMessages(isDoctor ? { patient: selectedThreadId } : { doctor: selectedThreadId })
         .then((items) => {
           if (active) {
             setMessages(Array.isArray(items) ? items : []);
@@ -110,7 +111,7 @@ export default function ChatPage() {
     return () => {
       active = false;
     };
-  }, [selectedDoctorId]);
+  }, [currentUser, isDoctor, selectedThreadId]);
 
   useEffect(() => {
     const socketUrl = getSocketUrl();
@@ -123,11 +124,18 @@ export default function ChatPage() {
     socketRef.current = socket;
 
     socket.on("receiveMessage", (msg) => {
-      const activeDoctorId = selectedDoctorRef.current;
+      const user = currentUserRef.current;
+      const activeThreadId = selectedThreadRef.current;
 
-      if (!activeDoctorId || getMessageDoctorId(msg) !== activeDoctorId) {
+      if (!user || !activeThreadId) {
         return;
       }
+
+      const belongsToThread = user.role === "doctor"
+        ? getMessageParticipantId(msg, user.id) === activeThreadId
+        : getMessageDoctorId(msg) === activeThreadId;
+
+      if (!belongsToThread) return;
 
       setMessages((prev) => {
         if (msg._id && prev.some((item) => item._id === msg._id)) {
@@ -149,12 +157,12 @@ export default function ChatPage() {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!message.trim() || !selectedDoctorId) return;
+    if (!message.trim() || !selectedThreadId) return;
 
     try {
       const sent = await sendChatMessage({
         message,
-        doctor: selectedDoctorId,
+        ...(isDoctor ? { receiver: selectedThreadId } : { doctor: selectedThreadId }),
       });
 
       setMessages((prev) => {
@@ -174,25 +182,25 @@ export default function ChatPage() {
     <div className="chat-page">
       <aside className="chat-sidebar">
         <div className="chat-sidebar-head">
-          <h2>Messages</h2>
-          <span>{doctors.length} doctors</span>
+          <h2>{isDoctor ? "Patient Messages" : "Messages"}</h2>
+          <span>{threads.length} {isDoctor ? "patients" : "doctors"}</span>
         </div>
 
         <div className="doctor-thread-list">
-          {loadingDoctors ? (
-            <p className="chat-empty">Loading doctors...</p>
-          ) : doctors.length === 0 ? (
-            <p className="chat-empty">No doctors available.</p>
+          {loadingThreads ? (
+            <p className="chat-empty">Loading conversations...</p>
+          ) : threads.length === 0 ? (
+            <p className="chat-empty">{isDoctor ? "No patient conversations yet." : "No doctors available."}</p>
           ) : (
-            doctors.map((doctor) => (
+            threads.map((thread) => (
               <button
                 type="button"
-                key={doctor._id}
-                className={`doctor-thread ${doctor._id === selectedDoctorId ? "active" : ""}`}
-                onClick={() => setSelectedDoctorId(doctor._id)}
+                key={thread._id}
+                className={`doctor-thread ${thread._id === selectedThreadId ? "active" : ""}`}
+                onClick={() => setSelectedThreadId(thread._id)}
               >
-                <span>{doctor.name}</span>
-                <small>{doctor.specialization}</small>
+                <span>{thread.name}</span>
+                <small>{thread.subtitle}</small>
               </button>
             ))
           )}
@@ -202,10 +210,10 @@ export default function ChatPage() {
       <section className="chat-panel">
         <div className="chat-header">
           <div>
-            <h3>{selectedDoctor?.name || "Select a doctor"}</h3>
-            <p>{selectedDoctor?.hospital || selectedDoctor?.specialization || "Choose a doctor to start chatting"}</p>
+            <h3>{selectedThread?.name || (isDoctor ? "Select a patient" : "Select a doctor")}</h3>
+            <p>{selectedThread?.subtitle || (isDoctor ? "Choose a patient to reply" : "Choose a doctor to start chatting")}</p>
           </div>
-          <span className="chat-status">{selectedDoctor ? "Doctor thread" : "Waiting"}</span>
+          <span className="chat-status">{selectedThread ? (isDoctor ? "Patient thread" : "Doctor thread") : "Waiting"}</span>
         </div>
 
         {error && <div className="chat-error">{error}</div>}
@@ -215,20 +223,20 @@ export default function ChatPage() {
             <p className="chat-empty">Loading conversation...</p>
           ) : messages.length === 0 ? (
             <p className="chat-empty">
-              {selectedDoctor
-                ? `No messages with ${selectedDoctor.name} yet.`
-                : "Select a doctor to view messages."}
+              {selectedThread
+                ? `No messages with ${selectedThread.name} yet.`
+                : `Select a ${isDoctor ? "patient" : "doctor"} to view messages.`}
             </p>
           ) : (
             messages.map((m, i) => {
-              const mine = (m.sender?._id || m.sender) === senderId;
+              const mine = (m.sender?._id || m.sender) === currentUser?.id;
 
               return (
                 <div
                   key={m._id || i}
                   className={`chat-msg ${mine ? "sent" : "received"}`}
                 >
-                  <span>{mine ? "You" : m.sender?.name || selectedDoctor?.name || "Doctor"}</span>
+                  <span>{mine ? "You" : m.sender?.name || selectedThread?.name || (isDoctor ? "Patient" : "Doctor")}</span>
                   <p>{m.message || m.text}</p>
                 </div>
               );
@@ -241,12 +249,12 @@ export default function ChatPage() {
           <input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={selectedDoctor ? `Message ${selectedDoctor.name}` : "Select a doctor first"}
-            disabled={!selectedDoctor}
+            placeholder={selectedThread ? `Message ${selectedThread.name}` : `Select a ${isDoctor ? "patient" : "doctor"} first`}
+            disabled={!selectedThread}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
 
-          <button disabled={!selectedDoctor || !message.trim()} onClick={sendMessage}>
+          <button disabled={!selectedThread || !message.trim()} onClick={sendMessage}>
             Send
           </button>
         </div>

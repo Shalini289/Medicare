@@ -1,8 +1,15 @@
 import { api } from "@/utils/api";
 
-export const getMessages = (doctor = null) => {
-  const params = doctor ? `?doctor=${encodeURIComponent(doctor)}` : "";
-  return api(`/api/chat${params}`);
+export const getChatThreads = () => api("/api/chat/threads");
+
+export const getMessages = ({ doctor = null, patient = null } = {}) => {
+  const params = new URLSearchParams();
+
+  if (doctor) params.set("doctor", doctor);
+  if (patient) params.set("patient", patient);
+
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return api(`/api/chat${query}`);
 };
 
 export const sendChatMessage = ({ message, receiver = null, doctor = null }) =>
