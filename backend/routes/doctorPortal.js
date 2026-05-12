@@ -9,11 +9,11 @@ const {
   updateAppointmentStatus,
   updateAvailability,
 } = require("../controllers/doctorPortalController");
-const { protect } = require("../middleware/authMiddleware");
+const { doctorOnly, protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.use(protect);
+router.use(protect, doctorOnly);
 
 router.get("/dashboard", getDoctorDashboard);
 router.put("/availability", updateAvailability);

@@ -4,7 +4,7 @@ import "../styles/navbar.css";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import NotificationBell from "./NotificationBell";
-import { getToken } from "@/utils/auth";
+import { getCurrentUser, getToken } from "@/utils/auth";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -53,12 +53,17 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [role, setRole] = useState("");
   const [open, setOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
 
   useEffect(() => {
     const syncAuthState = () => {
-      setLoggedIn(Boolean(getToken()));
+      const token = getToken();
+      const user = getCurrentUser();
+
+      setLoggedIn(Boolean(token));
+      setRole(user?.role || "");
     };
 
     syncAuthState();
@@ -81,6 +86,7 @@ export default function Navbar() {
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("authchange"));
     setLoggedIn(false);
+    setRole("");
     setOpen(false);
     setActiveGroup(null);
     router.push("/login");
@@ -97,7 +103,7 @@ export default function Navbar() {
       </button>
 
       <ul className={`nav-links ${open ? "is-open" : ""}`}>
-        {navItems.map((item) => (
+        {navItems.filter((item) => item.href !== "/doctor" || role === "doctor").map((item) => (
           <li key={item.href}>
             <button onClick={() => goTo(item.href)}>{item.label}</button>
           </li>

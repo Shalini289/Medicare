@@ -169,13 +169,19 @@ const placeOrder = async (req, res) => {
   let total = 0;
 
   for (let item of items) {
+    const quantity = Number(item.quantity || 0);
+
+    if (!quantity || quantity <= 0) {
+      return res.status(400).json({ msg: "Order quantity must be greater than 0" });
+    }
+
     const med = await Medicine.findById(item.medicine);
 
     if (!med) {
       return res.status(404).json({ msg: "Medicine not found" });
     }
 
-    if (med.stock < item.quantity) {
+    if (med.stock < quantity) {
       return res.status(400).json({ msg: `${med.name} is out of stock` });
     }
 
@@ -183,9 +189,9 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ msg: `${med.name} is expired and cannot be ordered` });
     }
 
-    total += med.price * item.quantity;
+    total += med.price * quantity;
 
-    med.stock -= item.quantity;
+    med.stock -= quantity;
     await med.save();
 
     if (med.stock <= Number(med.reorderLevel || 0)) {

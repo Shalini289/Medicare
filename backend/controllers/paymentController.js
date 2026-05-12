@@ -20,11 +20,26 @@ const createPaymentOrder = async (req, res) => {
     });
   }
 
-  const order = await razorpay.orders.create({
-    amount: Math.round(amount * 100),
-    currency: "INR",
-    receipt: `medicare_${Date.now()}`,
-  });
+  let order;
+
+  try {
+    order = await razorpay.orders.create({
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      receipt: `medicare_${Date.now()}`,
+    });
+  } catch (err) {
+    console.error(`Razorpay order failed: ${err.error?.description || err.message}`);
+
+    return res.json({
+      id: `mock_order_${Date.now()}`,
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      status: "created",
+      mock: true,
+      warning: "Payment provider unavailable. Created a demo payment order.",
+    });
+  }
 
   res.json(order);
 };

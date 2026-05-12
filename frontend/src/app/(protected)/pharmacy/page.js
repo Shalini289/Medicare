@@ -252,6 +252,18 @@ export default function Pharmacy() {
   };
 
   const checkout = async () => {
+    if (cart.length === 0) {
+      setMessage("Your cart is empty.");
+      return;
+    }
+
+    const unavailable = cart.find((item) => item.expiryStatus === "expired" || Number(item.stock || 0) < item.quantity);
+
+    if (unavailable) {
+      setMessage(`${unavailable.name} is unavailable or does not have enough stock.`);
+      return;
+    }
+
     const orderItems = cart.map((item) => ({
       medicine: item._id,
       quantity: item.quantity,
@@ -259,16 +271,22 @@ export default function Pharmacy() {
     const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * item.quantity, 0);
 
     try {
+      setMessage("");
       const paymentOrder = await createPaymentOrder(total);
       const order = await placeOrder({
         items: orderItems,
         paymentId: paymentOrder.id,
       });
 
-      alert(`Order placed. Payment order: ${paymentOrder.id}. Total: Rs ${order.total || 0}`);
+      setMessage(
+        paymentOrder.mock
+          ? `Order placed with demo payment. Total: Rs ${order.total || 0}`
+          : `Order placed. Payment order: ${paymentOrder.id}. Total: Rs ${order.total || 0}`
+      );
       clearCart();
-    } catch {
-      alert("Order or payment failed. Please check stock and payment setup.");
+      await loadPharmacyData(false);
+    } catch (err) {
+      setMessage(err.message || "Order or payment failed. Please check stock and payment setup.");
     }
   };
 

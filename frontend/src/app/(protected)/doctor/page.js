@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FaCalendarAlt, FaFilePrescription, FaMicrophone, FaSave, FaTrash, FaUserInjured, FaVideo } from "react-icons/fa";
 import { getDoctors, getMyDoctorProfile } from "@/services/doctorService";
+import { getCurrentUser } from "@/utils/auth";
 import {
   createDoctorNote,
   createDoctorPrescription,
@@ -15,13 +17,14 @@ import {
 } from "@/services/doctorPortalService";
 import "@/styles/doctorPortal.css";
 
-const blankMedicine = {
+const createMedicineLine = () => ({
+  lineId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
   name: "",
   dosage: "",
   frequency: "",
   duration: "",
   instructions: "",
-};
+});
 
 const blankSchedule = {
   patientId: "",
@@ -37,7 +40,7 @@ const blankPrescription = {
   patientInstructions: "",
   digitalSignature: "",
   notes: "",
-  medicines: [{ ...blankMedicine }],
+  medicines: [createMedicineLine()],
 };
 
 const blankNote = {
@@ -57,6 +60,7 @@ const SpeechRecognition =
   typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
 
 export default function DoctorPortalPage() {
+  const router = useRouter();
   const [doctors, setDoctors] = useState([]);
   const [doctorId, setDoctorId] = useState("");
   const [dashboard, setDashboard] = useState(null);
@@ -73,6 +77,7 @@ export default function DoctorPortalPage() {
   const [loading, setLoading] = useState(true);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const [authorized, setAuthorized] = useState(false);
 
   const patients = useMemo(() => dashboard?.patients || [], [dashboard]);
   const appointments = useMemo(() => dashboard?.appointments || [], [dashboard]);
@@ -82,6 +87,19 @@ export default function DoctorPortalPage() {
     () => patients.find((patient) => patient._id === (noteForm.patientId || prescriptionForm.patientId || scheduleForm.patientId)),
     [noteForm.patientId, patients, prescriptionForm.patientId, scheduleForm.patientId]
   );
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      const user = getCurrentUser();
+
+      if (user?.role !== "doctor") {
+        router.replace("/dashboard");
+        return;
+      }
+
+      setAuthorized(true);
+    });
+  }, [router]);
 
   const loadDashboard = useCallback(async (id) => {
     if (!id) return;
@@ -108,6 +126,8 @@ export default function DoctorPortalPage() {
   }, []);
 
   useEffect(() => {
+    if (!authorized) return;
+
     queueMicrotask(() => {
       getDoctors()
         .then(async (items) => {
@@ -130,15 +150,15 @@ export default function DoctorPortalPage() {
           setLoading(false);
         });
     });
-  }, [loadDashboard]);
+  }, [authorized, loadDashboard]);
 
   useEffect(() => {
-    if (!doctorId) return;
+    if (!authorized || !doctorId) return;
 
     queueMicrotask(() => {
       loadDashboard(doctorId);
     });
-  }, [doctorId, loadDashboard]);
+  }, [authorized, doctorId, loadDashboard]);
 
   const patientOptions = patients.length ? patients : [{ _id: "", name: "No patients yet" }];
 
@@ -154,7 +174,7 @@ export default function DoctorPortalPage() {
   const addMedicine = () => {
     setPrescriptionForm((current) => ({
       ...current,
-      medicines: [...current.medicines, { ...blankMedicine }],
+      medicines: [...current.medicines, createMedicineLine()],
     }));
   };
 
@@ -177,7 +197,11 @@ export default function DoctorPortalPage() {
         digitalSignature: prescriptionForm.digitalSignature || doctor?.name,
       });
       setStatus("Digital prescription created for patient.");
-      setPrescriptionForm((current) => ({ ...blankPrescription, patientId: current.patientId }));
+      setPrescriptionForm((current) => ({
+        ...blankPrescription,
+        patientId: current.patientId,
+        medicines: [createMedicineLine()],
+      }));
       await loadDashboard(doctorId);
     } catch (err) {
       setError(err.message || "Could not create prescription");
@@ -294,6 +318,14 @@ export default function DoctorPortalPage() {
       setError(err.message || "Could not update availability");
     }
   };
+
+  if (!authorized) {
+    return (
+      <main className="doctor-portal-page">
+        <p className="doctor-alert">Checking doctor access...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="doctor-portal-page">
@@ -452,7 +484,7 @@ export default function DoctorPortalPage() {
 
           <div className="medicine-stack">
             {prescriptionForm.medicines.map((medicine, index) => (
-              <div className="medicine-row" key={index}>
+              <div className="medicine-row" key={medicine.lineId || index}>
                 <label>
                   Medicine
                   <input value={medicine.name} onChange={(event) => changeMedicine(index, "name", event.target.value)} placeholder="Medicine name" />
