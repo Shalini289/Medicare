@@ -4,6 +4,8 @@ const router = express.Router();
 const {
   register,
   login,
+  getProfile,
+  updateProfile,
   verifyTwoFactorLogin,
   getTwoFactorSettings,
   updateTwoFactorSettings,
@@ -14,6 +16,8 @@ const { protect } = require("../middleware/authMiddleware");
 
 router.post("/register", register);
 router.post("/login", login);
+router.get("/me", protect, getProfile);
+router.put("/profile", protect, updateProfile);
 router.post("/2fa/verify", verifyTwoFactorLogin);
 router.get("/2fa/settings", protect, getTwoFactorSettings);
 router.put("/2fa/settings", protect, updateTwoFactorSettings);

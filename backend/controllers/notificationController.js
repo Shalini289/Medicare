@@ -35,9 +35,23 @@ const clearNotifications = async (req, res) => {
   res.json({ msg: "Notifications cleared" });
 };
 
+const deleteNotification = async (req, res) => {
+  const notification = await Notification.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user.id,
+  });
+
+  if (!notification) {
+    return res.status(404).json({ msg: "Notification not found" });
+  }
+
+  res.json({ msg: "Notification deleted" });
+};
+
 module.exports = {
   getNotifications,
   createNotification,
   markNotificationRead,
   clearNotifications,
+  deleteNotification,
 };

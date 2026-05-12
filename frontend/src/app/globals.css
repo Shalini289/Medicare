@@ -245,6 +245,25 @@ textarea,
 .report-box {
   margin-top: 20px;
 }
+
+.report-alert {
+  border-radius: 10px;
+  padding: 11px 13px;
+  margin: 16px 0;
+  font-weight: 700;
+}
+
+.report-alert.error {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.report-alert.success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
 /* AUTH */
 .auth-page {
   height: 100vh;

@@ -9,6 +9,8 @@ export default function Reports() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingReports, setLoadingReports] = useState(true);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const loadReports = useCallback(async () => {
     try {
@@ -37,20 +39,30 @@ export default function Reports() {
   }, [query, reports]);
 
   const upload = async () => {
-    if (!file) return alert("Select file");
+    if (!file) {
+      setError("Select a report file first.");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setError("Report file must be 8MB or smaller.");
+      return;
+    }
 
     const form = new FormData();
     form.append("file", file);
 
     try {
       setLoading(true);
+      setError("");
+      setMessage("");
 
       const uploaded = await api("/api/report/upload", "POST", form);
       setReports((prev) => [uploaded, ...prev]);
       setFile(null);
-      alert("Uploaded successfully");
-    } catch {
-      alert("Upload failed");
+      setMessage("Report uploaded successfully.");
+    } catch (err) {
+      setError(err.message || "Upload failed. Please try another report file.");
     } finally {
       setLoading(false);
     }
@@ -68,11 +80,18 @@ export default function Reports() {
         </button>
       </div>
 
+      {error && <p className="report-alert error">{error}</p>}
+      {message && <p className="report-alert success">{message}</p>}
+
       <div className="report-box">
         <input
           type="file"
           accept=".pdf,.png,.jpg,.jpeg"
-          onChange={(e)=>setFile(e.target.files[0] || null)}
+          onChange={(e) => {
+            setFile(e.target.files[0] || null);
+            setError("");
+            setMessage("");
+          }}
         />
 
         {file && (

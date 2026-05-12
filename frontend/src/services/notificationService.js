@@ -8,3 +8,6 @@ export const markNotificationRead = (id) =>
 
 export const clearNotifications = () =>
   api("/api/notifications", "DELETE");
+
+export const deleteNotification = (id) =>
+  api(`/api/notifications/${id}`, "DELETE");

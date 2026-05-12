@@ -19,6 +19,12 @@ export const getTwoFactorSettings = () =>
 export const updateTwoFactorSettings = (enabled) =>
   api("/api/auth/2fa/settings", "PUT", { enabled });
 
+export const getProfile = () =>
+  api("/api/auth/me");
+
+export const updateProfile = (data) =>
+  api("/api/auth/profile", "PUT", data);
+
 export const register = async (data) => {
   return api("/api/auth/register", "POST", data);
 };

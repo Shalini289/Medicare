@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import {
   clearNotifications,
+  deleteNotification,
   getNotifications,
   markNotificationRead,
 } from "@/services/notificationService";
@@ -62,6 +63,16 @@ export default function NotificationsPage() {
     setNotifications([]);
   };
 
+  const removeNotification = async (event, id) => {
+    event.stopPropagation();
+
+    if (!String(id).startsWith("bed-")) {
+      await deleteNotification(id);
+    }
+
+    setNotifications((prev) => prev.filter((n) => n._id !== id));
+  };
+
   return (
     <div className="notif-page">
       <div className="notif-header">
@@ -82,7 +93,17 @@ export default function NotificationsPage() {
             className={`notif-card ${n.read ? "read" : ""}`}
             onClick={() => markRead(n._id)}
           >
-            <strong>{n.title || "Notification"}</strong>
+            <div className="notif-card-head">
+              <strong>{n.title || "Notification"}</strong>
+              <button
+                type="button"
+                className="notif-delete-btn"
+                onClick={(event) => removeNotification(event, n._id)}
+                aria-label={`Delete ${n.title || "notification"}`}
+              >
+                Delete
+              </button>
+            </div>
             <p>{n.message}</p>
             <span>{n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}</span>
           </div>

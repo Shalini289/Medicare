@@ -11,6 +11,8 @@ const toSafeUser = (user) => ({
   email: user.email,
   phone: user.phone,
   role: user.role,
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
 });
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -231,6 +233,45 @@ const login = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  res.json({ user: toSafeUser(user) });
+};
+
+const updateProfile = async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  const name = req.body.name?.trim();
+  const phone = req.body.phone?.trim() || "";
+
+  if (!name || name.length < 2 || !/^[a-zA-Z\s.'-]+$/.test(name)) {
+    return res.status(400).json({ msg: "Enter a valid full name" });
+  }
+
+  if (phone && !/^[0-9+\-\s()]{7,20}$/.test(phone)) {
+    return res.status(400).json({ msg: "Enter a valid phone number" });
+  }
+
+  user.name = name;
+  user.phone = phone;
+  await user.save({ validateBeforeSave: false });
+
+  if (user.role === "doctor") {
+    await Doctor.findOneAndUpdate({ user: user._id }, { name });
+  }
+
+  res.json({ user: toSafeUser(user), msg: "Profile updated successfully" });
+};
+
 const verifyTwoFactorLogin = async (req, res) => {
   const { tempToken, code } = req.body;
 
@@ -290,6 +331,8 @@ const updateTwoFactorSettings = async (req, res) => {
 module.exports = {
   register,
   login,
+  getProfile,
+  updateProfile,
   verifyTwoFactorLogin,
   getTwoFactorSettings,
   updateTwoFactorSettings,

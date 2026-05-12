@@ -8,9 +8,25 @@ const uploadReport = async (req, res) => {
   }
 
   const filePath = req.file.path;
+  let extractedText = "";
+  let analysis = "";
 
-  const extractedText = await extractText(filePath);
-  const analysis = await analyzeWithAI(extractedText);
+  try {
+    extractedText = await extractText(filePath);
+  } catch (err) {
+    extractedText = "";
+    analysis = `Text extraction failed: ${err.message}`;
+  }
+
+  if (!analysis) {
+    try {
+      analysis = extractedText?.trim()
+        ? await analyzeWithAI(extractedText)
+        : "No readable text was extracted from this report. The file was saved for manual review.";
+    } catch (err) {
+      analysis = `AI analysis failed: ${err.message}. Extracted text was saved for manual review.`;
+    }
+  }
 
   const report = await Report.create({
     user: req.user.id,
@@ -22,9 +38,19 @@ const uploadReport = async (req, res) => {
   res.json(report);
 };
 
+const handleUploadError = (err, req, res, next) => {
+  if (!err) return next();
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ msg: "Report file must be 8MB or smaller" });
+  }
+
+  res.status(400).json({ msg: err.message || "Report upload failed" });
+};
+
 const getReports = async (req, res) => {
   const reports = await Report.find({ user: req.user.id }).sort({ createdAt: -1 });
   res.json(reports);
 };
 
-module.exports = { uploadReport, getReports };
+module.exports = { uploadReport, getReports, handleUploadError };

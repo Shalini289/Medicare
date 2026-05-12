@@ -55,6 +55,28 @@
   opacity: 0.62;
 }
 
+.notif-card-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.notif-delete-btn {
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #b42318;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.notif-delete-btn:hover {
+  background: #ffe4e6;
+}
+
 .notif-card span,
 .notif-item span {
   color: #888;
