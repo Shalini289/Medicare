@@ -1,6 +1,7 @@
 const Report = require("../models/Report");
 const extractText = require("../utils/extractText");
 const analyzeWithAI = require("../utils/aiAnalyzer");
+const fs = require("fs/promises");
 
 const uploadReport = async (req, res) => {
   if (!req.file) {
@@ -53,4 +54,21 @@ const getReports = async (req, res) => {
   res.json(reports);
 };
 
-module.exports = { uploadReport, getReports, handleUploadError };
+const deleteReport = async (req, res) => {
+  const report = await Report.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user.id,
+  });
+
+  if (!report) {
+    return res.status(404).json({ msg: "Report not found" });
+  }
+
+  if (report.file) {
+    await fs.unlink(report.file).catch(() => {});
+  }
+
+  res.json({ msg: "Report deleted" });
+};
+
+module.exports = { uploadReport, getReports, deleteReport, handleUploadError };

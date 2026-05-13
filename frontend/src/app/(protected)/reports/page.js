@@ -3,6 +3,144 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/utils/api";
 
+const detailLabels = [
+  "Patient Name",
+  "Patient ID",
+  "Client Name",
+  "Age / Gender",
+  "Ref. By",
+  "Registered On",
+  "Reported On",
+  "Collected On",
+  "Report Status",
+  "Sample Type",
+  "To Validate",
+];
+
+const testMarkers = [
+  "HEMOGLOBIN",
+  "Red Blood Cell Count",
+  "Hematocrit",
+  "Mean Corpuscular Volume",
+  "Mean Corpuscular Hemoglobin",
+  "MCHC",
+  "RDW",
+  "TOTAL COUNT",
+  "Differential Leucocyte Count",
+  "Neutrophils",
+  "Lymphocytes",
+  "Monocytes",
+  "Eosinophils",
+  "Basophils",
+  "Absolute Leucocyte Count",
+  "PLATELET COUNT",
+  "Mean Platelet Volume",
+  "Platelet Distribution Width",
+  "Plateletcrit",
+  "Salmonella Typhi",
+  "Slide agglutination",
+];
+
+const normalizeExtractedText = (text = "") => {
+  if (!text.trim()) return [];
+
+  let cleaned = text
+    .replace(/\r/g, "\n")
+    .replace(/\s+/g, " ")
+    .replace(/-{3,}\s*END OF REPORT\s*-{3,}/gi, "\nEND OF REPORT\n")
+    .replace(/Page\s+\d+\s+of\s+\d+/gi, "\n$&\n")
+    .trim();
+
+  [...detailLabels, ...testMarkers].forEach((label) => {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    cleaned = cleaned.replace(new RegExp(`\\s+(${escaped})`, "gi"), "\n$1");
+  });
+
+  cleaned = cleaned.replace(/\s+(Parameter Name Unit Reference Range Value)\s+/gi, "\n$1\n");
+
+  return cleaned
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+};
+
+const getLineType = (line) => {
+  if (/^(Patient|Client|Age|Ref\.|Registered|Reported|Collected|Report|Sample|To Validate)/i.test(line)) {
+    return "detail";
+  }
+
+  if (/^(END OF REPORT|Page\s+\d+)/i.test(line)) {
+    return "meta";
+  }
+
+  if (/Reference Range Value|g\/dL|mill\/mm3|\/cmm|%|fL|Pg|10\^3\/uL|antigen/i.test(line)) {
+    return "result";
+  }
+
+  return "note";
+};
+
+function OrganizedExtractedText({ text }) {
+  const lines = normalizeExtractedText(text);
+
+  if (lines.length === 0) {
+    return <p className="empty-state">No text extracted</p>;
+  }
+
+  const grouped = lines.reduce(
+    (acc, line) => {
+      acc[getLineType(line)].push(line);
+      return acc;
+    },
+    { detail: [], result: [], note: [], meta: [] }
+  );
+
+  return (
+    <div className="extracted-text">
+      {grouped.detail.length > 0 && (
+        <section className="extracted-section">
+          <h5>Report details</h5>
+          <div className="extracted-detail-grid">
+            {grouped.detail.map((line, index) => (
+              <span key={`${line}-${index}`}>{line}</span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {grouped.result.length > 0 && (
+        <section className="extracted-section">
+          <h5>Detected results</h5>
+          <div className="extracted-result-list">
+            {grouped.result.map((line, index) => (
+              <p key={`${line}-${index}`}>{line}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {grouped.note.length > 0 && (
+        <section className="extracted-section">
+          <h5>Other text</h5>
+          <div className="extracted-result-list">
+            {grouped.note.map((line, index) => (
+              <p key={`${line}-${index}`}>{line}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {grouped.meta.length > 0 && (
+        <div className="extracted-meta">
+          {grouped.meta.map((line, index) => (
+            <span key={`${line}-${index}`}>{line}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Reports() {
   const [file, setFile] = useState(null);
   const [reports, setReports] = useState([]);
@@ -133,7 +271,7 @@ export default function Reports() {
 
             <details>
               <summary>Extracted text</summary>
-              <p>{report.extractedText || "No text extracted"}</p>
+              <OrganizedExtractedText text={report.extractedText} />
             </details>
           </article>
         ))}

@@ -8,13 +8,17 @@ import {
 } from "@/services/medicalProfileService";
 import "@/styles/medicalId.css";
 
-const emptyContact = {
+const createClientId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const createEmptyContact = () => ({
+  clientId: createClientId(),
   name: "",
   relation: "",
   phone: "",
-};
+});
 
-const emptyHistory = {
+const createEmptyHistory = () => ({
+  clientId: createClientId(),
   type: "visit",
   title: "",
   doctorName: "",
@@ -22,15 +26,15 @@ const emptyHistory = {
   date: new Date().toISOString().slice(0, 10),
   notes: "",
   attachmentsText: "",
-};
+});
 
-const emptyForm = {
+const createEmptyForm = () => ({
   bloodGroup: "",
   allergiesText: "",
   conditionsText: "",
   currentMedicationsText: "",
-  medicalHistory: [{ ...emptyHistory }],
-  emergencyContacts: [{ ...emptyContact }],
+  medicalHistory: [createEmptyHistory()],
+  emergencyContacts: [createEmptyContact()],
   insurance: {
     provider: "",
     policyNumber: "",
@@ -39,7 +43,7 @@ const emptyForm = {
   primaryDoctor: "",
   organDonor: false,
   notes: "",
-};
+});
 
 const listText = (items) => (Array.isArray(items) ? items.join(", ") : "");
 const splitText = (text) =>
@@ -49,7 +53,7 @@ const splitText = (text) =>
     .filter(Boolean);
 
 export default function MedicalIdPage() {
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(createEmptyForm);
   const [completion, setCompletion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,22 +70,24 @@ export default function MedicalIdPage() {
       currentMedicationsText: listText(profile.currentMedications),
       medicalHistory: profile.medicalHistory?.length
         ? profile.medicalHistory.map((entry) => ({
+            clientId: entry._id || createClientId(),
             type: entry.type || "visit",
             title: entry.title || "",
             doctorName: entry.doctorName || "",
             facility: entry.facility || "",
-            date: entry.date ? entry.date.slice(0, 10) : emptyHistory.date,
+            date: entry.date ? entry.date.slice(0, 10) : createEmptyHistory().date,
             notes: entry.notes || "",
             attachmentsText: listText(entry.attachments),
           }))
-        : [{ ...emptyHistory }],
+        : [createEmptyHistory()],
       emergencyContacts: profile.emergencyContacts?.length
         ? profile.emergencyContacts.map((contact) => ({
+            clientId: contact._id || createClientId(),
             name: contact.name || "",
             relation: contact.relation || "",
             phone: contact.phone || "",
           }))
-        : [{ ...emptyContact }],
+        : [createEmptyContact()],
       insurance: {
         provider: profile.insurance?.provider || "",
         policyNumber: profile.insurance?.policyNumber || "",
@@ -117,7 +123,7 @@ export default function MedicalIdPage() {
   }, [loadProfile]);
 
   const emergencyContact = useMemo(() => (
-    form.emergencyContacts.find((contact) => contact.name || contact.phone) || emptyContact
+    form.emergencyContacts.find((contact) => contact.name || contact.phone) || createEmptyContact()
   ), [form.emergencyContacts]);
 
   const updateField = (event) => {
@@ -151,7 +157,7 @@ export default function MedicalIdPage() {
   const addContact = () => {
     setForm((current) => ({
       ...current,
-      emergencyContacts: [...current.emergencyContacts, { ...emptyContact }],
+      emergencyContacts: [...current.emergencyContacts, createEmptyContact()],
     }));
   };
 
@@ -174,7 +180,7 @@ export default function MedicalIdPage() {
   const addHistory = () => {
     setForm((current) => ({
       ...current,
-      medicalHistory: [...current.medicalHistory, { ...emptyHistory }],
+      medicalHistory: [...current.medicalHistory, createEmptyHistory()],
     }));
   };
 
@@ -197,11 +203,10 @@ export default function MedicalIdPage() {
         allergies: splitText(form.allergiesText),
         conditions: splitText(form.conditionsText),
         currentMedications: splitText(form.currentMedicationsText),
-        medicalHistory: form.medicalHistory.map((entry) => ({
-          ...entry,
+        medicalHistory: form.medicalHistory.map(({ clientId, ...entry }) => ({
           attachments: splitText(entry.attachmentsText),
         })),
-        emergencyContacts: form.emergencyContacts,
+        emergencyContacts: form.emergencyContacts.map(({ clientId, ...contact }) => contact),
         insurance: {
           ...form.insurance,
           validTill: form.insurance.validTill || undefined,
@@ -352,7 +357,7 @@ export default function MedicalIdPage() {
             </div>
 
             {form.medicalHistory.map((entry, index) => (
-              <div className="history-line" key={`${index}-${entry.title}`}>
+              <div className="history-line" key={entry.clientId || entry._id || index}>
                 <div className="form-grid">
                   <label>
                     Type
@@ -424,7 +429,7 @@ export default function MedicalIdPage() {
             </div>
 
             {form.emergencyContacts.map((contact, index) => (
-              <div className="contact-line" key={`${index}-${contact.phone}`}>
+              <div className="contact-line" key={contact.clientId || contact._id || index}>
                 <input
                   value={contact.name}
                   onChange={(event) => updateContact(index, "name", event.target.value)}

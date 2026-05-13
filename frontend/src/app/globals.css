@@ -475,6 +475,65 @@ textarea,
   cursor: pointer;
   font-weight: 600;
 }
+
+.extracted-text {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.extracted-section {
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  background: #fffafb;
+  padding: 14px;
+}
+
+.extracted-section h5 {
+  color: #8d3f59;
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+
+.extracted-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.extracted-detail-grid span,
+.extracted-result-list p,
+.extracted-meta span {
+  background: #fff;
+  border: 1px solid #f7d9e3;
+  border-radius: 8px;
+  color: #2d2d2d;
+  display: block;
+  line-height: 1.45;
+  margin: 0;
+  padding: 9px 10px;
+  word-break: break-word;
+}
+
+.extracted-result-list {
+  display: grid;
+  gap: 8px;
+}
+
+.extracted-result-list p {
+  font-family: Arial, sans-serif;
+}
+
+.extracted-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.extracted-meta span {
+  color: #667085;
+  font-size: 13px;
+}
 .empty-state {
   text-align: center;
   padding: 40px 20px;
