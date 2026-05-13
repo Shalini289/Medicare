@@ -35,11 +35,17 @@ export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOver
     throw new Error("Backend API URL is not configured. Set NEXT_PUBLIC_API_URL in Vercel.");
   }
 
-  const res = await fetch(`${baseUrl}${endpoint}`, {
-    cache: "no-store",
-    ...options,
-    headers,
-  });
+  let res;
+
+  try {
+    res = await fetch(`${baseUrl}${endpoint}`, {
+      cache: "no-store",
+      ...options,
+      headers,
+    });
+  } catch {
+    throw new Error(`Could not reach backend API at ${baseUrl}. Check NEXT_PUBLIC_API_URL and make sure the backend is running.`);
+  }
 
   let data = {};
 

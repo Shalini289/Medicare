@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaHeartbeat, FaNotesMedical, FaTrash } from "react-icons/fa";
+import { FaFilePdf, FaHeartbeat, FaNotesMedical, FaTrash } from "react-icons/fa";
 import {
   createVital,
   deleteVital,
@@ -39,6 +39,127 @@ const formatValue = (record, key) => {
   }
 
   return record[key] ?? "--";
+};
+
+const sanitizePdfText = (value) =>
+  String(value ?? "")
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const escapePdfText = (value) =>
+  sanitizePdfText(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+
+const wrapPdfText = (text, maxLength = 88) => {
+  const words = sanitizePdfText(text).split(" ").filter(Boolean);
+  const lines = [];
+  let line = "";
+
+  words.forEach((word) => {
+    if (`${line} ${word}`.trim().length > maxLength) {
+      if (line) lines.push(line);
+      line = word;
+    } else {
+      line = `${line} ${word}`.trim();
+    }
+  });
+
+  if (line) lines.push(line);
+  return lines.length ? lines : [""];
+};
+
+const downloadBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+const buildVitalsPdf = (records, summary) => {
+  const lineHeight = 18;
+  const top = 780;
+  const left = 42;
+  const maxLinesPerPage = 38;
+  const latest = summary?.latest;
+  const reportLines = [
+    { text: "MediCare Vitals Report", size: 18 },
+    { text: `Generated: ${new Date().toLocaleString()}`, size: 10 },
+    { text: `Total readings: ${records.length}`, size: 10 },
+    { text: "", size: 10 },
+    { text: "Latest Summary", size: 14 },
+    {
+      text: latest
+        ? `BP ${formatValue(latest, "bp")} mmHg | Pulse ${latest.pulse || "--"} bpm | Oxygen ${latest.oxygen || "--"}% | Temp ${latest.temperature || "--"} F | Sugar ${latest.bloodSugar || "--"} mg/dL | Weight ${latest.weight || "--"} kg`
+        : "No latest summary available.",
+      size: 10,
+    },
+    ...(summary?.alerts?.length
+      ? [
+          { text: "Alerts", size: 14 },
+          ...summary.alerts.flatMap((alert) =>
+            wrapPdfText(`- ${alert}`, 86).map((text) => ({ text, size: 10 }))
+          ),
+          ...wrapPdfText(summary.advice || "", 86).map((text) => ({ text, size: 10 })),
+        ]
+      : []),
+    { text: "", size: 10 },
+    { text: "Recent Readings", size: 14 },
+    ...records.flatMap((record, index) => {
+      const row = `${index + 1}. ${new Date(record.recordedAt).toLocaleString()} | BP ${formatValue(record, "bp")} | Pulse ${record.pulse || "--"} | SpO2 ${record.oxygen || "--"}% | Temp ${record.temperature || "--"} F | Sugar ${record.bloodSugar || "--"} | Weight ${record.weight || "--"} kg`;
+      const notes = record.notes ? `Notes: ${record.notes}` : "";
+      return [
+        ...wrapPdfText(row, 86).map((text) => ({ text, size: 10 })),
+        ...wrapPdfText(notes, 86).filter(Boolean).map((text) => ({ text, size: 9 })),
+        { text: "", size: 8 },
+      ];
+    }),
+  ];
+
+  const pages = [];
+  for (let index = 0; index < reportLines.length; index += maxLinesPerPage) {
+    pages.push(reportLines.slice(index, index + maxLinesPerPage));
+  }
+
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${pages.map((_, index) => `${3 + index * 2} 0 R`).join(" ")}] /Count ${pages.length} >>`,
+  ];
+
+  pages.forEach((pageLines, pageIndex) => {
+    const pageObjectId = 3 + pageIndex * 2;
+    const contentObjectId = pageObjectId + 1;
+    const commands = pageLines
+      .map((line, lineIndex) => {
+        const y = top - lineIndex * lineHeight;
+        return `BT /F1 ${line.size || 10} Tf ${left} ${y} Td (${escapePdfText(line.text)}) Tj ET`;
+      })
+      .join("\n");
+
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents ${contentObjectId} 0 R >>`);
+    objects.push(`<< /Length ${commands.length} >>\nstream\n${commands}\nendstream`);
+  });
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+
+  objects.forEach((object, index) => {
+    offsets.push(pdf.length);
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+
+  const xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => {
+    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+  return new Blob([pdf], { type: "application/pdf" });
 };
 
 export default function VitalsPage() {
@@ -126,13 +247,11 @@ export default function VitalsPage() {
       .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","))
       .join("\n");
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "medicare-vitals.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), "medicare-vitals.csv");
+  };
+
+  const exportPdf = () => {
+    downloadBlob(buildVitalsPdf(records, summary), "medicare-vitals-report.pdf");
   };
 
   return (
@@ -145,6 +264,10 @@ export default function VitalsPage() {
         </div>
 
         <div className="vitals-actions">
+          <button className="btn-primary" onClick={exportPdf} disabled={records.length === 0}>
+            <FaFilePdf aria-hidden="true" />
+            Download PDF
+          </button>
           <button className="btn-secondary" onClick={exportCsv} disabled={records.length === 0}>
             Export CSV
           </button>

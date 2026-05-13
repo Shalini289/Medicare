@@ -8,7 +8,6 @@ const vaccinationSchema = new mongoose.Schema({
   administeredDate: Date,
   provider: { type: String, default: "", trim: true },
   location: { type: String, default: "", trim: true },
-  certificateUrl: { type: String, default: "", trim: true },
   notes: { type: String, default: "", trim: true },
   status: {
     type: String,

@@ -18,7 +18,6 @@ const emptyForm = {
   administeredDate: "",
   provider: "",
   location: "",
-  certificateUrl: "",
   notes: "",
   status: "scheduled",
 };
@@ -105,7 +104,6 @@ export default function VaccinationsPage() {
       administeredDate: record.administeredDate ? record.administeredDate.slice(0, 10) : "",
       provider: record.provider || "",
       location: record.location || "",
-      certificateUrl: record.certificateUrl || "",
       notes: record.notes || "",
       status: record.status || "scheduled",
     });
@@ -116,7 +114,6 @@ export default function VaccinationsPage() {
       administeredDate: new Date().toISOString().slice(0, 10),
       provider: record.provider,
       location: record.location,
-      certificateUrl: record.certificateUrl,
     });
     await loadVaccinations();
   };
@@ -132,7 +129,7 @@ export default function VaccinationsPage() {
         <div>
           <span className="eyebrow">Immunization record</span>
           <h1>Vaccinations</h1>
-          <p>Track upcoming vaccines, completed doses, certificates, and overdue immunizations.</p>
+          <p>Track upcoming vaccines, completed doses, provider details, and overdue immunizations.</p>
         </div>
 
         <div className="vaccination-stats">
@@ -200,16 +197,6 @@ export default function VaccinationsPage() {
           </div>
 
           <label>
-            Certificate URL
-            <input
-              name="certificateUrl"
-              value={form.certificateUrl}
-              onChange={updateField}
-              placeholder="https://..."
-            />
-          </label>
-
-          <label>
             Notes
             <textarea
               name="notes"
@@ -263,12 +250,6 @@ export default function VaccinationsPage() {
                   </div>
 
                   {record.notes && <p className="vaccination-notes">{record.notes}</p>}
-
-                  {record.certificateUrl && (
-                    <a className="certificate-link" href={record.certificateUrl} target="_blank" rel="noreferrer">
-                      View certificate
-                    </a>
-                  )}
 
                   <div className="vaccination-actions">
                     {record.status !== "completed" && (

@@ -11,27 +11,30 @@ import {
 } from "@/services/carePlanService";
 import "@/styles/carePlans.css";
 
-const emptyTask = {
+const createClientId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const createEmptyTask = () => ({
+  clientId: createClientId(),
   title: "",
   schedule: "Daily",
   completed: false,
-};
+});
 
-const emptyForm = {
+const createEmptyForm = () => ({
   title: "",
   category: "General",
   startDate: new Date().toISOString().slice(0, 10),
   endDate: "",
   status: "active",
   notes: "",
-  tasks: [{ ...emptyTask }],
-};
+  tasks: [createEmptyTask()],
+});
 
 const categories = ["General", "Recovery", "Fitness", "Diabetes", "Heart", "Mental Health"];
 
 export default function CarePlansPage() {
   const [plans, setPlans] = useState([]);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(createEmptyForm);
   const [editingId, setEditingId] = useState(null);
   const [filter, setFilter] = useState("active");
   const [loading, setLoading] = useState(true);
@@ -86,7 +89,7 @@ export default function CarePlansPage() {
   const addTask = () => {
     setForm((current) => ({
       ...current,
-      tasks: [...current.tasks, { ...emptyTask }],
+      tasks: [...current.tasks, createEmptyTask()],
     }));
   };
 
@@ -98,7 +101,7 @@ export default function CarePlansPage() {
   };
 
   const resetForm = () => {
-    setForm(emptyForm);
+    setForm(createEmptyForm());
     setEditingId(null);
   };
 
@@ -133,17 +136,18 @@ export default function CarePlansPage() {
     setForm({
       title: plan.title || "",
       category: plan.category || "General",
-      startDate: plan.startDate ? plan.startDate.slice(0, 10) : emptyForm.startDate,
+      startDate: plan.startDate ? plan.startDate.slice(0, 10) : createEmptyForm().startDate,
       endDate: plan.endDate ? plan.endDate.slice(0, 10) : "",
       status: plan.status || "active",
       notes: plan.notes || "",
       tasks: plan.tasks?.length
         ? plan.tasks.map((task) => ({
+            clientId: task._id || createClientId(),
             title: task.title || "",
             schedule: task.schedule || "Daily",
             completed: Boolean(task.completed),
           }))
-        : [{ ...emptyTask }],
+        : [createEmptyTask()],
     });
   };
 
@@ -234,7 +238,7 @@ export default function CarePlansPage() {
             </div>
 
             {form.tasks.map((task, index) => (
-              <div className="care-task-line" key={`${index}-${task.title}`}>
+              <div className="care-task-line" key={task.clientId || task._id || index}>
                 <input
                   value={task.title}
                   onChange={(event) => updateTask(index, "title", event.target.value)}

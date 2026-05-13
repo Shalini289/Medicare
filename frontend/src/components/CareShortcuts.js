@@ -52,7 +52,7 @@ const shortcuts = [
   },
   {
     title: "Vaccinations",
-    text: "Track due dates, completed doses, and certificates.",
+    text: "Track due dates, completed doses, and provider details.",
     href: "/vaccinations",
     label: "Open tracker",
   },

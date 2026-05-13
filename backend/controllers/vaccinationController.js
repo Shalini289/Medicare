@@ -10,7 +10,6 @@ const normalizeVaccination = (body) => ({
   administeredDate: body.administeredDate || undefined,
   provider: body.provider?.trim() || "",
   location: body.location?.trim() || "",
-  certificateUrl: body.certificateUrl?.trim() || "",
   notes: body.notes?.trim() || "",
   status: body.status || "scheduled",
 });
@@ -95,7 +94,6 @@ exports.markVaccinationComplete = async (req, res) => {
       administeredDate: req.body.administeredDate || new Date(),
       provider: req.body.provider,
       location: req.body.location,
-      certificateUrl: req.body.certificateUrl,
     },
     { new: true, runValidators: true }
   );

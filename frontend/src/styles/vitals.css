@@ -24,6 +24,21 @@
   color: var(--muted-text);
 }
 
+.vitals-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.vitals-actions button {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
 .vital-summary {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -236,6 +251,10 @@
   .vitals-layout {
     grid-template-columns: 1fr;
   }
+
+  .vitals-actions {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 620px) {
@@ -248,5 +267,9 @@
   .form-grid,
   .vital-record {
     grid-template-columns: 1fr;
+  }
+
+  .vitals-actions button {
+    width: 100%;
   }
 }

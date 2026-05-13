@@ -19,7 +19,7 @@ const moduleLinks = [
   { title: "Track vitals", href: "/vitals", text: "Log BP, sugar, pulse, oxygen, and more." },
   { title: "Lab tests", href: "/lab-tests", text: "Book home sample collection." },
   { title: "Care plans", href: "/care-plans", text: "Track daily recovery and wellness tasks." },
-  { title: "Vaccinations", href: "/vaccinations", text: "Manage due doses and certificates." },
+  { title: "Vaccinations", href: "/vaccinations", text: "Manage due doses and completed vaccines." },
   { title: "Medical ID", href: "/medical-id", text: "Keep emergency information ready." },
 ];
 
