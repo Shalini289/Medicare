@@ -25,6 +25,9 @@ export const getProfile = () =>
 export const updateProfile = (data) =>
   api("/api/auth/profile", "PUT", data);
 
+export const changePassword = (data) =>
+  api("/api/auth/password", "PUT", data);
+
 export const register = async (data) => {
   return api("/api/auth/register", "POST", data);
 };

@@ -131,7 +131,7 @@ const issueTwoFactorChallenge = async (user) => {
       process.env.JWT_SECRET,
       { expiresIn: "10m" }
     ),
-    devCode: sent ? undefined : code,
+    devCode: !sent && process.env.NODE_ENV !== "production" ? code : undefined,
   };
 };
 
@@ -272,6 +272,48 @@ const updateProfile = async (req, res) => {
   res.json({ user: toSafeUser(user), msg: "Profile updated successfully" });
 };
 
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ msg: "Current password and new password are required" });
+  }
+
+  if (
+    newPassword.length < 8 ||
+    !/[A-Z]/.test(newPassword) ||
+    !/[a-z]/.test(newPassword) ||
+    !/[0-9]/.test(newPassword)
+  ) {
+    return res.status(400).json({ msg: "New password must be 8+ characters and include uppercase, lowercase, and a number" });
+  }
+
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ msg: "New password must be different from your current password" });
+  }
+
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  const matches = await user.matchPassword(currentPassword);
+
+  if (!matches) {
+    return res.status(400).json({ msg: "Current password is incorrect" });
+  }
+
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  user.twoFactorCodeHash = undefined;
+  user.twoFactorExpire = undefined;
+  await user.save();
+
+  res.json({ msg: "Password changed successfully" });
+};
+
 const verifyTwoFactorLogin = async (req, res) => {
   const { tempToken, code } = req.body;
 
@@ -333,6 +375,7 @@ module.exports = {
   login,
   getProfile,
   updateProfile,
+  changePassword,
   verifyTwoFactorLogin,
   getTwoFactorSettings,
   updateTwoFactorSettings,

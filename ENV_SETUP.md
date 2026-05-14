@@ -47,3 +47,19 @@ CLIENT_URL=https://your-vercel-frontend-domain.com
 ```
 
 Email credentials are needed for password reset and two-factor authentication. Razorpay, Groq, and Twilio keys are optional unless those features are used in production.
+
+For deployed serverless backends, prefer an HTTPS email provider such as Resend or SendGrid instead of Gmail SMTP:
+
+```env
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=MediCare <noreply@your_verified_domain.com>
+```
+
+or:
+
+```env
+SENDGRID_API_KEY=your_sendgrid_api_key
+SENDGRID_FROM=noreply@your_verified_domain.com
+```
+
+Also make sure `FRONTEND_URL` points to the deployed frontend, otherwise reset links may be generated for `localhost`.

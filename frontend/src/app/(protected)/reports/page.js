@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FaTrash } from "react-icons/fa";
 import { api } from "@/utils/api";
 
 const detailLabels = [
@@ -141,12 +142,80 @@ function OrganizedExtractedText({ text }) {
   );
 }
 
+const normalizeAnalysisText = (analysis) => {
+  const raw = typeof analysis === "string" ? analysis : JSON.stringify(analysis || "");
+
+  return raw
+    .replace(/\r/g, "\n")
+    .replace(/\*\*/g, "")
+    .replace(/\s+\*/g, "\n*")
+    .replace(/\s+\+/g, "\n+")
+    .replace(/\s+(\d+\.)\s+/g, "\n$1 ")
+    .replace(/The key findings from this lab report are:/i, "\nKey findings:")
+    .replace(/Based on the lab report provided, here are the key findings:/i, "\nKey findings:")
+    .replace(/\s+/g, " ")
+    .replace(/\s?(\n[*+\d])/g, "$1")
+    .trim();
+};
+
+const getAnalysisLineType = (line) => {
+  if (/^Key findings:?$/i.test(line) || /count|test|examination|smears/i.test(line)) {
+    return "section";
+  }
+
+  if (/^\d+\./.test(line)) {
+    return "numbered";
+  }
+
+  if (/^[*+]\s*/.test(line)) {
+    return "bullet";
+  }
+
+  return "paragraph";
+};
+
+function OrganizedAnalysis({ analysis }) {
+  const text = normalizeAnalysisText(analysis);
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) {
+    return <p>No AI analysis available.</p>;
+  }
+
+  return (
+    <div className="analysis-text">
+      {lines.map((line, index) => {
+        const type = getAnalysisLineType(line);
+        const cleaned = line.replace(/^[*+]\s*/, "");
+
+        if (type === "section") {
+          return <h5 key={`${line}-${index}`}>{cleaned}</h5>;
+        }
+
+        if (type === "numbered") {
+          return <p className="analysis-numbered" key={`${line}-${index}`}>{cleaned}</p>;
+        }
+
+        if (type === "bullet") {
+          return <p className="analysis-bullet" key={`${line}-${index}`}>{cleaned}</p>;
+        }
+
+        return <p key={`${line}-${index}`}>{cleaned}</p>;
+      })}
+    </div>
+  );
+}
+
 export default function Reports() {
   const [file, setFile] = useState(null);
   const [reports, setReports] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingReports, setLoadingReports] = useState(true);
+  const [deletingId, setDeletingId] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -206,6 +275,25 @@ export default function Reports() {
     }
   };
 
+  const deleteReport = async (report) => {
+    const fileName = report.file?.split(/[\\/]/).pop() || "this report";
+
+    if (!confirm(`Delete ${fileName}?`)) return;
+
+    try {
+      setDeletingId(report._id);
+      setError("");
+      setMessage("");
+      await api(`/api/report/${report._id}`, "DELETE");
+      setReports((current) => current.filter((item) => item._id !== report._id));
+      setMessage("Report deleted successfully.");
+    } catch (err) {
+      setError(err.message || "Could not delete report.");
+    } finally {
+      setDeletingId("");
+    }
+  };
+
   return (
     <div className="reports-page">
       <div className="reports-header">
@@ -260,13 +348,25 @@ export default function Reports() {
         {filteredReports.map((report) => (
           <article key={report._id} className="report-card">
             <div className="report-card__head">
-              <h3>{report.file?.split(/[\\/]/).pop() || "Medical report"}</h3>
-              <span>{new Date(report.createdAt).toLocaleDateString()}</span>
+              <div>
+                <h3>{report.file?.split(/[\\/]/).pop() || "Medical report"}</h3>
+                <span>{new Date(report.createdAt).toLocaleDateString()}</span>
+              </div>
+              <button
+                className="report-delete-btn"
+                type="button"
+                onClick={() => deleteReport(report)}
+                disabled={deletingId === report._id}
+                title="Delete report"
+              >
+                <FaTrash aria-hidden="true" />
+                {deletingId === report._id ? "Deleting..." : "Delete"}
+              </button>
             </div>
 
             <div className="report-card__section">
               <h4>AI Analysis</h4>
-              <p>{typeof report.analysis === "string" ? report.analysis : JSON.stringify(report.analysis)}</p>
+              <OrganizedAnalysis analysis={report.analysis} />
             </div>
 
             <details>
