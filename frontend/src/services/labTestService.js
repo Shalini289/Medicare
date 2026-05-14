@@ -11,3 +11,15 @@ export const createLabBooking = (payload) =>
 
 export const cancelLabBooking = (id) =>
   api(`/api/lab-tests/bookings/${id}/cancel`, "PUT");
+
+export const getPathologyDashboard = () =>
+  api("/api/lab-tests/pathology");
+
+export const updatePathologyBooking = (id, payload) =>
+  api(`/api/lab-tests/pathology/bookings/${id}`, "PUT", payload);
+
+export const createPathologyTest = (payload) =>
+  api("/api/lab-tests/pathology/tests", "POST", payload);
+
+export const updatePathologyTest = (id, payload) =>
+  api(`/api/lab-tests/pathology/tests/${id}`, "PUT", payload);

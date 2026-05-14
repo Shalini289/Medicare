@@ -11,6 +11,8 @@ const doctorSchema = new mongoose.Schema({
   specialization: String,
   image: String,
   hospital: String,
+  city: { type: String, default: "", trim: true },
+  address: { type: String, default: "", trim: true },
   about: String,
   experience: Number,
   fees: Number,

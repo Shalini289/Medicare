@@ -48,6 +48,12 @@
   color: #a64263;
 }
 
+.nav-links button.is-active {
+  background: #fff2f6;
+  color: #8d3f59;
+  font-weight: 800;
+}
+
 .nav-menu-group {
   position: relative;
 }
@@ -61,6 +67,7 @@
 .nav-group-trigger span {
   color: #a64263;
   font-size: 11px;
+  font-weight: 900;
 }
 
 .nav-submenu {
@@ -86,6 +93,10 @@
   text-align: left;
   white-space: nowrap;
   width: 100%;
+}
+
+.nav-submenu button.is-active {
+  background: #fff2f6;
 }
 
 .nav-right {
@@ -165,11 +176,12 @@
 
   .nav-submenu {
     border: 0;
+    border-left: 2px solid #f1dfe6;
     border-radius: 10px;
     box-shadow: none;
     margin: 2px 0 6px;
     min-width: 0;
-    padding: 4px 0 4px 12px;
+    padding: 4px 0 4px 10px;
     position: static;
   }
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { io } from "socket.io-client";
 import { api } from "../../utils/api";
+import { getApiUrl } from "@/utils/runtimeConfig";
 
 export default function HospitalPage() {
   const [hospitals, setHospitals] = useState([]);
@@ -27,7 +28,11 @@ export default function HospitalPage() {
   }, [loadHospitals]);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const socketUrl = getApiUrl();
+
+    if (!socketUrl) return undefined;
+
+    const socket = io(socketUrl);
 
     socket.on("bedUpdate", (updated) => {
       setHospitals(prev =>

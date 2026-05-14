@@ -30,9 +30,19 @@ const pharmacyStaff = (req, res, next) => {
   else res.status(403).json({ msg: "Pharmacy staff only" });
 };
 
+const pathologyOnly = (req, res, next) => {
+  if (req.user.role === "pathology") next();
+  else res.status(403).json({ msg: "Pathology only" });
+};
+
+const hospitalOnly = (req, res, next) => {
+  if (req.user.role === "hospital") next();
+  else res.status(403).json({ msg: "Hospital only" });
+};
+
 const doctorOnly = (req, res, next) => {
   if (req.user.role === "doctor") next();
   else res.status(403).json({ msg: "Doctor only" });
 };
 
-module.exports = { protect, admin, pharmacyStaff, doctorOnly };
+module.exports = { protect, admin, pharmacyStaff, pathologyOnly, hospitalOnly, doctorOnly };

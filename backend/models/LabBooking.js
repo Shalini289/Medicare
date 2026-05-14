@@ -18,6 +18,10 @@ const labBookingSchema = new mongoose.Schema({
     default: "scheduled",
   },
   notes: { type: String, default: "", trim: true },
+  pathologyNotes: { type: String, default: "", trim: true },
+  reportSummary: { type: String, default: "", trim: true },
+  sampleCollectedAt: Date,
+  reportReadyAt: Date,
 }, { timestamps: true });
 
 labBookingSchema.index({ user: 1, collectionDate: -1 });

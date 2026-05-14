@@ -1,0 +1,232 @@
+.hospital-portal-page {
+  display: grid;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 42px 0 64px;
+  width: min(1220px, calc(100% - 32px));
+}
+
+.hospital-portal-hero {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.hospital-portal-hero h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin: 8px 0 10px;
+}
+
+.hospital-portal-hero p,
+.hospital-portal-stats span,
+.hospital-preview-card p,
+.bed-management-row p {
+  color: var(--muted-text);
+}
+
+.hospital-portal-alert,
+.hospital-portal-section,
+.hospital-portal-stats div,
+.bed-management-row,
+.hospital-preview-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--soft-shadow);
+}
+
+.hospital-portal-alert {
+  color: var(--muted-text);
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+.hospital-portal-alert.error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.hospital-portal-alert.success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.hospital-portal-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.hospital-portal-stats div {
+  padding: 16px;
+}
+
+.hospital-portal-stats strong {
+  color: var(--primary-dark);
+  display: block;
+  font-size: 1.55rem;
+}
+
+.hospital-portal-layout {
+  align-items: start;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+}
+
+.hospital-portal-section {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.hospital-portal-title {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.hospital-portal-title svg {
+  color: var(--primary);
+}
+
+.hospital-portal-form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hospital-portal-section label {
+  color: var(--text);
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.hospital-portal-form-grid input,
+.hospital-portal-form-grid select,
+.bed-management-row input {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font: inherit;
+  padding: 12px 13px;
+  width: 100%;
+}
+
+.hospital-portal-wide {
+  grid-column: 1 / -1;
+}
+
+.bed-management-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bed-management-row {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.bed-management-row h3 {
+  color: var(--primary-dark);
+}
+
+.bed-management-row p {
+  border-radius: 8px;
+  background: #fff7ed;
+  font-weight: 900;
+  padding: 9px 10px;
+}
+
+.hospital-preview-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.hospital-preview-status {
+  border-radius: 999px;
+  justify-self: start;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.hospital-preview-status.active {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.hospital-preview-status.limited {
+  background: #fff4e5;
+  color: #a04b00;
+}
+
+.hospital-preview-status.closed {
+  background: #fdecea;
+  color: #c62828;
+}
+
+.hospital-preview-beds {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.hospital-preview-beds div {
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.hospital-preview-beds span,
+.hospital-preview-beds strong {
+  display: block;
+}
+
+.hospital-preview-beds span {
+  color: var(--muted-text);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.hospital-preview-beds strong {
+  color: var(--primary-dark);
+  font-size: 1.6rem;
+}
+
+@media (max-width: 1040px) {
+  .hospital-portal-stats,
+  .bed-management-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hospital-portal-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .hospital-portal-page {
+    padding-top: 26px;
+    width: min(100% - 22px, 1220px);
+  }
+
+  .hospital-portal-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hospital-portal-stats,
+  .hospital-portal-form-grid,
+  .bed-management-grid,
+  .hospital-preview-beds {
+    grid-template-columns: 1fr;
+  }
+}

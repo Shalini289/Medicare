@@ -48,6 +48,16 @@ const validateSignup = (values) => {
     nextErrors.specialization = "Specialization is required for doctor accounts.";
   }
 
+  if (values.role === "hospital") {
+    if (!values.hospitalName.trim()) {
+      nextErrors.hospitalName = "Hospital name is required.";
+    }
+
+    if (!values.city.trim()) {
+      nextErrors.city = "City is required for hospital accounts.";
+    }
+  }
+
   return nextErrors;
 };
 
@@ -64,6 +74,14 @@ export default function SignupPage() {
     hospital: "",
     experience: "",
     fees: "",
+    hospitalName: "",
+    city: "",
+    address: "",
+    phone: "",
+    emergencyPhone: "",
+    ICU: "",
+    oxygen: "",
+    general: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -100,6 +118,14 @@ export default function SignupPage() {
         hospital: form.hospital.trim(),
         experience: form.experience,
         fees: form.fees,
+        hospitalName: form.hospitalName.trim(),
+        city: form.city.trim(),
+        address: form.address.trim(),
+        phone: form.phone.trim(),
+        emergencyPhone: form.emergencyPhone.trim(),
+        ICU: form.ICU,
+        oxygen: form.oxygen,
+        general: form.general,
       });
 
       router.push("/login");
@@ -170,6 +196,8 @@ export default function SignupPage() {
               <option value="user">Patient</option>
               <option value="doctor">Doctor</option>
               <option value="pharmacy">Pharmacy</option>
+              <option value="pathology">Pathology</option>
+              <option value="hospital">Hospital</option>
             </select>
           </label>
 
@@ -203,6 +231,16 @@ export default function SignupPage() {
                 />
               </label>
 
+              <label className="signup-field">
+                <span>City</span>
+                <input
+                  type="text"
+                  placeholder="City for patient searches"
+                  value={form.city}
+                  onChange={(e) => updateField("city", e.target.value)}
+                />
+              </label>
+
               <div className="signup-field-grid">
                 <label className="signup-field">
                   <span>Experience</span>
@@ -224,6 +262,81 @@ export default function SignupPage() {
                     value={form.fees}
                     onChange={(e) => updateField("fees", e.target.value)}
                   />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {form.role === "hospital" && (
+            <div className="doctor-signup-fields">
+              <label className="signup-field">
+                <span>Hospital Name</span>
+                <input
+                  type="text"
+                  placeholder="Hospital or medical center name"
+                  value={form.hospitalName}
+                  aria-invalid={Boolean(errors.hospitalName)}
+                  onChange={(e) => updateField("hospitalName", e.target.value)}
+                />
+                {errors.hospitalName && <small>{errors.hospitalName}</small>}
+              </label>
+
+              <div className="signup-field-grid">
+                <label className="signup-field">
+                  <span>City</span>
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={form.city}
+                    aria-invalid={Boolean(errors.city)}
+                    onChange={(e) => updateField("city", e.target.value)}
+                  />
+                  {errors.city && <small>{errors.city}</small>}
+                </label>
+
+                <label className="signup-field">
+                  <span>Phone</span>
+                  <input
+                    type="tel"
+                    placeholder="Reception phone"
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <label className="signup-field">
+                <span>Address</span>
+                <input
+                  type="text"
+                  placeholder="Hospital address"
+                  value={form.address}
+                  onChange={(e) => updateField("address", e.target.value)}
+                />
+              </label>
+
+              <label className="signup-field">
+                <span>Emergency Phone</span>
+                <input
+                  type="tel"
+                  placeholder="Emergency contact number"
+                  value={form.emergencyPhone}
+                  onChange={(e) => updateField("emergencyPhone", e.target.value)}
+                />
+              </label>
+
+              <div className="signup-field-grid">
+                <label className="signup-field">
+                  <span>ICU Beds</span>
+                  <input type="number" min="0" value={form.ICU} onChange={(e) => updateField("ICU", e.target.value)} />
+                </label>
+                <label className="signup-field">
+                  <span>Oxygen Beds</span>
+                  <input type="number" min="0" value={form.oxygen} onChange={(e) => updateField("oxygen", e.target.value)} />
+                </label>
+                <label className="signup-field">
+                  <span>General Beds</span>
+                  <input type="number" min="0" value={form.general} onChange={(e) => updateField("general", e.target.value)} />
                 </label>
               </div>
             </div>

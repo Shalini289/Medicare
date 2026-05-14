@@ -1,0 +1,238 @@
+.pathology-page {
+  display: grid;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 42px 0 64px;
+  width: min(1220px, calc(100% - 32px));
+}
+
+.pathology-hero {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.pathology-hero h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin: 8px 0 10px;
+}
+
+.pathology-hero p,
+.pathology-card p,
+.pathology-stats span {
+  color: var(--muted-text);
+}
+
+.pathology-alert,
+.pathology-section,
+.pathology-stats div,
+.pathology-card,
+.pathology-test-form {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--soft-shadow);
+}
+
+.pathology-alert {
+  color: var(--muted-text);
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+.pathology-alert.error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.pathology-alert.success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.pathology-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.pathology-stats div {
+  padding: 16px;
+}
+
+.pathology-stats strong {
+  color: var(--primary-dark);
+  display: block;
+  font-size: 1.55rem;
+}
+
+.pathology-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pathology-tabs button,
+.pathology-card button,
+.pathology-test-form button {
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.pathology-tabs button {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  color: var(--muted-text);
+  padding: 10px 14px;
+}
+
+.pathology-tabs .is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.pathology-section {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.pathology-section-title {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.pathology-section-title svg {
+  color: var(--primary);
+}
+
+.pathology-booking-list,
+.pathology-test-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pathology-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pathology-card__head {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.pathology-status {
+  border-radius: 999px;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+  text-transform: capitalize;
+}
+
+.pathology-status.scheduled {
+  background: #fff4e5;
+  color: #a04b00;
+}
+
+.pathology-status.sample_collected,
+.pathology-status.active {
+  background: #eef6ff;
+  color: #1d4ed8;
+}
+
+.pathology-status.report_ready {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.pathology-status.cancelled {
+  background: #fdecea;
+  color: #c62828;
+}
+
+.pathology-form-grid,
+.pathology-test-form {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pathology-form-grid label {
+  color: var(--text);
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.pathology-wide,
+.pathology-test-form textarea,
+.pathology-test-form button {
+  grid-column: 1 / -1;
+}
+
+.pathology-form-grid input,
+.pathology-form-grid select,
+.pathology-form-grid textarea,
+.pathology-test-form input,
+.pathology-test-form textarea {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font: inherit;
+  padding: 12px 13px;
+  width: 100%;
+}
+
+.pathology-form-grid textarea,
+.pathology-test-form textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.pathology-test-form {
+  padding: 16px;
+}
+
+.pathology-checkbox {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.pathology-checkbox input {
+  width: auto;
+}
+
+@media (max-width: 1040px) {
+  .pathology-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .pathology-page {
+    padding-top: 26px;
+    width: min(100% - 22px, 1220px);
+  }
+
+  .pathology-hero,
+  .pathology-card__head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pathology-stats,
+  .pathology-form-grid,
+  .pathology-test-form {
+    grid-template-columns: 1fr;
+  }
+}

@@ -35,6 +35,21 @@ export default function LoginPage() {
       return;
     }
 
+    if (user?.role === "pathology") {
+      router.push("/pathology");
+      return;
+    }
+
+    if (user?.role === "hospital") {
+      router.push("/hospital-portal");
+      return;
+    }
+
+    if (user?.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+
     router.push("/dashboard");
   };
 

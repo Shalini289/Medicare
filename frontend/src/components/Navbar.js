@@ -12,17 +12,17 @@ const navItems = [
   { label: "Doctors", href: "/doctors" },
   { label: "Pharmacy", href: "/pharmacy" },
   { label: "Chat", href: "/chat" },
-  { label: "Video Call", href: "/video-call" },
-  { label: "Doctor Portal", href: "/doctor" },
 ];
 
 const navGroups = [
   {
     label: "Services",
     items: [
+      { label: "Find by Location", href: "/find-care" },
       { label: "Lab Tests", href: "/lab-tests" },
       { label: "Hospital Beds", href: "/hospital" },
       { label: "Symptom Checker", href: "/symptoms" },
+      { label: "Video Call", href: "/video-call" },
     ],
   },
   {
@@ -43,10 +43,19 @@ const navGroups = [
   {
     label: "Records",
     items: [
-      { label: "Appointments", href: "/profile" },
+      { label: "Profile", href: "/profile" },
       { label: "Orders", href: "/orders" },
       { label: "Reports", href: "/reports" },
       { label: "Security", href: "/security" },
+    ],
+  },
+  {
+    label: "Workspaces",
+    items: [
+      { label: "Admin", href: "/admin", roles: ["admin"] },
+      { label: "Doctor Portal", href: "/doctor", roles: ["doctor"] },
+      { label: "Pathology Portal", href: "/pathology", roles: ["pathology"] },
+      { label: "Hospital Portal", href: "/hospital-portal", roles: ["hospital"] },
     ],
   },
 ];
@@ -98,6 +107,20 @@ export default function Navbar() {
     setActiveGroup((current) => current === label ? null : label);
   };
 
+  const canAccessItem = (item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(role);
+  };
+
+  const isActive = (href) => pathname === href || pathname.startsWith(`${href}/`);
+
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(canAccessItem),
+    }))
+    .filter((group) => group.items.length > 0);
+
   return (
     <nav className="navbar">
       <button className="logo" onClick={() => goTo("/")}>
@@ -105,26 +128,32 @@ export default function Navbar() {
       </button>
 
       <ul className={`nav-links ${open ? "is-open" : ""}`}>
-        {navItems.filter((item) => item.href !== "/doctor" || role === "doctor").map((item) => (
+        {navItems.map((item) => (
           <li key={item.href}>
-            <button onClick={() => goTo(item.href)}>{item.label}</button>
+            <button className={isActive(item.href) ? "is-active" : ""} onClick={() => goTo(item.href)}>
+              {item.label}
+            </button>
           </li>
         ))}
 
-        {navGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <li className="nav-menu-group" key={group.label}>
             <button
-              className="nav-group-trigger"
+              className={`nav-group-trigger ${group.items.some((item) => isActive(item.href)) ? "is-active" : ""}`}
               aria-expanded={activeGroup === group.label}
               onClick={() => toggleGroup(group.label)}
             >
               {group.label}
-              <span aria-hidden="true">▾</span>
+              <span aria-hidden="true">v</span>
             </button>
 
             <div className={`nav-submenu ${activeGroup === group.label ? "is-open" : ""}`}>
               {group.items.map((item) => (
-                <button key={item.href} onClick={() => goTo(item.href)}>
+                <button
+                  className={isActive(item.href) ? "is-active" : ""}
+                  key={item.href}
+                  onClick={() => goTo(item.href)}
+                >
                   {item.label}
                 </button>
               ))}

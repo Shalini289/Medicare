@@ -9,6 +9,7 @@ import {
   getNotifications,
   markNotificationRead,
 } from "@/services/notificationService";
+import { getApiUrl } from "@/utils/runtimeConfig";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -25,7 +26,11 @@ export default function NotificationsPage() {
   }, [loadNotifications]);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const socketUrl = getApiUrl();
+
+    if (!socketUrl) return undefined;
+
+    const socket = io(socketUrl);
 
     socket.on("notification", (notification) => {
       setNotifications((prev) => [notification, ...prev]);

@@ -42,7 +42,7 @@ const validateRegisterInput = ({ name = "", email = "", password = "", role = "u
     return "Password must be 8+ characters and include uppercase, lowercase, and a number";
   }
 
-  if (!["user", "doctor", "pharmacy"].includes(role)) {
+  if (!["user", "doctor", "pharmacy", "pathology", "hospital"].includes(role)) {
     return "Select a valid account type";
   }
 
@@ -55,7 +55,7 @@ const validateRegisterInput = ({ name = "", email = "", password = "", role = "u
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
-  const role = ["doctor", "pharmacy"].includes(req.body.role) ? req.body.role : "user";
+  const role = ["doctor", "pharmacy", "pathology", "hospital"].includes(req.body.role) ? req.body.role : "user";
 
   const validationError = validateRegisterInput({
     name,
@@ -89,6 +89,8 @@ const register = async (req, res) => {
       name: cleanName,
       specialization: req.body.specialization.trim(),
       hospital: req.body.hospital?.trim() || "MediCare Online Clinic",
+      city: req.body.city?.trim() || "",
+      address: req.body.address?.trim() || "",
       about: req.body.about?.trim() || `${cleanName} is available for patient chat, video calls, appointments, and digital prescriptions.`,
       experience: Number(req.body.experience) || 0,
       fees: Number(req.body.fees) || 0,
@@ -101,6 +103,28 @@ const register = async (req, res) => {
         { day: "Wednesday", startTime: "09:00", endTime: "17:00", mode: "video" },
         { day: "Friday", startTime: "09:00", endTime: "17:00", mode: "video" },
       ],
+    });
+  }
+
+  if (role === "hospital") {
+    const Hospital = require("../models/Hospital");
+    await Hospital.create({
+      user: user._id,
+      name: req.body.hospitalName?.trim() || cleanName,
+      city: req.body.city?.trim() || "",
+      address: req.body.address?.trim() || "",
+      phone: req.body.phone?.trim() || "",
+      emergencyPhone: req.body.emergencyPhone?.trim() || "",
+      beds: {
+        ICU: Number(req.body.ICU || 0),
+        oxygen: Number(req.body.oxygen || 0),
+        general: Number(req.body.general || 0),
+      },
+      occupiedBeds: {
+        ICU: 0,
+        oxygen: 0,
+        general: 0,
+      },
     });
   }
 
