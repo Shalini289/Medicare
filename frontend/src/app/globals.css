@@ -488,21 +488,108 @@ textarea,
 
 .analysis-text {
   display: grid;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 14px;
+  margin-top: 12px;
 }
 
-.analysis-text h5 {
+.analysis-section {
   background: #fffafb;
   border: 1px solid #f0c8d5;
   border-radius: 8px;
-  color: #8d3f59;
-  font-size: 15px;
-  margin: 8px 0 0;
-  padding: 9px 10px;
+  padding: 14px;
 }
 
-.analysis-text p {
+.analysis-text h5 {
+  color: #8d3f59;
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+
+.analysis-detail-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.analysis-detail-grid div,
+.analysis-note {
+  background: #fff;
+  border: 1px solid #f7d9e3;
+  border-radius: 8px;
+  margin: 0;
+  padding: 10px;
+}
+
+.analysis-detail-grid span {
+  color: #8d3f59;
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.analysis-detail-grid strong {
+  color: #2d2d2d;
+  display: block;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.analysis-table-wrap {
+  overflow-x: auto;
+}
+
+.analysis-table {
+  background: #fff;
+  border: 1px solid #f7d9e3;
+  border-collapse: separate;
+  border-radius: 8px;
+  border-spacing: 0;
+  min-width: 620px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.analysis-table th,
+.analysis-table td {
+  border-bottom: 1px solid #f7d9e3;
+  color: #2d2d2d;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.analysis-table th {
+  background: #fff3f7;
+  color: #8d3f59;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.analysis-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.analysis-table .is-attention td {
+  background: #fff7ed;
+  color: #7a2e0e;
+  font-weight: 700;
+}
+
+.analysis-table .is-normal td {
+  background: #ffffff;
+}
+
+.analysis-note {
+  color: #2d2d2d;
+  line-height: 1.55;
+  margin-top: 10px;
+}
+
+.analysis-text > p {
   background: #fff;
   border: 1px solid #f7d9e3;
   border-radius: 8px;
@@ -645,6 +732,10 @@ textarea,
 @media (max-width: 768px) {
   .section {
     padding: 50px 15px;
+  }
+
+  .analysis-table {
+    min-width: 520px;
   }
 }
 /* ===== BODY ===== */

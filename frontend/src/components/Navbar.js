@@ -8,6 +8,7 @@ import { getCurrentUser, getToken } from "@/utils/auth";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Profile", href: "/profile" },
   { label: "Doctors", href: "/doctors" },
   { label: "Pharmacy", href: "/pharmacy" },
   { label: "Chat", href: "/chat" },
@@ -27,6 +28,7 @@ const navGroups = [
   {
     label: "Health",
     items: [
+      { label: "Health Summary", href: "/health" },
       { label: "Vitals", href: "/vitals" },
       { label: "Medical History", href: "/medical-id" },
       { label: "Emergency Contacts", href: "/emergency-contacts" },

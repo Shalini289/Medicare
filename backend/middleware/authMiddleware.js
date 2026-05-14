@@ -31,7 +31,7 @@ const pharmacyStaff = (req, res, next) => {
 };
 
 const doctorOnly = (req, res, next) => {
-  if (["doctor", "admin"].includes(req.user.role)) next();
+  if (req.user.role === "doctor") next();
   else res.status(403).json({ msg: "Doctor only" });
 };
 

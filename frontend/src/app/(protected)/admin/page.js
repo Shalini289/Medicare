@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   addAmbulance,
   addDepartment,
@@ -17,7 +18,9 @@ import {
   deleteInvoice,
   deleteMedicine,
   deleteStaff,
+  deleteUserAdmin,
   getAmbulancesAdmin,
+  getAdminRecords,
   getAppointmentsAdmin,
   getDashboardStats,
   getDepartmentsAdmin,
@@ -28,6 +31,7 @@ import {
   getMedicinesAdmin,
   getOrdersAdmin,
   getStaffAdmin,
+  getUsersAdmin,
   updateAmbulance,
   updateAppointment,
   updateDepartment,
@@ -39,6 +43,7 @@ import {
   updateOrder,
   updateStaff,
 } from "@/services/adminService";
+import { getCurrentUser } from "@/utils/auth";
 
 const emptyDoctorForm = {
   name: "",
@@ -115,9 +120,80 @@ const emptyDepartmentForm = {
   status: "active",
 };
 
+const formatCurrency = (value) =>
+  `Rs ${Number(value || 0).toLocaleString("en-IN")}`;
+
+const formatDateTime = (value) => {
+  if (!value) return "Not available";
+  return new Date(value).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const toStatusRows = (items = {}) =>
+  Object.entries(items).map(([label, value]) => ({
+    label: label.replace(/-/g, " "),
+    value,
+  }));
+
+const getPersonName = (value, fallback = "Not assigned") => {
+  if (!value) return fallback;
+  if (typeof value === "string") return value;
+  return value.name || value.email || fallback;
+};
+
+const renderRecordValue = (value) => {
+  if (value === null || value === undefined || value === "") return "Not set";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "number") return value.toLocaleString("en-IN");
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return `${value.length} item${value.length === 1 ? "" : "s"}`;
+  if (typeof value === "object") return value.name || value.email || value.title || value._id || "Record";
+  return String(value);
+};
+
+function RecordGroup({ title, records, fields }) {
+  const items = Array.isArray(records) ? records : [];
+
+  return (
+    <section className="admin-section">
+      <div className="admin-section-title">
+        <h2>{title}</h2>
+        <span>{items.length} record{items.length === 1 ? "" : "s"}</span>
+      </div>
+
+      {items.length === 0 && <p className="analytics-empty">No records found.</p>}
+
+      {items.map((record) => (
+        <div key={record._id} className="admin-card admin-card--records">
+          <div>
+            <h3>{record.name || record.title || record.invoiceNumber || record.claimNumber || record.file?.split(/[\\/]/).pop() || record._id}</h3>
+            <div className="record-field-grid">
+              {fields.map(([label, getter]) => (
+                <p key={label}>
+                  <span>{label}</span>
+                  <strong>{renderRecordValue(getter(record))}</strong>
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 export default function AdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [accessStatus, setAccessStatus] = useState("checking");
   const [stats, setStats] = useState({});
+  const [users, setUsers] = useState([]);
+  const [records, setRecords] = useState({});
   const [doctors, setDoctors] = useState([]);
   const [orders, setOrders] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -142,6 +218,8 @@ export default function AdminDashboard() {
 
   const tabs = useMemo(() => ([
     { id: "overview", label: "Analytics" },
+    { id: "users", label: "Users" },
+    { id: "records", label: "Records" },
     { id: "hospitals", label: "Beds" },
     { id: "staff", label: "Staff" },
     { id: "invoices", label: "Billing" },
@@ -160,6 +238,8 @@ export default function AdminDashboard() {
     try {
       const [
         statsData,
+        usersData,
+        recordsData,
         doctorsData,
         ordersData,
         appointmentsData,
@@ -172,6 +252,8 @@ export default function AdminDashboard() {
         departmentData,
       ] = await Promise.all([
         getDashboardStats(),
+        getUsersAdmin(),
+        getAdminRecords(),
         getDoctorsAdmin(),
         getOrdersAdmin(),
         getAppointmentsAdmin(),
@@ -185,6 +267,8 @@ export default function AdminDashboard() {
       ]);
 
       setStats(statsData);
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setRecords(recordsData && typeof recordsData === "object" ? recordsData : {});
       setDoctors(Array.isArray(doctorsData) ? doctorsData : []);
       setOrders(Array.isArray(ordersData) ? ordersData : []);
       setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
@@ -202,9 +286,18 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     queueMicrotask(() => {
+      const currentUser = getCurrentUser();
+
+      if (currentUser?.role !== "admin") {
+        setAccessStatus("denied");
+        router.replace("/dashboard");
+        return;
+      }
+
+      setAccessStatus("allowed");
       loadDashboard();
     });
-  }, [loadDashboard]);
+  }, [loadDashboard, router]);
 
   const setEditing = (key, id) => {
     setEditingIds((current) => ({ ...current, [key]: id }));
@@ -321,13 +414,33 @@ export default function AdminDashboard() {
     ["Doctors", stats.totalDoctors || 0],
     ["Appointments", stats.totalAppointments || 0],
     ["Orders", stats.totalOrders || 0],
-    ["Invoice revenue", `Rs ${stats.invoiceRevenue || 0}`],
+    ["Invoice revenue", formatCurrency(stats.invoiceRevenue)],
     ["Available beds", stats.availableBeds || 0],
     ["Open claims", stats.openClaims || 0],
     ["Ambulances ready", stats.ambulancesAvailable || 0],
     ["Low stock meds", stats.lowStockMedicines || 0],
     ["Departments", stats.totalDepartments || 0],
   ];
+
+  const analyticsLists = {
+    appointments: Array.isArray(stats.recentAppointments) ? stats.recentAppointments : [],
+    orders: Array.isArray(stats.recentOrders) ? stats.recentOrders : [],
+    invoices: Array.isArray(stats.recentInvoices) ? stats.recentInvoices : [],
+    claims: Array.isArray(stats.recentClaims) ? stats.recentClaims : [],
+    hospitals: Array.isArray(stats.hospitalBedSummary) ? stats.hospitalBedSummary : [],
+    lowStock: Array.isArray(stats.lowStockItems) ? stats.lowStockItems : [],
+  };
+
+  if (accessStatus !== "allowed") {
+    return (
+      <div className="admin-access-gate">
+        <div>
+          <h1>Admin access only</h1>
+          <p>{accessStatus === "denied" ? "Redirecting to your dashboard..." : "Checking permissions..."}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-page">
@@ -357,10 +470,288 @@ export default function AdminDashboard() {
         {message && <p className="admin-message success">{message}</p>}
 
         {activeTab === "overview" && (
-          <div className="stats-grid">
-            {statCards.map(([label, value]) => (
-              <div className="stat-card" key={label}><h3>{label}</h3><p>{value}</p></div>
+          <>
+            <div className="stats-grid">
+              {statCards.map(([label, value]) => (
+                <div className="stat-card" key={label}><h3>{label}</h3><p>{value}</p></div>
+              ))}
+            </div>
+
+            <section className="analytics-panel">
+              <div className="analytics-panel__head">
+                <div>
+                  <h2>Live database analytics</h2>
+                  <p>These values are loaded from MongoDB through the admin stats API.</p>
+                </div>
+                <strong>{formatCurrency(stats.revenueBreakdown?.total)} total revenue</strong>
+              </div>
+
+              <div className="analytics-breakdown-grid">
+                <div className="analytics-breakdown-card">
+                  <h3>Revenue</h3>
+                  <p><span>Pharmacy</span><strong>{formatCurrency(stats.revenueBreakdown?.pharmacy)}</strong></p>
+                  <p><span>Invoices</span><strong>{formatCurrency(stats.revenueBreakdown?.invoices)}</strong></p>
+                </div>
+
+                <div className="analytics-breakdown-card">
+                  <h3>Appointments</h3>
+                  {toStatusRows(stats.statusBreakdowns?.appointments).map((item) => (
+                    <p key={item.label}><span>{item.label}</span><strong>{item.value}</strong></p>
+                  ))}
+                </div>
+
+                <div className="analytics-breakdown-card">
+                  <h3>Orders</h3>
+                  {toStatusRows(stats.statusBreakdowns?.orders).map((item) => (
+                    <p key={item.label}><span>{item.label}</span><strong>{item.value}</strong></p>
+                  ))}
+                </div>
+
+                <div className="analytics-breakdown-card">
+                  <h3>Claims</h3>
+                  {toStatusRows(stats.statusBreakdowns?.claims).map((item) => (
+                    <p key={item.label}><span>{item.label}</span><strong>{item.value}</strong></p>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <div className="analytics-grid">
+              <section className="analytics-panel">
+                <h2>Recent appointments</h2>
+                {analyticsLists.appointments.length === 0 && <p className="analytics-empty">No appointment records found.</p>}
+                {analyticsLists.appointments.map((appointment) => (
+                  <div className="analytics-row" key={appointment._id}>
+                    <div>
+                      <strong>{appointment.user?.name || "Patient"}</strong>
+                      <span>{appointment.doctor?.name || "Doctor"} | {appointment.date} at {appointment.time}</span>
+                    </div>
+                    <em>{appointment.status}</em>
+                  </div>
+                ))}
+              </section>
+
+              <section className="analytics-panel">
+                <h2>Recent orders</h2>
+                {analyticsLists.orders.length === 0 && <p className="analytics-empty">No order records found.</p>}
+                {analyticsLists.orders.map((order) => (
+                  <div className="analytics-row" key={order._id}>
+                    <div>
+                      <strong>{order.user?.name || "Customer"}</strong>
+                      <span>{formatDateTime(order.createdAt)}</span>
+                    </div>
+                    <em>{formatCurrency(order.total)} | {order.status}</em>
+                  </div>
+                ))}
+              </section>
+
+              <section className="analytics-panel">
+                <h2>Hospital beds</h2>
+                {analyticsLists.hospitals.length === 0 && <p className="analytics-empty">No hospital records found.</p>}
+                {analyticsLists.hospitals.map((hospital) => (
+                  <div className="analytics-row" key={hospital._id}>
+                    <div>
+                      <strong>{hospital.name}</strong>
+                      <span>{hospital.city || "City not set"} | Total {hospital.total} | Occupied {hospital.occupied}</span>
+                    </div>
+                    <em>{hospital.available} available</em>
+                  </div>
+                ))}
+              </section>
+
+              <section className="analytics-panel">
+                <h2>Low stock medicines</h2>
+                {analyticsLists.lowStock.length === 0 && <p className="analytics-empty">No low stock medicines.</p>}
+                {analyticsLists.lowStock.map((medicine) => (
+                  <div className="analytics-row" key={medicine._id}>
+                    <div>
+                      <strong>{medicine.name}</strong>
+                      <span>{medicine.category || "Uncategorized"} | Reorder at {medicine.reorderLevel || 0}</span>
+                    </div>
+                    <em>{medicine.stock || 0} left</em>
+                  </div>
+                ))}
+              </section>
+
+              <section className="analytics-panel">
+                <h2>Recent invoices</h2>
+                {analyticsLists.invoices.length === 0 && <p className="analytics-empty">No invoice records found.</p>}
+                {analyticsLists.invoices.map((invoice) => (
+                  <div className="analytics-row" key={invoice._id}>
+                    <div>
+                      <strong>{invoice.invoiceNumber || "Invoice"}</strong>
+                      <span>{invoice.patientName} | {formatDateTime(invoice.createdAt)}</span>
+                    </div>
+                    <em>{formatCurrency(invoice.amount)} | {invoice.status}</em>
+                  </div>
+                ))}
+              </section>
+
+              <section className="analytics-panel">
+                <h2>Recent insurance claims</h2>
+                {analyticsLists.claims.length === 0 && <p className="analytics-empty">No insurance claim records found.</p>}
+                {analyticsLists.claims.map((claim) => (
+                  <div className="analytics-row" key={claim._id}>
+                    <div>
+                      <strong>{claim.claimNumber || "Claim"}</strong>
+                      <span>{claim.patientName} | {claim.provider}</span>
+                    </div>
+                    <em>{formatCurrency(claim.amount)} | {claim.status}</em>
+                  </div>
+                ))}
+              </section>
+            </div>
+          </>
+        )}
+
+        {activeTab === "users" && (
+          <section className="admin-section">
+            <div className="admin-section-title">
+              <h2>User accounts</h2>
+              <span>{users.length} record{users.length === 1 ? "" : "s"}</span>
+            </div>
+            {users.length === 0 && <p className="analytics-empty">No users found.</p>}
+            {users.map((user) => (
+              <div key={user._id} className="admin-card">
+                <div>
+                  <h3>{user.name || "Unnamed user"}</h3>
+                  <p>{user.email || "No email"} | {user.phone || "No phone"} | {user.role || "user"}</p>
+                  <p>Joined {formatDateTime(user.createdAt)}</p>
+                </div>
+                <button onClick={async () => { await deleteUserAdmin(user._id); showSaved("User deleted"); }}>Delete</button>
+              </div>
             ))}
+          </section>
+        )}
+
+        {activeTab === "records" && (
+          <div className="records-grid">
+            <RecordGroup
+              title="Medical reports"
+              records={records.reports}
+              fields={[
+                ["Patient", (item) => getPersonName(item.user)],
+                ["Analysis", (item) => item.analysis],
+                ["Created", (item) => formatDateTime(item.createdAt)],
+              ]}
+            />
+            <RecordGroup
+              title="Lab tests"
+              records={records.labTests}
+              fields={[
+                ["Category", (item) => item.category],
+                ["Price", (item) => formatCurrency(item.price)],
+                ["Report time", (item) => item.reportTime],
+              ]}
+            />
+            <RecordGroup
+              title="Lab bookings"
+              records={records.labBookings}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Test", (item) => getPersonName(item.test, "Test")],
+                ["Status", (item) => item.status],
+              ]}
+            />
+            <RecordGroup
+              title="Blood donors"
+              records={records.bloodDonors}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Blood group", (item) => item.bloodGroup],
+                ["City", (item) => item.city],
+              ]}
+            />
+            <RecordGroup
+              title="Prescriptions"
+              records={records.prescriptions}
+              fields={[
+                ["Patient", (item) => getPersonName(item.user)],
+                ["Doctor", (item) => getPersonName(item.doctor)],
+                ["Medicines", (item) => item.medicines],
+              ]}
+            />
+            <RecordGroup
+              title="Reviews"
+              records={records.reviews}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Doctor", (item) => getPersonName(item.doctor)],
+                ["Rating", (item) => item.rating],
+              ]}
+            />
+            <RecordGroup
+              title="Notifications"
+              records={records.notifications}
+              fields={[
+                ["User", (item) => getPersonName(item.user, "Broadcast")],
+                ["Type", (item) => item.type],
+                ["Read", (item) => item.read],
+              ]}
+            />
+            <RecordGroup
+              title="Medical profiles"
+              records={records.medicalProfiles}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Blood group", (item) => item.bloodGroup],
+                ["Contacts", (item) => item.emergencyContacts],
+              ]}
+            />
+            <RecordGroup
+              title="Vitals"
+              records={records.vitals}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Recorded", (item) => formatDateTime(item.recordedAt)],
+                ["Pulse", (item) => item.pulse],
+              ]}
+            />
+            <RecordGroup
+              title="Vaccinations"
+              records={records.vaccinations}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Due", (item) => formatDateTime(item.dueDate)],
+                ["Status", (item) => item.status],
+              ]}
+            />
+            <RecordGroup
+              title="Care plans"
+              records={records.carePlans}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Status", (item) => item.status],
+                ["Tasks", (item) => item.tasks],
+              ]}
+            />
+            <RecordGroup
+              title="Medicine reminders"
+              records={records.medicineLogs}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Medicine", (item) => item.medicine],
+                ["Reminder", (item) => item.time],
+              ]}
+            />
+            <RecordGroup
+              title="Chat messages"
+              records={records.chats}
+              fields={[
+                ["Sender", (item) => getPersonName(item.sender)],
+                ["Receiver", (item) => getPersonName(item.receiver)],
+                ["Message", (item) => item.message],
+              ]}
+            />
+            <RecordGroup
+              title="Doctor notes"
+              records={records.doctorNotes}
+              fields={[
+                ["Doctor", (item) => getPersonName(item.doctor)],
+                ["Patient", (item) => getPersonName(item.patient)],
+                ["Title", (item) => item.title],
+              ]}
+            />
           </div>
         )}
 

@@ -142,69 +142,269 @@ function OrganizedExtractedText({ text }) {
   );
 }
 
+const analysisSections = [
+  "Patient Review Summary",
+  "Complete Blood Count (CBC) Highlights",
+  "Widal Test",
+  "Interpretation",
+  "Liver Function Tests (SGOT(AST) and SGPT(ALT))",
+  "Malaria Parasite Smear Test",
+  "Urine Routine Examination",
+  "Chemical Examination (by Reflectance Photometric Method)",
+  "Microscopic Examination (Manual by Microscopy)",
+];
+
+const analysisTestGroups = {
+  cbc: [
+    "HEMOGLOBIN",
+    "Red Blood Cell Count",
+    "Hematocrit",
+    "Mean Corpuscular Volume (MCV)",
+    "Total COUNT (WBC)",
+    "Neutrophils (%)",
+    "Lymphocytes (%)",
+    "Neutrophils (Abs)",
+    "Lymphocytes (Abs)",
+    "Platelet Count",
+    "Mean Platelet Volume (MPV)",
+  ],
+  liver: ["SGOT(AST) value", "SGPT(ALT) value"],
+  urine: ["Quantity", "Colour", "Appearance", "pH", "Sp. Gravity", "Protein", "Glucose"],
+  microscopy: ["Erythrocytes (Red Cells)", "Leucocytes (Pus Cells)", "Epithelial Cells", "Bacteria"],
+};
+
+const patientDetailFields = [
+  "Patient Name",
+  "Patient ID",
+  "Client Name",
+  "Age / Gender",
+  "Registration Details",
+  "Registered On",
+  "Collected On",
+  "Reported On",
+  "Report Status",
+];
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const normalizeAnalysisText = (analysis) => {
   const raw = typeof analysis === "string" ? analysis : JSON.stringify(analysis || "");
 
   return raw
-    .replace(/\r/g, "\n")
+    .replace(/\r/g, " ")
     .replace(/\*\*/g, "")
-    .replace(/\s+\*/g, "\n*")
-    .replace(/\s+\+/g, "\n+")
-    .replace(/\s+(\d+\.)\s+/g, "\n$1 ")
-    .replace(/The key findings from this lab report are:/i, "\nKey findings:")
-    .replace(/Based on the lab report provided, here are the key findings:/i, "\nKey findings:")
     .replace(/\s+/g, " ")
-    .replace(/\s?(\n[*+\d])/g, "$1")
     .trim();
 };
 
-const getAnalysisLineType = (line) => {
-  if (/^Key findings:?$/i.test(line) || /count|test|examination|smears/i.test(line)) {
-    return "section";
-  }
+const getSectionText = (text, sectionName) => {
+  const startMatch = text.match(new RegExp(`${escapeRegExp(sectionName)}\\s*:?`, "i"));
+  if (!startMatch) return "";
 
-  if (/^\d+\./.test(line)) {
-    return "numbered";
-  }
+  const start = startMatch.index + startMatch[0].length;
+  const nextStarts = analysisSections
+    .filter((name) => name !== sectionName)
+    .map((name) => {
+      const match = text.slice(start).match(new RegExp(`${escapeRegExp(name)}\\s*:?`, "i"));
+      return match ? start + match.index : -1;
+    })
+    .filter((index) => index >= start);
 
-  if (/^[*+]\s*/.test(line)) {
-    return "bullet";
-  }
-
-  return "paragraph";
+  const end = nextStarts.length ? Math.min(...nextStarts) : text.length;
+  return text.slice(start, end).replace(/^-\s*/, "").trim();
 };
 
-function OrganizedAnalysis({ analysis }) {
-  const text = normalizeAnalysisText(analysis);
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+const extractLabeledValues = (text, labels) => {
+  const matches = labels
+    .map((label) => {
+      const match = text.match(new RegExp(`${escapeRegExp(label)}\\s*:`, "i"));
+      return match ? { label, index: match.index, end: match.index + match[0].length } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.index - b.index);
 
-  if (lines.length === 0) {
+  return matches
+    .map((match, index) => {
+      const next = matches[index + 1]?.index ?? text.length;
+      const value = text
+        .slice(match.end, next)
+        .replace(/^-\s*/, "")
+        .replace(/\s+-\s*$/, "")
+        .trim();
+
+      return value ? { label: match.label, value } : null;
+    })
+    .filter(Boolean);
+};
+
+const splitReference = (value) => {
+  const referenceMatch = value.match(/\(Reference range:\s*([^)]+)\)/i);
+  const result = value.replace(/\(Reference range:\s*[^)]+\)/i, "").trim();
+
+  return {
+    result: result.replace(/^-\s*/, "") || "-",
+    reference: referenceMatch?.[1]?.trim() || "-",
+  };
+};
+
+const getStatusClass = ({ label, result, reference }) => {
+  const normalized = `${label} ${result}`.toLowerCase();
+
+  if (
+    normalized.includes("positive") ||
+    normalized.includes("present") ||
+    normalized.includes("turbid") ||
+    normalized.includes("14-16") ||
+    normalized.includes("6-8") ||
+    normalized.includes("5-6") ||
+    /hemoglobin|hematocrit|platelet/.test(normalized)
+  ) {
+    return "is-attention";
+  }
+
+  if (reference !== "-" || /absent|not detected|clear|normal/i.test(result)) {
+    return "is-normal";
+  }
+
+  return "";
+};
+
+const buildTestRows = (sectionText, labels) =>
+  extractLabeledValues(sectionText, labels).map(({ label, value }) => {
+    const split = splitReference(value);
+    return {
+      label,
+      ...split,
+      status: getStatusClass({ label, ...split }),
+    };
+  });
+
+const buildWidalRows = (text) => {
+  const widalText = getSectionText(text, "Widal Test");
+  if (!widalText) return [];
+
+  const rows = [];
+  const oMatch = widalText.match(/Salmonella Typhi\s+"O"[^:]*antigen\s*\(([^)]+)\)/i);
+  const hMatch = widalText.match(/"H"\s*antigen\s*\(([^)]+)\)/i);
+
+  if (oMatch) rows.push({ label: 'Salmonella Typhi "O" antigen', result: `Positive (${oMatch[1]})`, reference: "-", status: "is-attention" });
+  if (hMatch) rows.push({ label: 'Salmonella Typhi "H" antigen', result: `Positive (${hMatch[1]})`, reference: "-", status: "is-attention" });
+
+  return rows;
+};
+
+const buildAnalysisData = (analysis) => {
+  const text = normalizeAnalysisText(analysis);
+  const patientText = getSectionText(text, "Patient Review Summary") || text;
+  const cbcText = getSectionText(text, "Complete Blood Count (CBC) Highlights");
+  const liverText = getSectionText(text, "Liver Function Tests (SGOT(AST) and SGPT(ALT))");
+  const malariaText = getSectionText(text, "Malaria Parasite Smear Test");
+  const urineText = `${getSectionText(text, "Urine Routine Examination")} ${getSectionText(text, "Chemical Examination (by Reflectance Photometric Method)")}`;
+  const microscopyText = getSectionText(text, "Microscopic Examination (Manual by Microscopy)");
+
+  return {
+    text,
+    patientDetails: extractLabeledValues(patientText, patientDetailFields),
+    cbcRows: buildTestRows(cbcText, analysisTestGroups.cbc),
+    widalRows: buildWidalRows(text),
+    interpretation: getSectionText(text, "Interpretation"),
+    liverRows: buildTestRows(liverText, analysisTestGroups.liver),
+    malaria: malariaText,
+    urineRows: buildTestRows(urineText, analysisTestGroups.urine),
+    microscopyRows: buildTestRows(microscopyText, analysisTestGroups.microscopy),
+  };
+};
+
+function AnalysisTable({ rows }) {
+  if (!rows.length) return null;
+
+  return (
+    <div className="analysis-table-wrap">
+      <table className="analysis-table">
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Result</th>
+            <th>Reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label} className={row.status}>
+              <td>{row.label}</td>
+              <td>{row.result}</td>
+              <td>{row.reference}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function OrganizedAnalysis({ analysis }) {
+  const data = buildAnalysisData(analysis);
+
+  if (!data.text) {
     return <p>No AI analysis available.</p>;
   }
 
   return (
     <div className="analysis-text">
-      {lines.map((line, index) => {
-        const type = getAnalysisLineType(line);
-        const cleaned = line.replace(/^[*+]\s*/, "");
+      {data.patientDetails.length > 0 && (
+        <section className="analysis-section">
+          <h5>Patient details</h5>
+          <div className="analysis-detail-grid">
+            {data.patientDetails.map((item) => (
+              <div key={item.label}>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-        if (type === "section") {
-          return <h5 key={`${line}-${index}`}>{cleaned}</h5>;
-        }
+      <section className="analysis-section">
+        <h5>Complete Blood Count (CBC)</h5>
+        <AnalysisTable rows={data.cbcRows} />
+      </section>
 
-        if (type === "numbered") {
-          return <p className="analysis-numbered" key={`${line}-${index}`}>{cleaned}</p>;
-        }
+      {data.widalRows.length > 0 && (
+        <section className="analysis-section">
+          <h5>Widal test</h5>
+          <AnalysisTable rows={data.widalRows} />
+          {data.interpretation && <p className="analysis-note">{data.interpretation}</p>}
+        </section>
+      )}
 
-        if (type === "bullet") {
-          return <p className="analysis-bullet" key={`${line}-${index}`}>{cleaned}</p>;
-        }
+      {data.liverRows.length > 0 && (
+        <section className="analysis-section">
+          <h5>Liver function tests</h5>
+          <AnalysisTable rows={data.liverRows} />
+        </section>
+      )}
 
-        return <p key={`${line}-${index}`}>{cleaned}</p>;
-      })}
+      {data.malaria && (
+        <section className="analysis-section">
+          <h5>Malaria parasite smear</h5>
+          <p className="analysis-note">{data.malaria}</p>
+        </section>
+      )}
+
+      {data.urineRows.length > 0 && (
+        <section className="analysis-section">
+          <h5>Urine routine and chemical examination</h5>
+          <AnalysisTable rows={data.urineRows} />
+        </section>
+      )}
+
+      {data.microscopyRows.length > 0 && (
+        <section className="analysis-section">
+          <h5>Microscopic examination</h5>
+          <AnalysisTable rows={data.microscopyRows} />
+        </section>
+      )}
     </div>
   );
 }

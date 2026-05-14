@@ -54,6 +54,32 @@
   opacity: 0.58;
 }
 
+.doctor-profile-chip {
+  align-self: stretch;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+  padding: 12px 14px;
+}
+
+.doctor-profile-chip strong,
+.doctor-profile-chip span {
+  display: block;
+}
+
+.doctor-profile-chip strong {
+  color: var(--text);
+}
+
+.doctor-profile-chip span {
+  color: var(--muted-text);
+  font-size: 14px;
+}
+
 .doctor-alert,
 .doctor-section,
 .doctor-stat-grid div {

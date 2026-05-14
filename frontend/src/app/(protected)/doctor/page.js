@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaCalendarAlt, FaFilePrescription, FaMicrophone, FaSave, FaTrash, FaUserInjured, FaVideo } from "react-icons/fa";
-import { getDoctors, getMyDoctorProfile } from "@/services/doctorService";
+import { getMyDoctorProfile } from "@/services/doctorService";
 import { getCurrentUser } from "@/utils/auth";
 import {
   createDoctorNote,
@@ -61,8 +61,8 @@ const SpeechRecognition =
 
 export default function DoctorPortalPage() {
   const router = useRouter();
-  const [doctors, setDoctors] = useState([]);
   const [doctorId, setDoctorId] = useState("");
+  const [accessStatus, setAccessStatus] = useState("checking");
   const [dashboard, setDashboard] = useState(null);
   const [notes, setNotes] = useState([]);
   const [scheduleForm, setScheduleForm] = useState(blankSchedule);
@@ -77,7 +77,6 @@ export default function DoctorPortalPage() {
   const [loading, setLoading] = useState(true);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
-  const [authorized, setAuthorized] = useState(false);
 
   const patients = useMemo(() => dashboard?.patients || [], [dashboard]);
   const appointments = useMemo(() => dashboard?.appointments || [], [dashboard]);
@@ -93,11 +92,12 @@ export default function DoctorPortalPage() {
       const user = getCurrentUser();
 
       if (user?.role !== "doctor") {
+        setAccessStatus("denied");
         router.replace("/dashboard");
         return;
       }
 
-      setAuthorized(true);
+      setAccessStatus("allowed");
     });
   }, [router]);
 
@@ -126,39 +126,24 @@ export default function DoctorPortalPage() {
   }, []);
 
   useEffect(() => {
-    if (!authorized) return;
+    if (accessStatus !== "allowed") return;
 
     queueMicrotask(() => {
-      getDoctors()
-        .then(async (items) => {
-          const list = Array.isArray(items) ? items : [];
-          setDoctors(list);
-          let initialDoctor = list[0]?._id || "";
-
-          try {
-            const ownDoctor = await getMyDoctorProfile();
-            initialDoctor = ownDoctor?._id || initialDoctor;
-          } catch {
-            initialDoctor = list[0]?._id || "";
+      getMyDoctorProfile()
+        .then((ownDoctor) => {
+          if (!ownDoctor?._id) {
+            throw new Error("Doctor profile not found for this account");
           }
 
-          setDoctorId(initialDoctor);
-          return loadDashboard(initialDoctor);
+          setDoctorId(ownDoctor._id);
+          return loadDashboard(ownDoctor._id);
         })
         .catch((err) => {
-          setError(err.message || "Could not load doctors");
+          setError(err.message || "Could not load doctor portal");
           setLoading(false);
         });
     });
-  }, [authorized, loadDashboard]);
-
-  useEffect(() => {
-    if (!authorized || !doctorId) return;
-
-    queueMicrotask(() => {
-      loadDashboard(doctorId);
-    });
-  }, [authorized, doctorId, loadDashboard]);
+  }, [accessStatus, loadDashboard]);
 
   const patientOptions = patients.length ? patients : [{ _id: "", name: "No patients yet" }];
 
@@ -319,10 +304,12 @@ export default function DoctorPortalPage() {
     }
   };
 
-  if (!authorized) {
+  if (accessStatus !== "allowed") {
     return (
       <main className="doctor-portal-page">
-        <p className="doctor-alert">Checking doctor access...</p>
+        <p className="doctor-alert">
+          {accessStatus === "denied" ? "Doctor access only. Redirecting..." : "Checking doctor access..."}
+        </p>
       </main>
     );
   }
@@ -336,13 +323,10 @@ export default function DoctorPortalPage() {
           <p>Manage patients, visits, prescriptions, schedules, notes, AI suggestions, and availability from one clinical workspace.</p>
         </div>
 
-        <select value={doctorId} onChange={(event) => setDoctorId(event.target.value)}>
-          {doctors.map((item) => (
-            <option key={item._id} value={item._id}>
-              {item.name} - {item.specialization}
-            </option>
-          ))}
-        </select>
+        <div className="doctor-profile-chip">
+          <strong>{doctor?.name || "Doctor"}</strong>
+          <span>{doctor?.specialization || "Your portal"}</span>
+        </div>
 
         <a className="doctor-video-link" href={`/video-call?doctor=${doctorId}&role=doctor`} aria-disabled={!doctorId}>
           <FaVideo aria-hidden="true" />

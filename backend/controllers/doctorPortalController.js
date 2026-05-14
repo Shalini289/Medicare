@@ -37,10 +37,7 @@ const diagnosisRules = [
 const getDoctorId = async (req) => {
   if (req.user?.role === "doctor") {
     const ownDoctor = await Doctor.findOne({ user: req.user.id });
-
-    if (ownDoctor) {
-      return ownDoctor._id;
-    }
+    return ownDoctor?._id;
   }
 
   if (req.query.doctorId || req.body.doctorId) {

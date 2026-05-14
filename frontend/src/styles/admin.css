@@ -6,6 +6,31 @@
   min-height: 100vh;
 }
 
+.admin-access-gate {
+  display: grid;
+  min-height: 55vh;
+  place-items: center;
+  text-align: center;
+}
+
+.admin-access-gate > div {
+  background: #fff;
+  border: 1px solid #f0dbe3;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(69, 34, 48, 0.08);
+  padding: 28px;
+}
+
+.admin-access-gate h1 {
+  color: #28222a;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.admin-access-gate p {
+  color: #6f6670;
+}
+
 .admin-sidebar {
   align-self: start;
   background: linear-gradient(180deg, #b44e70, #853653);
@@ -112,6 +137,183 @@
   font-weight: 800;
 }
 
+.analytics-grid,
+.analytics-breakdown-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.analytics-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.analytics-breakdown-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.analytics-panel,
+.analytics-breakdown-card {
+  background: #fff;
+  border: 1px solid #f0dbe3;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(69, 34, 48, 0.06);
+  padding: 18px;
+}
+
+.analytics-panel__head {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.analytics-panel h2,
+.analytics-breakdown-card h3 {
+  color: #28222a;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.analytics-panel__head p {
+  color: #6f6670;
+}
+
+.analytics-panel__head strong {
+  background: #fff2f6;
+  border-radius: 999px;
+  color: #9f3f61;
+  flex: 0 0 auto;
+  padding: 9px 12px;
+}
+
+.analytics-breakdown-card p,
+.analytics-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.analytics-breakdown-card p {
+  border-top: 1px solid #f7e5eb;
+  color: #6f6670;
+  padding: 9px 0;
+  text-transform: capitalize;
+}
+
+.analytics-breakdown-card p:last-child {
+  padding-bottom: 0;
+}
+
+.analytics-breakdown-card strong {
+  color: #9f3f61;
+}
+
+.analytics-row {
+  border-top: 1px solid #f7e5eb;
+  padding: 12px 0;
+}
+
+.analytics-row:last-child {
+  padding-bottom: 0;
+}
+
+.analytics-row strong,
+.analytics-row span {
+  display: block;
+}
+
+.analytics-row strong {
+  color: #28222a;
+}
+
+.analytics-row span {
+  color: #6f6670;
+  font-size: 14px;
+  margin-top: 3px;
+}
+
+.analytics-row em {
+  color: #9f3f61;
+  flex: 0 0 auto;
+  font-style: normal;
+  font-weight: 800;
+  text-align: right;
+  text-transform: capitalize;
+}
+
+.analytics-empty {
+  color: #6f6670;
+  margin-top: 10px;
+}
+
+.records-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-section-title {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.admin-section-title h2 {
+  margin-bottom: 0;
+}
+
+.admin-section-title span {
+  background: #fff2f6;
+  border-radius: 999px;
+  color: #9f3f61;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 7px 10px;
+}
+
+.admin-card--records {
+  align-items: stretch;
+}
+
+.admin-card--records > div {
+  width: 100%;
+}
+
+.record-field-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
+.record-field-grid p {
+  background: #fffafb;
+  border: 1px solid #f7e5eb;
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.record-field-grid span {
+  color: #9f3f61;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.record-field-grid strong {
+  color: #28222a;
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .admin-section {
   margin-bottom: 30px;
 }
@@ -215,6 +417,12 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .analytics-grid,
+  .analytics-breakdown-grid,
+  .record-field-grid {
+    grid-template-columns: 1fr;
+  }
+
   .admin-form {
     grid-template-columns: 1fr;
   }
@@ -232,5 +440,15 @@
   .admin-card {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .analytics-panel__head,
+  .analytics-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .analytics-row em {
+    text-align: left;
   }
 }

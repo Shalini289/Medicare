@@ -9,9 +9,34 @@ const Invoice = require("../models/Invoice");
 const InsuranceClaim = require("../models/InsuranceClaim");
 const Ambulance = require("../models/Ambulance");
 const Department = require("../models/Department");
+const BloodDonor = require("../models/BloodDonor");
+const CarePlan = require("../models/CarePlan");
+const Chat = require("../models/Chat");
+const DoctorNote = require("../models/DoctorNote");
+const LabBooking = require("../models/LabBooking");
+const LabTest = require("../models/LabTest");
+const MedicalProfile = require("../models/MedicalProfile");
+const MedicineLog = require("../models/MedicineLog");
+const Notification = require("../models/Notification");
+const Prescription = require("../models/Prescription");
+const Report = require("../models/Report");
+const Review = require("../models/Review");
+const Vaccination = require("../models/Vaccination");
+const Vital = require("../models/Vital");
 
 const makeCode = (prefix) =>
   `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+const countByStatus = async (Model, statuses = []) => {
+  const counts = await Model.aggregate([
+    { $group: { _id: "$status", count: { $sum: 1 } } },
+  ]);
+
+  return statuses.reduce((acc, status) => {
+    acc[status] = counts.find((item) => item._id === status)?.count || 0;
+    return acc;
+  }, {});
+};
 
 const parseItems = (items = []) => {
   if (Array.isArray(items)) {
@@ -43,6 +68,15 @@ const getDashboardStats = async (req, res) => {
       totalDepartments,
       lowStockMedicines,
       hospitals,
+      recentAppointments,
+      recentOrders,
+      recentInvoices,
+      recentClaims,
+      lowStockItems,
+      appointmentStatus,
+      orderStatus,
+      invoiceStatus,
+      claimStatus,
     ] = await Promise.all([
       User.countDocuments(),
       Doctor.countDocuments(),
@@ -55,6 +89,25 @@ const getDashboardStats = async (req, res) => {
       Department.countDocuments(),
       Medicine.countDocuments({ $expr: { $lte: ["$stock", "$reorderLevel"] } }),
       Hospital.find(),
+      Appointment.find()
+        .populate("user", "name email")
+        .populate("doctor", "name specialization")
+        .sort({ createdAt: -1 })
+        .limit(5),
+      Order.find()
+        .populate("user", "name email")
+        .populate("items.medicine", "name price")
+        .sort({ createdAt: -1 })
+        .limit(5),
+      Invoice.find().sort({ createdAt: -1 }).limit(5),
+      InsuranceClaim.find().sort({ createdAt: -1 }).limit(5),
+      Medicine.find({ $expr: { $lte: ["$stock", "$reorderLevel"] } })
+        .sort({ stock: 1, name: 1 })
+        .limit(6),
+      countByStatus(Appointment, ["booked", "completed", "cancelled"]),
+      countByStatus(Order, ["pending", "paid", "delivered"]),
+      countByStatus(Invoice, ["draft", "unpaid", "paid", "overdue"]),
+      countByStatus(InsuranceClaim, ["submitted", "under-review", "approved", "rejected", "paid"]),
     ]);
 
     const revenueAgg = await Order.aggregate([
@@ -70,6 +123,20 @@ const getDashboardStats = async (req, res) => {
 
     const occupiedBeds = hospitals.reduce((sum, hospital) =>
       sum + Number(hospital.occupiedBeds?.ICU || 0) + Number(hospital.occupiedBeds?.oxygen || 0) + Number(hospital.occupiedBeds?.general || 0), 0);
+
+    const hospitalBedSummary = hospitals.map((hospital) => {
+      const total = Number(hospital.beds?.ICU || 0) + Number(hospital.beds?.oxygen || 0) + Number(hospital.beds?.general || 0);
+      const occupied = Number(hospital.occupiedBeds?.ICU || 0) + Number(hospital.occupiedBeds?.oxygen || 0) + Number(hospital.occupiedBeds?.general || 0);
+
+      return {
+        _id: hospital._id,
+        name: hospital.name,
+        city: hospital.city,
+        total,
+        occupied,
+        available: Math.max(total - occupied, 0),
+      };
+    });
 
     res.json({
       totalUsers,
@@ -87,6 +154,23 @@ const getDashboardStats = async (req, res) => {
       totalBeds,
       occupiedBeds,
       availableBeds: Math.max(totalBeds - occupiedBeds, 0),
+      revenueBreakdown: {
+        pharmacy: revenueAgg[0]?.revenue || 0,
+        invoices: invoiceAgg[0]?.revenue || 0,
+        total: (revenueAgg[0]?.revenue || 0) + (invoiceAgg[0]?.revenue || 0),
+      },
+      statusBreakdowns: {
+        appointments: appointmentStatus,
+        orders: orderStatus,
+        invoices: invoiceStatus,
+        claims: claimStatus,
+      },
+      hospitalBedSummary,
+      lowStockItems,
+      recentAppointments,
+      recentOrders,
+      recentInvoices,
+      recentClaims,
     });
   } catch (err) {
     res.status(500).json({ msg: err.message });
@@ -94,8 +178,59 @@ const getDashboardStats = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-  const users = await User.find().select("-password");
+  const users = await User.find().select("-password").sort({ createdAt: -1 });
   res.json(users);
+};
+
+const getAdminRecords = async (req, res) => {
+  const [
+    reports,
+    labTests,
+    labBookings,
+    bloodDonors,
+    prescriptions,
+    reviews,
+    notifications,
+    medicalProfiles,
+    vitals,
+    vaccinations,
+    carePlans,
+    medicineLogs,
+    chats,
+    doctorNotes,
+  ] = await Promise.all([
+    Report.find().populate("user", "name email role").sort({ createdAt: -1 }),
+    LabTest.find().sort({ name: 1 }),
+    LabBooking.find().populate("user test", "name email price category").sort({ createdAt: -1 }),
+    BloodDonor.find().populate("user", "name email phone").sort({ updatedAt: -1 }),
+    Prescription.find().populate("user doctor issuedBy", "name email specialization role").sort({ createdAt: -1 }),
+    Review.find().populate("user doctor", "name email specialization").sort({ createdAt: -1 }),
+    Notification.find().populate("user", "name email").sort({ createdAt: -1 }),
+    MedicalProfile.find().populate("user", "name email phone").sort({ updatedAt: -1 }),
+    Vital.find().populate("user", "name email").sort({ recordedAt: -1 }),
+    Vaccination.find().populate("user", "name email").sort({ dueDate: 1, createdAt: -1 }),
+    CarePlan.find().populate("user", "name email").sort({ createdAt: -1 }),
+    MedicineLog.find().populate("user", "name email").sort({ time: 1, createdAt: -1 }),
+    Chat.find().populate("sender receiver doctor", "name email specialization").sort({ createdAt: -1 }),
+    DoctorNote.find().populate("doctor patient", "name email specialization").sort({ createdAt: -1 }),
+  ]);
+
+  res.json({
+    reports,
+    labTests,
+    labBookings,
+    bloodDonors,
+    prescriptions,
+    reviews,
+    notifications,
+    medicalProfiles,
+    vitals,
+    vaccinations,
+    carePlans,
+    medicineLogs,
+    chats,
+    doctorNotes,
+  });
 };
 
 const deleteUser = async (req, res) => {
@@ -333,6 +468,7 @@ const deleteDepartment = async (req, res) => {
 module.exports = {
   getDashboardStats,
   getUsers,
+  getAdminRecords,
   deleteUser,
   getDoctorsAdmin,
   addDoctor,

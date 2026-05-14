@@ -4,6 +4,15 @@ import { getToken } from "../utils/auth";
 export const getDashboardStats = () =>
   api("/api/admin/stats", "GET", null, getToken());
 
+export const getAdminRecords = () =>
+  api("/api/admin/records", "GET", null, getToken());
+
+export const getUsersAdmin = () =>
+  api("/api/admin/users", "GET", null, getToken());
+
+export const deleteUserAdmin = (id) =>
+  api(`/api/admin/users/${id}`, "DELETE", null, getToken());
+
 export const getDoctorsAdmin = () =>
   api("/api/admin/doctors", "GET", null, getToken());
 

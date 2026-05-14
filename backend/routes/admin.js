@@ -21,6 +21,7 @@ const {
   getAmbulancesAdmin,
   getAppointmentsAdmin,
   getDashboardStats,
+  getAdminRecords,
   getDepartmentsAdmin,
   getDoctorsAdmin,
   getHospitalsAdmin,
@@ -47,6 +48,7 @@ const { protect, admin } = require("../middleware/authMiddleware");
 router.use(protect, admin);
 
 router.get("/stats", getDashboardStats);
+router.get("/records", getAdminRecords);
 
 router.get("/users", getUsers);
 router.delete("/users/:id", deleteUser);
