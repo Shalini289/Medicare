@@ -283,6 +283,126 @@
   width: 100%;
 }
 
+.admin-card--staff,
+.admin-card--details {
+  align-items: flex-start;
+}
+
+.admin-card--staff > div:first-child,
+.admin-card--details > div:first-child {
+  min-width: 0;
+  width: 100%;
+}
+
+.staff-card-head,
+.detail-card-head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.status-pill {
+  border-radius: 999px;
+  color: #7a3150;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 10px;
+  text-transform: capitalize;
+}
+
+.status-pill--active {
+  background: #e6f7ec;
+  color: #24733a;
+}
+
+.status-pill--on-leave {
+  background: #fff4e5;
+  color: #b95d00;
+}
+
+.status-pill--inactive {
+  background: #fdecea;
+  color: #b71c1c;
+}
+
+.status-pill--draft,
+.status-pill--submitted {
+  background: #eef5ff;
+  color: #275a9b;
+}
+
+.status-pill--unpaid,
+.status-pill--under-review,
+.status-pill--overdue {
+  background: #fff4e5;
+  color: #b95d00;
+}
+
+.status-pill--paid,
+.status-pill--approved {
+  background: #e6f7ec;
+  color: #24733a;
+}
+
+.status-pill--rejected {
+  background: #fdecea;
+  color: #b71c1c;
+}
+
+.staff-detail-grid,
+.detail-field-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.staff-detail-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.detail-field-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.staff-detail-grid p,
+.detail-field-grid p {
+  background: #fffafb;
+  border: 1px solid #f7e5eb;
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  min-width: 0;
+  padding: 10px;
+}
+
+.staff-detail-grid span,
+.detail-field-grid span {
+  color: #9f3f61;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.staff-detail-grid strong,
+.detail-field-grid strong {
+  color: #28222a;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.admin-card-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.admin-card-actions button {
+  margin-left: 0;
+}
+
 .record-field-grid {
   display: grid;
   gap: 8px;
@@ -419,7 +539,9 @@
 
   .analytics-grid,
   .analytics-breakdown-grid,
-  .record-field-grid {
+  .record-field-grid,
+  .staff-detail-grid,
+  .detail-field-grid {
     grid-template-columns: 1fr;
   }
 
@@ -440,6 +562,20 @@
   .admin-card {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .staff-card-head,
+  .detail-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-card-actions {
+    width: 100%;
+  }
+
+  .admin-card-actions button {
+    flex: 1;
   }
 
   .analytics-panel__head,

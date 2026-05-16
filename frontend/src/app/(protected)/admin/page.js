@@ -235,52 +235,52 @@ export default function AdminDashboard() {
   const loadDashboard = useCallback(async () => {
     setError("");
 
-    try {
-      const [
-        statsData,
-        usersData,
-        recordsData,
-        doctorsData,
-        ordersData,
-        appointmentsData,
-        medicinesData,
-        hospitalsData,
-        staffData,
-        invoiceData,
-        claimData,
-        ambulanceData,
-        departmentData,
-      ] = await Promise.all([
-        getDashboardStats(),
-        getUsersAdmin(),
-        getAdminRecords(),
-        getDoctorsAdmin(),
-        getOrdersAdmin(),
-        getAppointmentsAdmin(),
-        getMedicinesAdmin(),
-        getHospitalsAdmin(),
-        getStaffAdmin(),
-        getInvoicesAdmin(),
-        getInsuranceClaimsAdmin(),
-        getAmbulancesAdmin(),
-        getDepartmentsAdmin(),
-      ]);
+    const requests = [
+      ["stats", getDashboardStats],
+      ["users", getUsersAdmin],
+      ["records", getAdminRecords],
+      ["doctors", getDoctorsAdmin],
+      ["orders", getOrdersAdmin],
+      ["appointments", getAppointmentsAdmin],
+      ["medicines", getMedicinesAdmin],
+      ["hospitals", getHospitalsAdmin],
+      ["staff", getStaffAdmin],
+      ["invoices", getInvoicesAdmin],
+      ["claims", getInsuranceClaimsAdmin],
+      ["ambulances", getAmbulancesAdmin],
+      ["departments", getDepartmentsAdmin],
+    ];
 
-      setStats(statsData);
-      setUsers(Array.isArray(usersData) ? usersData : []);
-      setRecords(recordsData && typeof recordsData === "object" ? recordsData : {});
-      setDoctors(Array.isArray(doctorsData) ? doctorsData : []);
-      setOrders(Array.isArray(ordersData) ? ordersData : []);
-      setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
-      setMedicines(Array.isArray(medicinesData) ? medicinesData : []);
-      setHospitals(Array.isArray(hospitalsData) ? hospitalsData : []);
-      setStaff(Array.isArray(staffData) ? staffData : []);
-      setInvoices(Array.isArray(invoiceData) ? invoiceData : []);
-      setClaims(Array.isArray(claimData) ? claimData : []);
-      setAmbulances(Array.isArray(ambulanceData) ? ambulanceData : []);
-      setDepartments(Array.isArray(departmentData) ? departmentData : []);
-    } catch (err) {
-      setError(err.message || "Could not load admin dashboard");
+    const results = await Promise.allSettled(requests.map(([, request]) => request()));
+    const data = {};
+    const failures = [];
+
+    results.forEach((result, index) => {
+      const key = requests[index][0];
+
+      if (result.status === "fulfilled") {
+        data[key] = result.value;
+      } else {
+        failures.push(`${key}: ${result.reason?.message || "API Error"}`);
+      }
+    });
+
+    setStats(data.stats && typeof data.stats === "object" ? data.stats : {});
+    setUsers(Array.isArray(data.users) ? data.users : []);
+    setRecords(data.records && typeof data.records === "object" ? data.records : {});
+    setDoctors(Array.isArray(data.doctors) ? data.doctors : []);
+    setOrders(Array.isArray(data.orders) ? data.orders : []);
+    setAppointments(Array.isArray(data.appointments) ? data.appointments : []);
+    setMedicines(Array.isArray(data.medicines) ? data.medicines : []);
+    setHospitals(Array.isArray(data.hospitals) ? data.hospitals : []);
+    setStaff(Array.isArray(data.staff) ? data.staff : []);
+    setInvoices(Array.isArray(data.invoices) ? data.invoices : []);
+    setClaims(Array.isArray(data.claims) ? data.claims : []);
+    setAmbulances(Array.isArray(data.ambulances) ? data.ambulances : []);
+    setDepartments(Array.isArray(data.departments) ? data.departments : []);
+
+    if (failures.length) {
+      setError(`Some admin data could not load. ${failures.join(" | ")}`);
     }
   }, []);
 
@@ -782,18 +782,36 @@ export default function AdminDashboard() {
 
         {activeTab === "staff" && (
           <section className="admin-section">
-            <h2>Staff management</h2>
+            <div className="admin-section-title">
+              <h2>Staff management</h2>
+              <span>{staff.length} member{staff.length === 1 ? "" : "s"}</span>
+            </div>
             <div className="admin-form">
               {Object.keys(emptyStaffForm).map((field) => (
                 <input key={field} placeholder={field} value={staffForm[field]} onChange={(e) => setStaffForm({ ...staffForm, [field]: e.target.value })} />
               ))}
               <button onClick={saveStaff}>{editingIds.staff ? "Update staff" : "Add staff"}</button>
             </div>
+            {staff.length === 0 && <p className="analytics-empty">No staff records found. Add a staff member above.</p>}
             {staff.map((member) => (
-              <div key={member._id} className="admin-card">
-                <div><h3>{member.name}</h3><p>{member.role} | {member.department} | {member.shift} | {member.status}</p></div>
+              <div key={member._id} className="admin-card admin-card--staff">
                 <div>
-                  <button onClick={() => { setStaffForm(member); setEditing("staff", member._id); }}>Edit</button>
+                  <div className="staff-card-head">
+                    <h3>{member.name || "Unnamed staff"}</h3>
+                    <span className={`status-pill status-pill--${member.status || "active"}`}>
+                      {(member.status || "active").replace(/-/g, " ")}
+                    </span>
+                  </div>
+                  <div className="staff-detail-grid">
+                    <p><span>Role</span><strong>{member.role || "Not assigned"}</strong></p>
+                    <p><span>Department</span><strong>{member.department || "Not assigned"}</strong></p>
+                    <p><span>Phone</span><strong>{member.phone || "Not set"}</strong></p>
+                    <p><span>Shift</span><strong>{member.shift || "General"}</strong></p>
+                    <p><span>Added</span><strong>{formatDateTime(member.createdAt)}</strong></p>
+                  </div>
+                </div>
+                <div className="admin-card-actions">
+                  <button onClick={() => { setStaffForm({ ...emptyStaffForm, ...member }); setEditing("staff", member._id); }}>Edit</button>
                   <button onClick={async () => { await deleteStaff(member._id); showSaved("Staff deleted"); }}>Delete</button>
                 </div>
               </div>
@@ -803,17 +821,35 @@ export default function AdminDashboard() {
 
         {activeTab === "invoices" && (
           <section className="admin-section">
-            <h2>Billing and invoices</h2>
+            <div className="admin-section-title">
+              <h2>Billing and invoices</h2>
+              <span>{invoices.length} invoice{invoices.length === 1 ? "" : "s"}</span>
+            </div>
             <div className="admin-form">
               {Object.keys(emptyInvoiceForm).map((field) => (
                 <input key={field} placeholder={field} value={invoiceForm[field]} onChange={(e) => setInvoiceForm({ ...invoiceForm, [field]: e.target.value })} />
               ))}
               <button onClick={saveInvoice}>{editingIds.invoice ? "Update invoice" : "Create invoice"}</button>
             </div>
+            {invoices.length === 0 && <p className="analytics-empty">No invoices found. Create an invoice above.</p>}
             {invoices.map((invoice) => (
-              <div key={invoice._id} className="admin-card">
-                <div><h3>{invoice.invoiceNumber || "Invoice"}</h3><p>{invoice.patientName} | Rs {invoice.amount || 0} | {invoice.status}</p></div>
+              <div key={invoice._id} className="admin-card admin-card--details">
                 <div>
+                  <div className="detail-card-head">
+                    <h3>{invoice.invoiceNumber || "Invoice"}</h3>
+                    <span className={`status-pill status-pill--${invoice.status || "unpaid"}`}>
+                      {(invoice.status || "unpaid").replace(/-/g, " ")}
+                    </span>
+                  </div>
+                  <div className="detail-field-grid">
+                    <p><span>Patient</span><strong>{invoice.patientName || "Not set"}</strong></p>
+                    <p><span>Amount</span><strong>{formatCurrency(invoice.amount)}</strong></p>
+                    <p><span>Due date</span><strong>{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString("en-IN") : "Not set"}</strong></p>
+                    <p><span>Items</span><strong>{Array.isArray(invoice.items) && invoice.items.length ? invoice.items.map((item) => item.name).filter(Boolean).join(", ") : "Not set"}</strong></p>
+                    <p><span>Created</span><strong>{formatDateTime(invoice.createdAt)}</strong></p>
+                  </div>
+                </div>
+                <div className="admin-card-actions">
                   <button onClick={() => { setInvoiceForm({ ...emptyInvoiceForm, ...invoice, items: invoice.items?.map((item) => item.name).join(", ") || "" }); setEditing("invoice", invoice._id); }}>Edit</button>
                   <button onClick={async () => { await deleteInvoice(invoice._id); showSaved("Invoice deleted"); }}>Delete</button>
                 </div>
@@ -824,17 +860,36 @@ export default function AdminDashboard() {
 
         {activeTab === "claims" && (
           <section className="admin-section">
-            <h2>Insurance claim processing</h2>
+            <div className="admin-section-title">
+              <h2>Insurance claim processing</h2>
+              <span>{claims.length} claim{claims.length === 1 ? "" : "s"}</span>
+            </div>
             <div className="admin-form">
               {Object.keys(emptyClaimForm).map((field) => (
                 <input key={field} placeholder={field} value={claimForm[field]} onChange={(e) => setClaimForm({ ...claimForm, [field]: e.target.value })} />
               ))}
               <button onClick={saveClaim}>{editingIds.claim ? "Update claim" : "Create claim"}</button>
             </div>
+            {claims.length === 0 && <p className="analytics-empty">No insurance claims found. Create a claim above.</p>}
             {claims.map((claim) => (
-              <div key={claim._id} className="admin-card">
-                <div><h3>{claim.claimNumber || "Claim"}</h3><p>{claim.patientName} | {claim.provider} | Rs {claim.amount || 0} | {claim.status}</p></div>
+              <div key={claim._id} className="admin-card admin-card--details">
                 <div>
+                  <div className="detail-card-head">
+                    <h3>{claim.claimNumber || "Claim"}</h3>
+                    <span className={`status-pill status-pill--${claim.status || "submitted"}`}>
+                      {(claim.status || "submitted").replace(/-/g, " ")}
+                    </span>
+                  </div>
+                  <div className="detail-field-grid">
+                    <p><span>Patient</span><strong>{claim.patientName || "Not set"}</strong></p>
+                    <p><span>Provider</span><strong>{claim.provider || "Not set"}</strong></p>
+                    <p><span>Policy</span><strong>{claim.policyNumber || "Not set"}</strong></p>
+                    <p><span>Amount</span><strong>{formatCurrency(claim.amount)}</strong></p>
+                    <p><span>Notes</span><strong>{claim.notes || "No notes"}</strong></p>
+                    <p><span>Created</span><strong>{formatDateTime(claim.createdAt)}</strong></p>
+                  </div>
+                </div>
+                <div className="admin-card-actions">
                   <button onClick={() => { setClaimForm({ ...emptyClaimForm, ...claim }); setEditing("claim", claim._id); }}>Edit</button>
                   <button onClick={async () => { await deleteInsuranceClaim(claim._id); showSaved("Claim deleted"); }}>Delete</button>
                 </div>

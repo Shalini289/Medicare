@@ -91,15 +91,29 @@
 .beds {
   margin-top: 15px;
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* ===== BED BOX ===== */
 .bed {
   flex: 1;
-  text-align: center;
+  min-width: 96px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 10px;
   border-radius: 10px;
+  white-space: nowrap;
+}
+
+.bed span {
+  font-weight: 500;
+}
+
+.bed strong {
+  font-weight: 700;
 }
 
 /* COLORS */
