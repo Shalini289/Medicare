@@ -505,6 +505,13 @@ textarea,
   margin: 0 0 10px;
 }
 
+.analysis-text h6 {
+  color: #2d2d2d;
+  font-size: 13px;
+  margin: 14px 0 8px;
+  text-transform: uppercase;
+}
+
 .analysis-detail-grid {
   display: grid;
   gap: 8px;
@@ -592,6 +599,51 @@ textarea,
   color: #2d2d2d;
   line-height: 1.55;
   margin-top: 10px;
+}
+
+.analysis-section--clinical {
+  background: #ffffff;
+  border-left: 4px solid #c65f80;
+}
+
+.analysis-clinical-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.analysis-clinical-list li {
+  background: #fffafb;
+  border: 1px solid #f7d9e3;
+  border-radius: 8px;
+  color: #2d2d2d;
+  line-height: 1.5;
+  padding: 10px 10px 10px 30px;
+  position: relative;
+}
+
+.analysis-clinical-list li::before {
+  background: #c65f80;
+  border-radius: 999px;
+  content: "";
+  height: 7px;
+  left: 12px;
+  position: absolute;
+  top: 18px;
+  width: 7px;
+}
+
+.analysis-disclaimer {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 10px;
 }
 
 .analysis-raw summary {

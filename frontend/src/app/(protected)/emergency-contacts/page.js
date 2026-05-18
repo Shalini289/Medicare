@@ -9,16 +9,19 @@ import {
 } from "@/services/medicalProfileService";
 import "@/styles/emergencyContacts.css";
 
-const emptyContact = {
+const createClientId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const createEmptyContact = () => ({
+  clientId: createClientId(),
   name: "",
   relation: "",
   phone: "",
-};
+});
 
 const sanitizePhone = (phone) => String(phone || "").replace(/[^\d+]/g, "");
 
 export default function EmergencyContactsPage() {
-  const [contacts, setContacts] = useState([{ ...emptyContact }]);
+  const [contacts, setContacts] = useState([createEmptyContact()]);
   const [medicalSummary, setMedicalSummary] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -39,7 +42,9 @@ export default function EmergencyContactsPage() {
 
     try {
       const data = await getEmergencyContacts();
-      setContacts(data.contacts?.length ? data.contacts : [{ ...emptyContact }]);
+      setContacts(data.contacts?.length
+        ? data.contacts.map((contact) => ({ clientId: contact._id || createClientId(), ...contact }))
+        : [createEmptyContact()]);
       setMedicalSummary(data.medicalSummary || {});
     } catch (err) {
       setError(err.message || "Could not load emergency contacts");
@@ -63,13 +68,13 @@ export default function EmergencyContactsPage() {
   };
 
   const addContact = () => {
-    setContacts((current) => [...current, { ...emptyContact }]);
+    setContacts((current) => [...current, createEmptyContact()]);
   };
 
   const removeContact = (index) => {
     setContacts((current) => {
       const next = current.filter((_, itemIndex) => itemIndex !== index);
-      return next.length ? next : [{ ...emptyContact }];
+      return next.length ? next : [createEmptyContact()];
     });
   };
 
@@ -80,8 +85,11 @@ export default function EmergencyContactsPage() {
     setMessage("");
 
     try {
-      const data = await saveEmergencyContacts(contacts);
-      setContacts(data.contacts?.length ? data.contacts : [{ ...emptyContact }]);
+      const payload = contacts.map(({ clientId, ...contact }) => contact);
+      const data = await saveEmergencyContacts(payload);
+      setContacts(data.contacts?.length
+        ? data.contacts.map((contact) => ({ clientId: contact._id || createClientId(), ...contact }))
+        : [createEmptyContact()]);
       setMedicalSummary(data.medicalSummary || {});
       setMessage("Emergency contacts saved");
     } catch (err) {
@@ -205,7 +213,7 @@ export default function EmergencyContactsPage() {
           {loading && <p className="empty-state">Loading contacts...</p>}
 
           {contacts.map((contact, index) => (
-            <div className="emergency-contact-row" key={`${index}-${contact.phone}`}>
+            <div className="emergency-contact-row" key={contact.clientId || contact._id || index}>
               <label>
                 Name
                 <input
@@ -227,6 +235,9 @@ export default function EmergencyContactsPage() {
               <label>
                 Phone
                 <input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
                   value={contact.phone}
                   onChange={(event) => updateContact(index, "phone", event.target.value)}
                   placeholder="+91 98765 43210"

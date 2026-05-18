@@ -144,6 +144,11 @@ function OrganizedExtractedText({ text }) {
 
 const analysisSections = [
   "Patient Review Summary",
+  "Doctor's Clinical Review",
+  "Key Abnormal Findings",
+  "Clinical Significance",
+  "Recommended Next Steps",
+  "Red Flags",
   "Complete Blood Count (CBC) Highlights",
   "Widal Test",
   "Interpretation",
@@ -152,6 +157,7 @@ const analysisSections = [
   "Urine Routine Examination",
   "Chemical Examination (by Reflectance Photometric Method)",
   "Microscopic Examination (Manual by Microscopy)",
+  "Disclaimer",
 ];
 
 const analysisTestGroups = {
@@ -351,6 +357,12 @@ const buildReadableSummary = (text) =>
     .filter((item) => item.length > 24)
     .slice(0, 10);
 
+const splitClinicalItems = (sectionText) =>
+  sectionText
+    .split(/\s*(?:\n|;|\.\s+(?=[A-Z]))\s*/)
+    .map((item) => item.replace(/^[-*]\s*/, "").replace(/\s+/g, " ").trim())
+    .filter((item) => item.length > 8);
+
 const buildWidalRows = (text) => {
   const widalText = getSectionText(text, "Widal Test");
   if (!widalText) return [];
@@ -377,6 +389,11 @@ const buildAnalysisData = (analysis) => {
   return {
     text,
     patientDetails: extractPatientDetails(patientText),
+    clinicalReview: getSectionText(text, "Doctor's Clinical Review"),
+    abnormalFindings: splitClinicalItems(getSectionText(text, "Key Abnormal Findings")),
+    clinicalSignificance: getSectionText(text, "Clinical Significance"),
+    nextSteps: splitClinicalItems(getSectionText(text, "Recommended Next Steps")),
+    redFlags: splitClinicalItems(getSectionText(text, "Red Flags")),
     cbcRows: buildTestRows(cbcText, analysisTestGroups.cbc),
     widalRows: buildWidalRows(text),
     interpretation: getSectionText(text, "Interpretation"),
@@ -385,6 +402,7 @@ const buildAnalysisData = (analysis) => {
     urineRows: buildTestRows(urineText, analysisTestGroups.urine),
     microscopyRows: buildTestRows(microscopyText, analysisTestGroups.microscopy),
     summaryItems: buildReadableSummary(text),
+    disclaimer: getSectionText(text, "Disclaimer"),
   };
 };
 
@@ -415,6 +433,18 @@ function AnalysisTable({ rows }) {
   );
 }
 
+function ClinicalList({ items }) {
+  if (!items.length) return null;
+
+  return (
+    <ul className="analysis-clinical-list">
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
 function OrganizedAnalysis({ analysis }) {
   const data = buildAnalysisData(analysis);
 
@@ -435,6 +465,41 @@ function OrganizedAnalysis({ analysis }) {
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {(data.clinicalReview || data.abnormalFindings.length || data.clinicalSignificance || data.nextSteps.length || data.redFlags.length) && (
+        <section className="analysis-section analysis-section--clinical">
+          <h5>Doctor-style clinical review</h5>
+          {data.clinicalReview && <p className="analysis-note">{data.clinicalReview}</p>}
+
+          {data.abnormalFindings.length > 0 && (
+            <>
+              <h6>Key abnormal or important findings</h6>
+              <ClinicalList items={data.abnormalFindings} />
+            </>
+          )}
+
+          {data.clinicalSignificance && (
+            <>
+              <h6>Clinical significance</h6>
+              <p className="analysis-note">{data.clinicalSignificance}</p>
+            </>
+          )}
+
+          {data.nextSteps.length > 0 && (
+            <>
+              <h6>Recommended next steps</h6>
+              <ClinicalList items={data.nextSteps} />
+            </>
+          )}
+
+          {data.redFlags.length > 0 && (
+            <>
+              <h6>Red flags</h6>
+              <ClinicalList items={data.redFlags} />
+            </>
+          )}
         </section>
       )}
 
@@ -489,6 +554,8 @@ function OrganizedAnalysis({ analysis }) {
           </div>
         </details>
       )}
+
+      {data.disclaimer && <p className="analysis-disclaimer">{data.disclaimer}</p>}
     </div>
   );
 }
