@@ -201,7 +201,10 @@ const getAdminRecords = async (req, res) => {
   ] = await Promise.all([
     Report.find().populate("user", "name email role").sort({ createdAt: -1 }),
     LabTest.find().sort({ name: 1 }),
-    LabBooking.find().populate("user test", "name email price category").sort({ createdAt: -1 }),
+    LabBooking.find()
+      .populate("user", "name email role")
+      .populate("tests.test", "name price category reportTime")
+      .sort({ createdAt: -1 }),
     BloodDonor.find().populate("user", "name email phone").sort({ updatedAt: -1 }),
     Prescription.find().populate("user doctor issuedBy", "name email specialization role").sort({ createdAt: -1 }),
     Review.find().populate("user doctor", "name email specialization").sort({ createdAt: -1 }),

@@ -25,6 +25,7 @@ export default function SymptomPage() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -72,6 +73,7 @@ export default function SymptomPage() {
 
     try {
       setLoading(true);
+      setError("");
 
       const res = await api("/api/ai/symptoms", "POST", { symptoms: composedSymptoms }, token);
       const nextResult = {
@@ -90,8 +92,9 @@ export default function SymptomPage() {
         severity,
         result: nextResult,
       });
-    } catch {
-      alert("Failed to analyze symptoms");
+    } catch (err) {
+      setResult(null);
+      setError(err.message || "Failed to analyze symptoms");
     } finally {
       setLoading(false);
     }
@@ -133,6 +136,8 @@ export default function SymptomPage() {
       <button className="btn-primary" onClick={checkSymptoms} disabled={loading}>
         {loading ? "Analyzing..." : "Check Symptoms"}
       </button>
+
+      {error && <p className="auth-error">{error}</p>}
 
       <div className="symptom-results">
         {!result && !loading && (

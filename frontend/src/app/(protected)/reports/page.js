@@ -178,6 +178,8 @@ const patientDetailFields = [
   "Patient ID",
   "Client Name",
   "Age / Gender",
+  "Age",
+  "Gender",
   "Registration Details",
   "Registered On",
   "Collected On",
@@ -237,6 +239,68 @@ const extractLabeledValues = (text, labels) => {
     .filter(Boolean);
 };
 
+const cleanPatientValue = (label, value) => {
+  let nextValue = value
+    .replace(/\s+[-*]\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const stopPatterns = [
+    /\s+Age\s*\/\s*Gender\s*:?/i,
+    /\s+Age\s*:?/i,
+    /\s+Gender\s*:?/i,
+    /\s+Summary\s*:?/i,
+    /\s+Haematological Analysis/i,
+    /\s+Complete Blood Count/i,
+    /\s+CBC\s*Highlights/i,
+    /\s+Widal Test/i,
+    /\s+Liver Function Tests/i,
+    /\s+Malaria Parasite/i,
+    /\s+Urine Routine/i,
+    /\s+Chemical Examination/i,
+    /\s+Microscopic Examination/i,
+  ];
+
+  const stopIndexes = stopPatterns
+    .map((pattern) => nextValue.search(pattern))
+    .filter((index) => index > 0);
+
+  if (stopIndexes.length) {
+    nextValue = nextValue.slice(0, Math.min(...stopIndexes)).trim();
+  }
+
+  if (/Patient ID/i.test(label)) {
+    const idMatch = nextValue.match(/^[A-Z0-9-]+/i);
+    return idMatch?.[0] || nextValue;
+  }
+
+  return nextValue;
+};
+
+const extractPatientDetails = (text) => {
+  const details = extractLabeledValues(text, patientDetailFields)
+    .map((item) => ({
+      label: item.label,
+      value: cleanPatientValue(item.label, item.value),
+    }))
+    .filter((item) => item.value);
+
+  const hasAge = details.some((item) => /^Age$/i.test(item.label) || /^Age \/ Gender$/i.test(item.label));
+  const hasGender = details.some((item) => /^Gender$/i.test(item.label) || /^Age \/ Gender$/i.test(item.label));
+
+  if (!hasAge) {
+    const ageMatch = text.match(/\bAge\s*:?\s*([0-9]{1,3}\s*years?)/i);
+    if (ageMatch) details.push({ label: "Age", value: ageMatch[1].replace(/\s+/g, " ") });
+  }
+
+  if (!hasGender) {
+    const genderMatch = text.match(/\bGender\s*:?\s*(Female|Male|Other)/i);
+    if (genderMatch) details.push({ label: "Gender", value: genderMatch[1] });
+  }
+
+  return details;
+};
+
 const splitReference = (value) => {
   const referenceMatch = value.match(/\(Reference range:\s*([^)]+)\)/i);
   const result = value.replace(/\(Reference range:\s*[^)]+\)/i, "").trim();
@@ -279,6 +343,14 @@ const buildTestRows = (sectionText, labels) =>
     };
   });
 
+const buildReadableSummary = (text) =>
+  text
+    .replace(/Patient Review Summary\s*:?/i, "")
+    .split(/\s+\*\s+|\s+-\s+(?=[A-Z][A-Za-z\s()/%]+:)/)
+    .map((item) => item.replace(/\s+/g, " ").trim())
+    .filter((item) => item.length > 24)
+    .slice(0, 10);
+
 const buildWidalRows = (text) => {
   const widalText = getSectionText(text, "Widal Test");
   if (!widalText) return [];
@@ -304,7 +376,7 @@ const buildAnalysisData = (analysis) => {
 
   return {
     text,
-    patientDetails: extractLabeledValues(patientText, patientDetailFields),
+    patientDetails: extractPatientDetails(patientText),
     cbcRows: buildTestRows(cbcText, analysisTestGroups.cbc),
     widalRows: buildWidalRows(text),
     interpretation: getSectionText(text, "Interpretation"),
@@ -312,6 +384,7 @@ const buildAnalysisData = (analysis) => {
     malaria: malariaText,
     urineRows: buildTestRows(urineText, analysisTestGroups.urine),
     microscopyRows: buildTestRows(microscopyText, analysisTestGroups.microscopy),
+    summaryItems: buildReadableSummary(text),
   };
 };
 
@@ -404,6 +477,17 @@ function OrganizedAnalysis({ analysis }) {
           <h5>Microscopic examination</h5>
           <AnalysisTable rows={data.microscopyRows} />
         </section>
+      )}
+
+      {data.summaryItems.length > 0 && (
+        <details className="analysis-section analysis-raw">
+          <summary>Full organized summary</summary>
+          <div className="analysis-summary-list">
+            {data.summaryItems.map((item) => (
+              <p key={item}>{item}</p>
+            ))}
+          </div>
+        </details>
       )}
     </div>
   );

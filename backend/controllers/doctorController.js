@@ -1,4 +1,5 @@
 const Doctor = require("../models/Doctor");
+const User = require("../models/User");
 const doctors = require("../data/doctors");
 
 const seedDemoDoctorsIfEmpty = async () => {
@@ -48,10 +49,34 @@ const getMyDoctorProfile = async (req, res) => {
     return res.status(403).json({ msg: "Doctor account required" });
   }
 
-  const doctor = await Doctor.findOne({ user: req.user.id });
+  let doctor = await Doctor.findOne({ user: req.user.id });
 
   if (!doctor) {
-    return res.status(404).json({ msg: "Doctor profile not found" });
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: "Doctor account not found" });
+    }
+
+    doctor = await Doctor.create({
+      user: user._id,
+      name: user.name || "Doctor",
+      specialization: "General Physician",
+      hospital: "MediCare Online Clinic",
+      city: "",
+      address: "",
+      about: `${user.name || "This doctor"} is available for appointments, patient notes, prescriptions, and digital consultations.`,
+      experience: 0,
+      fees: 0,
+      image: "/doctor-hero.png",
+      availability: "Online consultation",
+      availableToday: true,
+      availabilitySchedule: [
+        { day: "Monday", startTime: "09:00", endTime: "17:00", mode: "both" },
+        { day: "Wednesday", startTime: "09:00", endTime: "17:00", mode: "both" },
+        { day: "Friday", startTime: "09:00", endTime: "17:00", mode: "both" },
+      ],
+    });
   }
 
   res.json(doctor);

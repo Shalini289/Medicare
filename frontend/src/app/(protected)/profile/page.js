@@ -273,9 +273,13 @@ export default function Profile() {
           <label>
             Phone
             <input
+              type="tel"
               name="phone"
               value={form.phone}
               onChange={handleFormChange}
+              autoComplete="tel"
+              inputMode="tel"
+              maxLength={20}
               placeholder="+91 98765 43210"
             />
           </label>

@@ -259,7 +259,13 @@
   color: #1f2937;
   min-height: 44px;
   padding: 10px 12px;
+  user-select: text;
   width: 100%;
+}
+
+.profile-form input[type="tel"] {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 .profile-form input:disabled {

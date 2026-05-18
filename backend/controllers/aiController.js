@@ -23,6 +23,90 @@ const fallbackConditions = [
   },
 ];
 
+const healthKeywords = [
+  "ache",
+  "allergy",
+  "anxiety",
+  "appetite",
+  "asthma",
+  "back",
+  "bleeding",
+  "blood",
+  "body",
+  "breath",
+  "breathing",
+  "burn",
+  "chest",
+  "cold",
+  "constipation",
+  "cough",
+  "cramp",
+  "diabetes",
+  "diarrhea",
+  "dizzy",
+  "doctor",
+  "dose",
+  "ear",
+  "eye",
+  "fatigue",
+  "fever",
+  "flu",
+  "head",
+  "headache",
+  "heart",
+  "infection",
+  "injury",
+  "itch",
+  "medicine",
+  "medication",
+  "migraine",
+  "nausea",
+  "pain",
+  "pregnancy",
+  "rash",
+  "sick",
+  "skin",
+  "sleep",
+  "sore",
+  "stomach",
+  "swelling",
+  "symptom",
+  "temperature",
+  "throat",
+  "tired",
+  "urine",
+  "vomit",
+  "weak",
+];
+
+const nonHealthKeywords = [
+  "code",
+  "cricket",
+  "finance",
+  "game",
+  "homework",
+  "javascript",
+  "movie",
+  "politics",
+  "python",
+  "recipe",
+  "salary",
+  "stock",
+  "travel",
+  "weather",
+];
+
+const isHealthRelated = (text = "") => {
+  const normalized = text.toLowerCase();
+  const hasHealthKeyword = healthKeywords.some((keyword) => normalized.includes(keyword));
+  const hasNonHealthKeyword = nonHealthKeywords.some((keyword) => normalized.includes(keyword));
+
+  if (hasHealthKeyword) return true;
+  if (hasNonHealthKeyword) return false;
+
+  return /\b(bp|b\.p\.|spo2|sugar|pulse|tablet|capsule|mg|ml|bpm|cbc|lft|rbc|wbc|hba1c)\b/i.test(text);
+};
+
 const buildFallback = (text) => {
   const normalized = text.toLowerCase();
   const matches = fallbackConditions.filter((item) =>
@@ -64,6 +148,12 @@ const symptomCheck = async (req, res) => {
     return res.status(400).json({ msg: "Symptoms are required" });
   }
 
+  if (!isHealthRelated(symptoms)) {
+    return res.status(400).json({
+      msg: "Please ask only health, symptom, medicine, or care-related questions.",
+    });
+  }
+
   const groq = createGroqClient();
 
   if (!groq) {
@@ -77,7 +167,7 @@ const symptomCheck = async (req, res) => {
         {
           role: "system",
           content:
-            "Return only valid JSON with keys: conditions array, urgency string, advice array, nextSteps array, summary string. Do not diagnose definitively.",
+            "You are a healthcare symptom checker. Answer only health, symptom, medicine, and care-related requests. If the request is unrelated to health, return valid JSON with empty conditions and advice arrays, urgency 'not_applicable', nextSteps containing one instruction to ask a health-related question, and summary saying you can only help with health-related questions. Return only valid JSON with keys: conditions array, urgency string, advice array, nextSteps array, summary string. Do not diagnose definitively.",
         },
         { role: "user", content: symptoms },
       ],

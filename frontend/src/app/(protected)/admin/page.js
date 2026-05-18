@@ -146,6 +146,13 @@ const getPersonName = (value, fallback = "Not assigned") => {
   return value.name || value.email || fallback;
 };
 
+const getBookedTests = (booking) => {
+  if (!Array.isArray(booking.tests) || booking.tests.length === 0) return "No tests";
+  return booking.tests
+    .map((item) => item.test?.name || "Lab test")
+    .join(", ");
+};
+
 const renderRecordValue = (value) => {
   if (value === null || value === undefined || value === "") return "Not set";
   if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -649,7 +656,8 @@ export default function AdminDashboard() {
               records={records.labBookings}
               fields={[
                 ["User", (item) => getPersonName(item.user)],
-                ["Test", (item) => getPersonName(item.test, "Test")],
+                ["Tests", (item) => getBookedTests(item)],
+                ["Total", (item) => formatCurrency(item.total)],
                 ["Status", (item) => item.status],
               ]}
             />
