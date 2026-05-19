@@ -20,12 +20,6 @@
   color: #c62828;
 }
 
-.report {
-  padding: 10px;
-  background: #fafafa;
-  margin-top: 10px;
-}
-
 .health-advice {
   margin: 10px 0 0 18px;
   color: #555;
@@ -42,8 +36,55 @@
   color: var(--muted-text);
 }
 
+.health-section-head {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.health-section-head p {
+  color: var(--muted-text);
+  margin-top: 4px;
+}
+
+.health-report-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.health-report-card {
+  background: #fffafb;
+  border: 1px solid #f0c8d5;
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.health-report-card h4 {
+  color: #111827;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.health-report-card span {
+  color: var(--muted-text);
+  display: block;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.health-report-card p {
+  color: #374151;
+  line-height: 1.55;
+  margin: 0;
+}
+
 @media (max-width: 640px) {
-  .health-actions {
+  .health-actions,
+  .health-section-head {
     display: grid;
   }
 }

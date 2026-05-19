@@ -434,6 +434,34 @@
   overflow-wrap: anywhere;
 }
 
+.record-analysis-preview {
+  display: grid;
+  gap: 8px;
+}
+
+.record-analysis-preview p {
+  color: #28222a;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.record-analysis-preview ul {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.record-analysis-preview li {
+  background: #fff3f7;
+  border-radius: 8px;
+  color: #7a3150;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 8px;
+}
+
 .admin-section {
   margin-bottom: 30px;
 }

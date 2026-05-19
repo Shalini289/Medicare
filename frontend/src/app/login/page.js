@@ -180,9 +180,9 @@ export default function LoginPage() {
         </div>
 
         <div className="login-footer">
-          <button className="text-link" onClick={() => router.push("/forgot-password")}>
+          {/* <button className="text-link" onClick={() => router.push("/forgot-password")}>
             Forgot password?
-          </button>
+          </button> */}
           <br />
           Do not have an account?{" "}
           <span onClick={()=>router.push("/signup")}>

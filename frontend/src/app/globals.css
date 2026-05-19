@@ -492,6 +492,68 @@ textarea,
   margin-top: 12px;
 }
 
+.analysis-overview {
+  align-items: stretch;
+  background: linear-gradient(135deg, #fffafb, #ffffff);
+  border: 1px solid #f0c8d5;
+  border-left: 4px solid #9f3f61;
+  border-radius: 10px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(240px, 0.8fr);
+  padding: 16px;
+}
+
+.analysis-overview__eyebrow {
+  color: #9f3f61;
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.analysis-overview h5 {
+  color: #28222a;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.analysis-overview p {
+  color: #374151;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.analysis-score-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysis-score-grid div {
+  background: #fff;
+  border: 1px solid #f7d9e3;
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  text-align: center;
+}
+
+.analysis-score-grid strong {
+  color: #9f3f61;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.analysis-score-grid span {
+  color: #6f6670;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .analysis-section {
   background: #fffafb;
   border: 1px solid #f0c8d5;
@@ -510,6 +572,21 @@ textarea,
   font-size: 13px;
   margin: 14px 0 8px;
   text-transform: uppercase;
+}
+
+.analysis-section-intro,
+.analysis-empty {
+  color: #6f6670;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.analysis-empty {
+  background: #fff;
+  border: 1px dashed #f0c8d5;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .analysis-detail-grid {
@@ -572,6 +649,29 @@ textarea,
   padding: 10px 12px;
   text-align: left;
   vertical-align: top;
+}
+
+.analysis-table td strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.result-chip {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
+}
+
+.result-chip--attention {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.result-chip--normal {
+  background: #dcfce7;
+  color: #166534;
 }
 
 .analysis-table th {
@@ -815,6 +915,14 @@ textarea,
 
   .analysis-table {
     min-width: 520px;
+  }
+
+  .analysis-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-score-grid {
+    grid-template-columns: 1fr;
   }
 }
 /* ===== BODY ===== */

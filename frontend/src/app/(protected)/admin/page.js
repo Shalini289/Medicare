@@ -153,7 +153,74 @@ const getBookedTests = (booking) => {
     .join(", ");
 };
 
+const cleanAnalysisText = (analysis) => {
+  const text = typeof analysis === "string"
+    ? analysis
+    : JSON.stringify(analysis || "");
+
+  return text
+    .replace(/\*\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const getAnalysisSection = (text, heading) => {
+  const headings = [
+    "Patient Review Summary",
+    "Doctor's Clinical Review",
+    "Key Abnormal Findings",
+    "Clinical Significance",
+    "Recommended Next Steps",
+    "Red Flags",
+    "Complete Blood Count (CBC) Highlights",
+    "Widal Test",
+    "Interpretation",
+    "Liver Function Tests",
+    "Urine Routine Examination",
+    "Microscopic Examination",
+    "Disclaimer",
+  ];
+  const startMatch = text.match(new RegExp(`${heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:?`, "i"));
+  if (!startMatch) return "";
+  const start = startMatch.index + startMatch[0].length;
+  const next = headings
+    .filter((item) => item !== heading)
+    .map((item) => text.slice(start).search(new RegExp(`${item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:?`, "i")))
+    .filter((index) => index >= 0)
+    .map((index) => start + index);
+  const end = next.length ? Math.min(...next) : text.length;
+  return text.slice(start, end).trim();
+};
+
+function AnalysisPreview({ analysis }) {
+  const text = cleanAnalysisText(analysis);
+  if (!text) return <strong>Not set</strong>;
+
+  const summary = getAnalysisSection(text, "Doctor's Clinical Review") ||
+    getAnalysisSection(text, "Patient Review Summary") ||
+    text;
+  const findings = getAnalysisSection(text, "Key Abnormal Findings")
+    .split(/\s*(?:;|\. (?=[A-Z])| - )\s*/)
+    .map((item) => item.replace(/^[-*]\s*/, "").trim())
+    .filter((item) => item.length > 12)
+    .slice(0, 3);
+
+  return (
+    <div className="record-analysis-preview">
+      <p>{summary.length > 260 ? `${summary.slice(0, 260).trim()}...` : summary}</p>
+      {findings.length > 0 && (
+        <ul>
+          {findings.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 const renderRecordValue = (value) => {
+  if (value?.type === "analysis") return <AnalysisPreview analysis={value.value} />;
   if (value === null || value === undefined || value === "") return "Not set";
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") return value.toLocaleString("en-IN");
@@ -638,7 +705,7 @@ export default function AdminDashboard() {
               records={records.reports}
               fields={[
                 ["Patient", (item) => getPersonName(item.user)],
-                ["Analysis", (item) => item.analysis],
+                ["Analysis", (item) => ({ type: "analysis", value: item.analysis })],
                 ["Created", (item) => formatDateTime(item.createdAt)],
               ]}
             />

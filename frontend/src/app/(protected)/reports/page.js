@@ -386,6 +386,15 @@ const buildAnalysisData = (analysis) => {
   const urineText = `${getSectionText(text, "Urine Routine Examination")} ${getSectionText(text, "Chemical Examination (by Reflectance Photometric Method)")}`;
   const microscopyText = getSectionText(text, "Microscopic Examination (Manual by Microscopy)");
 
+  const cbcRows = buildTestRows(cbcText, analysisTestGroups.cbc);
+  const widalRows = buildWidalRows(text);
+  const liverRows = buildTestRows(liverText, analysisTestGroups.liver);
+  const urineRows = buildTestRows(urineText, analysisTestGroups.urine);
+  const microscopyRows = buildTestRows(microscopyText, analysisTestGroups.microscopy);
+  const allRows = [...cbcRows, ...widalRows, ...liverRows, ...urineRows, ...microscopyRows];
+  const attentionRows = allRows.filter((row) => row.status === "is-attention");
+  const normalRows = allRows.filter((row) => row.status === "is-normal");
+
   return {
     text,
     patientDetails: extractPatientDetails(patientText),
@@ -394,20 +403,44 @@ const buildAnalysisData = (analysis) => {
     clinicalSignificance: getSectionText(text, "Clinical Significance"),
     nextSteps: splitClinicalItems(getSectionText(text, "Recommended Next Steps")),
     redFlags: splitClinicalItems(getSectionText(text, "Red Flags")),
-    cbcRows: buildTestRows(cbcText, analysisTestGroups.cbc),
-    widalRows: buildWidalRows(text),
+    cbcRows,
+    widalRows,
     interpretation: getSectionText(text, "Interpretation"),
-    liverRows: buildTestRows(liverText, analysisTestGroups.liver),
+    liverRows,
     malaria: malariaText,
-    urineRows: buildTestRows(urineText, analysisTestGroups.urine),
-    microscopyRows: buildTestRows(microscopyText, analysisTestGroups.microscopy),
+    urineRows,
+    microscopyRows,
+    attentionRows,
+    normalRows,
     summaryItems: buildReadableSummary(text),
     disclaimer: getSectionText(text, "Disclaimer"),
   };
 };
 
+const getFriendlyTakeaway = (data) => {
+  if (data.abnormalFindings.length) {
+    return "Some values need attention. Review the highlighted findings with a doctor, especially if symptoms are present.";
+  }
+
+  if (data.attentionRows.length) {
+    return "A few report values are outside or near clinical attention range. A doctor should correlate them with symptoms and history.";
+  }
+
+  if (data.normalRows.length) {
+    return "No major abnormal pattern was detected from the structured values shown here. Continue routine follow-up if symptoms persist.";
+  }
+
+  return "The report was processed, but only limited structured values could be detected. Open the full summary or extracted text for review.";
+};
+
+const SectionIntro = ({ children }) => (
+  <p className="analysis-section-intro">{children}</p>
+);
+
 function AnalysisTable({ rows }) {
-  if (!rows.length) return null;
+  if (!rows.length) {
+    return <p className="analysis-empty">No structured values detected in this section.</p>;
+  }
 
   return (
     <div className="analysis-table-wrap">
@@ -423,7 +456,11 @@ function AnalysisTable({ rows }) {
           {rows.map((row) => (
             <tr key={row.label} className={row.status}>
               <td>{row.label}</td>
-              <td>{row.result}</td>
+              <td>
+                <strong>{row.result}</strong>
+                {row.status === "is-attention" && <span className="result-chip result-chip--attention">Needs review</span>}
+                {row.status === "is-normal" && <span className="result-chip result-chip--normal">Within/expected</span>}
+              </td>
               <td>{row.reference}</td>
             </tr>
           ))}
@@ -454,6 +491,28 @@ function OrganizedAnalysis({ analysis }) {
 
   return (
     <div className="analysis-text">
+      <section className="analysis-overview">
+        <div>
+          <span className="analysis-overview__eyebrow">At a glance</span>
+          <h5>Report summary in simple words</h5>
+          <p>{getFriendlyTakeaway(data)}</p>
+        </div>
+        <div className="analysis-score-grid">
+          <div>
+            <strong>{data.attentionRows.length + data.abnormalFindings.length}</strong>
+            <span>Need review</span>
+          </div>
+          <div>
+            <strong>{data.normalRows.length}</strong>
+            <span>Looks okay</span>
+          </div>
+          <div>
+            <strong>{data.nextSteps.length || 1}</strong>
+            <span>Next steps</span>
+          </div>
+        </div>
+      </section>
+
       {data.patientDetails.length > 0 && (
         <section className="analysis-section">
           <h5>Patient details</h5>
@@ -505,12 +564,14 @@ function OrganizedAnalysis({ analysis }) {
 
       <section className="analysis-section">
         <h5>Complete Blood Count (CBC)</h5>
+        <SectionIntro>Blood count values help review anemia, infection pattern, inflammation, and platelet-related concerns.</SectionIntro>
         <AnalysisTable rows={data.cbcRows} />
       </section>
 
       {data.widalRows.length > 0 && (
         <section className="analysis-section">
           <h5>Widal test</h5>
+          <SectionIntro>Widal results should be interpreted with symptoms, fever history, and a doctor’s clinical examination.</SectionIntro>
           <AnalysisTable rows={data.widalRows} />
           {data.interpretation && <p className="analysis-note">{data.interpretation}</p>}
         </section>
@@ -519,6 +580,7 @@ function OrganizedAnalysis({ analysis }) {
       {data.liverRows.length > 0 && (
         <section className="analysis-section">
           <h5>Liver function tests</h5>
+          <SectionIntro>These enzymes help screen liver stress or inflammation, but symptoms and medicines also matter.</SectionIntro>
           <AnalysisTable rows={data.liverRows} />
         </section>
       )}
@@ -533,6 +595,7 @@ function OrganizedAnalysis({ analysis }) {
       {data.urineRows.length > 0 && (
         <section className="analysis-section">
           <h5>Urine routine and chemical examination</h5>
+          <SectionIntro>Urine findings can indicate hydration status, infection markers, sugar/protein loss, or blood cells.</SectionIntro>
           <AnalysisTable rows={data.urineRows} />
         </section>
       )}
@@ -540,6 +603,7 @@ function OrganizedAnalysis({ analysis }) {
       {data.microscopyRows.length > 0 && (
         <section className="analysis-section">
           <h5>Microscopic examination</h5>
+          <SectionIntro>Microscopy looks for cells, pus cells, bacteria, crystals, and other urine sediment findings.</SectionIntro>
           <AnalysisTable rows={data.microscopyRows} />
         </section>
       )}

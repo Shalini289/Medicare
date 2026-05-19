@@ -5,6 +5,27 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/utils/api";
 import { getToken } from "@/utils/auth";
 
+const getReportName = (file = "") =>
+  String(file || "Medical report").split(/[\\/]/).pop() || "Medical report";
+
+const getAnalysisPreview = (analysis) => {
+  const text = typeof analysis === "string"
+    ? analysis
+    : JSON.stringify(analysis || "");
+
+  if (!text.trim()) return "Analysis is processing or not available yet.";
+
+  const cleaned = text
+    .replace(/\*\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const preferred = cleaned.match(/(?:Doctor's Clinical Review|Patient Review Summary|Clinical Significance)\s*:?\s*([^]*?)(?:Key Abnormal Findings|Recommended Next Steps|Complete Blood Count|Widal Test|Disclaimer|$)/i);
+  const preview = preferred?.[1]?.trim() || cleaned;
+
+  return preview.length > 260 ? `${preview.slice(0, 260).trim()}...` : preview;
+};
+
 export default function HealthPage() {
   const token = getToken();
   const [reports, setReports] = useState([]);
@@ -101,14 +122,29 @@ export default function HealthPage() {
       </div>
 
       <div className="card">
-        <h3>Reports</h3>
-
-        {reports.map(rep => (
-          <div key={rep._id} className="report">
-            <p>{rep.file}</p>
-            <small>{typeof rep.analysis === "string" ? rep.analysis : JSON.stringify(rep.analysis) || "Processing..."}</small>
+        <div className="health-section-head">
+          <div>
+            <h3>Reports</h3>
+            <p>Recent report summaries from your uploaded medical records.</p>
           </div>
-        ))}
+          <Link className="btn-secondary" href="/reports">
+            View full reports
+          </Link>
+        </div>
+
+        {reports.length === 0 && <p>No reports uploaded yet.</p>}
+
+        <div className="health-report-list">
+          {reports.slice(0, 3).map((rep) => (
+            <article key={rep._id} className="health-report-card">
+              <div>
+                <h4>{getReportName(rep.file)}</h4>
+                <span>{rep.createdAt ? new Date(rep.createdAt).toLocaleDateString("en-IN") : "Date not available"}</span>
+              </div>
+              <p>{getAnalysisPreview(rep.analysis)}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   );
