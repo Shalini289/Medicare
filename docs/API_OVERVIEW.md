@@ -1,0 +1,105 @@
+# API Overview
+
+Base backend URL in local development:
+
+```text
+http://localhost:5000
+```
+
+Frontend should use:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+## API Groups
+
+| Area | Base Route | Purpose |
+| --- | --- | --- |
+| Auth | `/api/auth` | Signup, login, profile, password, 2FA, reset password |
+| Dashboard | `/api/dashboard` | Patient dashboard data |
+| Doctors | `/api/doctors` | Doctor listing and doctor profile |
+| Doctor Portal | `/api/doctor-portal` | Doctor dashboard, notes, prescriptions, diagnosis support |
+| Appointments | `/api/appointments` | Booking, slots, appointment history, cancellation |
+| Pharmacy | `/api/pharmacy` | Medicines, orders, inventory, alerts |
+| Blood Donors | `/api/blood-donors` | Donor search and donor profile |
+| Payment | `/api/payment` | Razorpay order and verification |
+| Reports | `/api/report` | Upload reports, list reports, delete reports |
+| AI | `/api/ai` | Symptom checker |
+| Risk | `/api/risk` | Report-based risk prediction |
+| Reviews | `/api/review` | Doctor reviews |
+| Family | `/api/family` | Family member management |
+| Chat | `/api/chat` | Chat threads and messages |
+| Hospital | `/api/hospital` | Public hospitals and hospital portal |
+| Admin | `/api/admin` | Admin analytics and CRUD modules |
+| Notifications | `/api/notifications` | Notification list and status |
+| Medicine Reminders | `/api/medicine-reminders` | Reminder CRUD and taken status |
+| Prescriptions | `/api/prescriptions` | Patient prescription list |
+| Vitals | `/api/vitals` | Vitals tracking |
+| Medical Profile | `/api/medical-profile` | Medical ID and emergency contacts |
+| Lab Tests | `/api/lab-tests` | Lab catalog, bookings, pathology portal |
+| Care Plans | `/api/care-plans` | Care plan and task tracking |
+| Vaccinations | `/api/vaccinations` | Vaccination tracking |
+
+## Auth Pattern
+
+Protected requests send:
+
+```text
+Authorization: Bearer <jwt>
+```
+
+Frontend wrapper:
+
+```text
+frontend/src/utils/api.js
+```
+
+## Important Protected Areas
+
+| Route | Middleware |
+| --- | --- |
+| `/api/admin/*` | `protect, admin` |
+| `/api/doctor-portal/*` | `protect, doctorOnly` |
+| `/api/lab-tests/pathology/*` | `protect, pathologyOnly` |
+| `/api/hospital/portal` | `protect, hospitalOnly` |
+| Pharmacy staff routes | `protect, pharmacyStaff` |
+
+## Uploads
+
+Report upload:
+
+```text
+POST /api/report/upload
+Content-Type: multipart/form-data
+field: file
+```
+
+Allowed report types:
+
+```text
+PDF, PNG, JPG, JPEG
+```
+
+## Realtime Events
+
+Socket.io runs on the backend server.
+
+Common event areas:
+
+- Chat messages
+- Notifications
+- `bedUpdate`
+- `ambulanceUpdate`
+
+## Error Format
+
+Most backend errors return:
+
+```json
+{
+  "msg": "Error message"
+}
+```
+
+The frontend API wrapper converts failed responses into readable exceptions with status and endpoint.

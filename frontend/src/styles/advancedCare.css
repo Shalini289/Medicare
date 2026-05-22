@@ -1,0 +1,134 @@
+.advanced-care-page {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 48px 20px;
+}
+
+.advanced-care-hero {
+  background: linear-gradient(135deg, #fff2f6, #ffffff);
+  border: 1px solid #f0c8d5;
+  border-radius: 14px;
+  padding: 28px;
+}
+
+.advanced-care-hero h1 {
+  color: #28222a;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1;
+  margin: 8px 0 12px;
+}
+
+.advanced-care-hero p {
+  color: #5f5863;
+  font-size: 18px;
+  line-height: 1.55;
+  max-width: 780px;
+}
+
+.advanced-feature-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.advanced-feature-card {
+  background: #fff;
+  border: 1px solid #f0dbe3;
+  border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(69, 34, 48, 0.07);
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
+
+.advanced-feature-card__head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.advanced-feature-icon {
+  align-items: center;
+  background: #fff2f6;
+  border-radius: 10px;
+  color: #9f3f61;
+  display: inline-flex;
+  font-size: 20px;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+.advanced-status {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+
+.advanced-status.is-live {
+  background: #e6f7ec;
+  color: #24733a;
+}
+
+.advanced-status.is-planned {
+  background: #fff4e5;
+  color: #b95d00;
+}
+
+.advanced-feature-card h2 {
+  color: #28222a;
+  font-size: 22px;
+}
+
+.advanced-feature-card p {
+  color: #5f5863;
+  line-height: 1.55;
+}
+
+.advanced-feature-columns {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.advanced-feature-columns div {
+  background: #fffafb;
+  border: 1px solid #f7d9e3;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.advanced-feature-columns h3 {
+  color: #8d3f59;
+  font-size: 13px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.advanced-feature-columns ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.advanced-feature-columns li {
+  color: #374151;
+  line-height: 1.4;
+}
+
+.advanced-feature-card a {
+  color: #9f3f61;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+@media (max-width: 860px) {
+  .advanced-feature-grid,
+  .advanced-feature-columns {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,4 +1,5 @@
 const Hospital = require("../models/Hospital");
+const User = require("../models/User");
 
 const buildHospitalSummary = (hospital) => {
   const beds = hospital.beds || {};
@@ -31,6 +32,36 @@ const getHospitals = async (req, res) => {
   res.json(await Hospital.find());
 };
 
+const ensureHospitalProfile = async (userId) => {
+  let hospital = await Hospital.findOne({ user: userId });
+  if (hospital) return hospital;
+
+  const user = await User.findById(userId);
+  if (!user || user.role !== "hospital") return null;
+
+  hospital = await Hospital.create({
+    user: user._id,
+    name: user.name || "MediCare Hospital",
+    city: "",
+    address: "",
+    phone: user.phone || "",
+    emergencyPhone: "",
+    status: "active",
+    beds: {
+      ICU: 0,
+      oxygen: 0,
+      general: 0,
+    },
+    occupiedBeds: {
+      ICU: 0,
+      oxygen: 0,
+      general: 0,
+    },
+  });
+
+  return hospital;
+};
+
 const updateBeds = async (req, res) => {
   if (!req.body.id || !req.body.beds) {
     return res.status(400).json({ msg: "Hospital id and beds are required" });
@@ -52,7 +83,7 @@ const updateBeds = async (req, res) => {
 };
 
 const getMyHospitalDashboard = async (req, res) => {
-  const hospital = await Hospital.findOne({ user: req.user.id });
+  const hospital = await ensureHospitalProfile(req.user.id);
 
   if (!hospital) {
     return res.status(404).json({ msg: "Hospital profile not found" });
@@ -87,6 +118,8 @@ const updateMyHospital = async (req, res) => {
   if (!payload.name || !payload.city) {
     return res.status(400).json({ msg: "Hospital name and city are required" });
   }
+
+  await ensureHospitalProfile(req.user.id);
 
   const hospital = await Hospital.findOneAndUpdate(
     { user: req.user.id },

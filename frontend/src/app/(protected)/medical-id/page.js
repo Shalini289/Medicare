@@ -203,8 +203,9 @@ export default function MedicalIdPage() {
         allergies: splitText(form.allergiesText),
         conditions: splitText(form.conditionsText),
         currentMedications: splitText(form.currentMedicationsText),
-        medicalHistory: form.medicalHistory.map(({ clientId, ...entry }) => ({
-          attachments: splitText(entry.attachmentsText),
+        medicalHistory: form.medicalHistory.map(({ clientId, attachmentsText, ...entry }) => ({
+          ...entry,
+          attachments: splitText(attachmentsText),
         })),
         emergencyContacts: form.emergencyContacts.map(({ clientId, ...contact }) => contact),
         insurance: {

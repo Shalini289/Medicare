@@ -29,6 +29,7 @@ const navGroups = [
     label: "Health",
     items: [
       { label: "Health Summary", href: "/health" },
+      { label: "Advanced Care", href: "/advanced-care" },
       { label: "Vitals", href: "/vitals" },
       { label: "Medical History", href: "/medical-id" },
       { label: "Emergency Contacts", href: "/emergency-contacts" },

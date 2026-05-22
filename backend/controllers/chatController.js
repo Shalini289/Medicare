@@ -5,7 +5,35 @@ const Notification = require("../models/Notification");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
-const getOwnDoctor = (userId) => Doctor.findOne({ user: userId });
+const getOwnDoctor = async (userId) => {
+  let doctor = await Doctor.findOne({ user: userId });
+  if (doctor) return doctor;
+
+  const user = await User.findById(userId);
+  if (!user || user.role !== "doctor") return null;
+
+  doctor = await Doctor.create({
+    user: user._id,
+    name: user.name || "Doctor",
+    specialization: "General Physician",
+    hospital: "MediCare Online Clinic",
+    city: "",
+    address: "",
+    about: `${user.name || "This doctor"} is available for patient chat, appointments, prescriptions, and digital consultations.`,
+    experience: 0,
+    fees: 0,
+    image: "/doctor-hero.png",
+    availability: "Online consultation",
+    availableToday: true,
+    availabilitySchedule: [
+      { day: "Monday", startTime: "09:00", endTime: "17:00", mode: "both" },
+      { day: "Wednesday", startTime: "09:00", endTime: "17:00", mode: "both" },
+      { day: "Friday", startTime: "09:00", endTime: "17:00", mode: "both" },
+    ],
+  });
+
+  return doctor;
+};
 
 const serializeThreadDoctor = (doctor, lastMessage = null) => ({
   _id: doctor._id,

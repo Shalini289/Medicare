@@ -11,6 +11,7 @@ import "../styles/admin.css";
 import "../styles/pathology.css";
 import "../styles/hospitalPortal.css";
 import "../styles/findCare.css";
+import "../styles/advancedCare.css";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
