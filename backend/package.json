@@ -7,7 +7,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed:doctors": "node scripts/seedDoctors.js",
-    "seed:medicines": "node scripts/seedMedicines.js"
+    "seed:medicines": "node scripts/seedMedicines.js",
+    "seed:demo": "node scripts/seedDemo.js"
   },
   "keywords": [],
   "author": "",
