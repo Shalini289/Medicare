@@ -3,6 +3,89 @@ const Doctor = require("../models/Doctor");
 const Notification = require("../models/Notification");
 const mongoose = require("mongoose");
 
+const AVERAGE_CONSULT_MINUTES = 15;
+
+const getToday = () => new Date().toISOString().slice(0, 10);
+
+const toMinutes = (time = "00:00") => {
+  const [hours, minutes] = String(time).split(":").map(Number);
+  return (Number.isFinite(hours) ? hours : 0) * 60 + (Number.isFinite(minutes) ? minutes : 0);
+};
+
+const getNowMinutes = () => {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+};
+
+const buildQueue = async ({ doctorId, date, userId = "" }) => {
+  const doctor = await Doctor.findById(doctorId).select("name specialization hospital slotDurationMinutes");
+
+  if (!doctor) {
+    return null;
+  }
+
+  const appointments = await Appointment.find({ doctor: doctorId, date })
+    .populate("user patient", "name email phone")
+    .sort({ time: 1, createdAt: 1 });
+
+  const activeAppointments = appointments.filter((item) => item.status !== "cancelled");
+  const waitingAppointments = activeAppointments.filter((item) => item.status === "booked");
+  const completedCount = activeAppointments.filter((item) => item.status === "completed").length;
+  const slotMinutes = Number(doctor.slotDurationMinutes || AVERAGE_CONSULT_MINUTES);
+  const nowMinutes = date === getToday() ? getNowMinutes() : 0;
+  const firstWaiting = waitingAppointments[0] || null;
+  const scheduledStart = firstWaiting ? toMinutes(firstWaiting.time) : 0;
+  const predictedDelayMinutes = firstWaiting && date === getToday()
+    ? Math.max(nowMinutes - scheduledStart, 0)
+    : 0;
+
+  const queue = activeAppointments.map((appointment, index) => {
+    const activeBefore = activeAppointments
+      .slice(0, index)
+      .filter((item) => item.status === "booked").length;
+    const waitingPosition = appointment.status === "booked" ? activeBefore + 1 : 0;
+    const estimatedWaitMinutes = appointment.status === "booked"
+      ? Math.max((waitingPosition - 1) * slotMinutes + predictedDelayMinutes, 0)
+      : 0;
+
+    return {
+      _id: appointment._id,
+      tokenNumber: index + 1,
+      queuePosition: waitingPosition,
+      estimatedWaitMinutes,
+      status: appointment.status,
+      date: appointment.date,
+      time: appointment.time,
+      patient: appointment.patient || appointment.user,
+      user: appointment.user,
+      isMine: userId
+        ? appointment.user?._id?.toString() === userId || appointment.patient?._id?.toString() === userId
+        : false,
+    };
+  });
+
+  return {
+    doctor,
+    date,
+    stats: {
+      totalTokens: activeAppointments.length,
+      waiting: waitingAppointments.length,
+      completed: completedCount,
+      currentToken: firstWaiting ? queue.find((item) => item._id.toString() === firstWaiting._id.toString())?.tokenNumber || null : null,
+      predictedDelayMinutes,
+      averageConsultMinutes: slotMinutes,
+    },
+    queue,
+  };
+};
+
+const emitQueueUpdate = (req, appointment) => {
+  req.app.get("io")?.emit("appointmentQueueUpdated", {
+    doctor: appointment.doctor?.toString(),
+    date: appointment.date,
+  });
+};
+
 const bookAppointment = async (req, res) => {
   try {
     const { doctor, date, time, patient } = req.body;
@@ -35,6 +118,7 @@ const bookAppointment = async (req, res) => {
     });
 
     req.app.get("io").emit("slotBooked", appointment);
+    emitQueueUpdate(req, appointment);
 
     await Notification.create({
       user: req.user.id,
@@ -60,6 +144,46 @@ const getMyAppointments = async (req, res) => {
   res.json(data);
 };
 
+const getAppointmentQueue = async (req, res) => {
+  const doctorId = req.query.doctor;
+  const date = req.query.date || getToday();
+
+  if (!doctorId || !mongoose.isValidObjectId(doctorId)) {
+    return res.status(400).json({ msg: "Valid doctor is required" });
+  }
+
+  const queue = await buildQueue({ doctorId, date, userId: req.user.id });
+
+  if (!queue) {
+    return res.status(404).json({ msg: "Doctor not found" });
+  }
+
+  res.json(queue);
+};
+
+const getMyAppointmentQueues = async (req, res) => {
+  const appointments = await Appointment.find({
+    user: req.user.id,
+    status: "booked",
+    date: { $gte: getToday() },
+  })
+    .populate("doctor", "name specialization hospital slotDurationMinutes")
+    .sort({ date: 1, time: 1 })
+    .limit(8);
+
+  const queues = await Promise.all(
+    appointments.map((appointment) =>
+      buildQueue({
+        doctorId: appointment.doctor?._id || appointment.doctor,
+        date: appointment.date,
+        userId: req.user.id,
+      })
+    )
+  );
+
+  res.json(queues.filter(Boolean));
+};
+
 const getSlots = async (req, res) => {
   const { doctorId, date } = req.params;
 
@@ -81,6 +205,7 @@ const cancelAppointment = async (req, res) => {
 
   appt.status = "cancelled";
   await appt.save();
+  emitQueueUpdate(req, appt);
 
   await Notification.create({
     user: req.user.id,
@@ -94,6 +219,8 @@ const cancelAppointment = async (req, res) => {
 
 module.exports = {
   bookAppointment,
+  getAppointmentQueue,
+  getMyAppointmentQueues,
   getMyAppointments,
   getSlots,
   cancelAppointment

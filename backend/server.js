@@ -50,6 +50,7 @@ app.use("/api/payment", require("./routes/payment"));
 app.use("/api/report", require("./routes/report"));
 app.use("/api/ai", require("./routes/ai"));
 app.use("/api/risk", require("./routes/risk"));
+app.use("/api/health-emi", require("./routes/healthEmi"));
 app.use("/api/review", require("./routes/review"));
 app.use("/api/family", require("./routes/family"));
 app.use("/api/chat", require("./routes/chat"));

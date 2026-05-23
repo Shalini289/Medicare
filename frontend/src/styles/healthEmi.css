@@ -1,0 +1,235 @@
+.health-emi-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.health-emi-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 28px;
+}
+
+.health-emi-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.health-emi-hero p,
+.health-emi-hero-card span,
+.emi-empty-state p,
+.emi-score-card p {
+  color: var(--muted-text);
+  line-height: 1.7;
+}
+
+.health-emi-hero-card,
+.health-emi-form,
+.health-emi-result,
+.emi-metric,
+.emi-plan-card,
+.emi-info-block {
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.health-emi-hero-card {
+  display: grid;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.health-emi-hero-card svg,
+.emi-empty-state svg,
+.emi-section-head svg {
+  color: var(--primary);
+}
+
+.health-emi-hero-card svg {
+  font-size: 30px;
+}
+
+.health-emi-hero-card strong {
+  font-size: 1.4rem;
+}
+
+.health-emi-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 410px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.health-emi-form,
+.health-emi-result {
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.health-emi-form {
+  display: grid;
+  gap: 18px;
+}
+
+.health-emi-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.health-emi-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.health-emi-form input,
+.health-emi-form select {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  background: #fff;
+  font: inherit;
+}
+
+.health-emi-form button {
+  border: 0;
+  border-radius: 8px;
+  padding: 13px 16px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+}
+
+.health-emi-form button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.emi-empty-state {
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.emi-empty-state svg {
+  font-size: 32px;
+}
+
+.emi-score-card {
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.emi-score-meter {
+  display: grid;
+  width: 126px;
+  height: 126px;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #fff 58%, transparent 60%),
+    conic-gradient(var(--primary) var(--score), #f3dbe4 0);
+}
+
+.emi-score-meter span {
+  color: var(--primary);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.emi-stat-grid,
+.emi-plan-grid,
+.emi-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.emi-metric,
+.emi-plan-card,
+.emi-info-block {
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.emi-metric span,
+.emi-plan-card strong {
+  display: block;
+  color: var(--muted-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.emi-metric strong,
+.emi-plan-card span {
+  display: block;
+  margin-top: 6px;
+  color: var(--primary);
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.emi-plan-section {
+  margin-bottom: 18px;
+}
+
+.emi-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.emi-plan-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+.emi-insight-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+.emi-info-block ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted-text);
+  line-height: 1.6;
+}
+
+@media (max-width: 1020px) {
+  .health-emi-hero,
+  .health-emi-layout,
+  .emi-score-card,
+  .emi-insight-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .health-emi-page {
+    width: min(100% - 22px, 1180px);
+    padding-top: 26px;
+  }
+
+  .emi-stat-grid,
+  .emi-plan-grid {
+    grid-template-columns: 1fr;
+  }
+}

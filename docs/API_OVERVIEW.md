@@ -20,13 +20,14 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 | Dashboard | `/api/dashboard` | Patient dashboard data |
 | Doctors | `/api/doctors` | Doctor listing and doctor profile |
 | Doctor Portal | `/api/doctor-portal` | Doctor dashboard, notes, prescriptions, diagnosis support |
-| Appointments | `/api/appointments` | Booking, slots, appointment history, cancellation |
+| Appointments | `/api/appointments` | Booking, slots, appointment history, cancellation, live queue |
 | Pharmacy | `/api/pharmacy` | Medicines, orders, inventory, alerts |
 | Blood Donors | `/api/blood-donors` | Donor search and donor profile |
 | Payment | `/api/payment` | Razorpay order and verification |
 | Reports | `/api/report` | Upload reports, list reports, delete reports |
 | AI | `/api/ai` | Symptom checker |
 | Risk | `/api/risk` | Report-based risk prediction |
+| Health EMI | `/api/health-emi` | EMI eligibility scoring and repayment options |
 | Reviews | `/api/review` | Doctor reviews |
 | Family | `/api/family` | Family member management |
 | Chat | `/api/chat` | Chat threads and messages |
@@ -34,7 +35,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 | Admin | `/api/admin` | Admin analytics and CRUD modules |
 | Notifications | `/api/notifications` | Notification list and status |
 | Medicine Reminders | `/api/medicine-reminders` | Reminder CRUD and taken status |
-| Prescriptions | `/api/prescriptions` | Patient prescription list |
+| Prescriptions | `/api/prescriptions` | Patient prescription list and prescription analysis |
 | Vitals | `/api/vitals` | Vitals tracking |
 | Medical Profile | `/api/medical-profile` | Medical ID and emergency contacts |
 | Lab Tests | `/api/lab-tests` | Lab catalog, bookings, pathology portal |
@@ -81,6 +82,32 @@ Allowed report types:
 PDF, PNG, JPG, JPEG
 ```
 
+Prescription analysis upload:
+
+```text
+POST /api/prescriptions/analyze
+Content-Type: multipart/form-data
+field: file
+```
+
+Health EMI prediction:
+
+```text
+POST /api/health-emi/predict
+```
+
+Voice assistant health guidance uses:
+
+```text
+POST /api/ai/symptoms
+```
+
+Offline clinic sync uses the doctor note API:
+
+```text
+POST /api/doctor-portal/notes
+```
+
 ## Realtime Events
 
 Socket.io runs on the backend server.
@@ -91,6 +118,7 @@ Common event areas:
 - Notifications
 - `bedUpdate`
 - `ambulanceUpdate`
+- `appointmentQueueUpdated`
 
 ## Error Format
 

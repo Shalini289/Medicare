@@ -7,7 +7,12 @@ This file groups MediCare features by user role and product area.
 - Dashboard overview
 - Doctor browsing
 - Appointment booking
+- Live appointment queue with tokens and wait time
 - AI symptom checker
+- AI prescription analyzer
+- Health EMI eligibility prediction
+- Offline clinic visit capture and sync
+- Voice-based rural assistant with speech input and spoken guidance
 - Medical report upload and AI analysis
 - Health dashboard
 - Vitals tracking
@@ -53,6 +58,8 @@ This file groups MediCare features by user role and product area.
 - Digital prescription creation
 - Diagnosis suggestions
 - Appointment status updates
+- Live queue updates when appointments are completed or cancelled
+- Offline-to-online clinic mode for local visit capture and note sync
 
 ## Pathology Features
 
@@ -85,7 +92,10 @@ This file groups MediCare features by user role and product area.
 
 - Health-only symptom checker
 - AI medical report analysis
+- AI prescription analysis with OCR and medication safety review
 - Doctor-style report review
+- Health EMI scoring and repayment plan suggestions
+- Voice assistant backed by health-only symptom guidance
 - Diagnosis suggestion support inside doctor portal
 - Advanced Care roadmap page
 
@@ -94,21 +104,22 @@ This file groups MediCare features by user role and product area.
 The Advanced Care page documents product-level enhancements:
 
 - AI Symptom Checker
-- Smart Appointment Queue
+- Smart Appointment Queue (live)
 - Emergency One-Tap Health Share
-- AI Prescription Analyzer
+- AI Prescription Analyzer (live)
 - Family Health Dashboard
-- Health EMI Eligibility Predictor
+- Health EMI Eligibility Predictor (live)
 - Doctor Availability Prediction
-- Voice-Based Rural Assistant
+- Voice-Based Rural Assistant (live)
 - Medicine Reminder + Adherence
-- Offline-to-Online Clinic System
+- Offline-to-Online Clinic System (live)
 
 ## Realtime Features
 
 - Chat
 - Notifications
 - Hospital bed updates
+- Appointment queue updates
 - Operational updates through Socket.io
 
 ## Payments and Communication

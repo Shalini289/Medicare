@@ -1,0 +1,262 @@
+.offline-clinic-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.offline-clinic-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 28px;
+}
+
+.offline-clinic-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.offline-clinic-hero p,
+.offline-sync-panel p,
+.offline-empty-state p,
+.offline-draft-card p,
+.offline-draft-card small {
+  color: var(--muted-text);
+  line-height: 1.7;
+}
+
+.offline-status-card,
+.offline-visit-form,
+.offline-sync-panel,
+.offline-metric,
+.offline-draft-card {
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.offline-status-card {
+  display: grid;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.offline-status-card svg {
+  color: var(--primary);
+  font-size: 30px;
+}
+
+.offline-status-card strong {
+  font-size: 1.45rem;
+}
+
+.offline-status-card.is-offline {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.offline-status-card.is-online {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.offline-clinic-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.offline-visit-form,
+.offline-sync-panel {
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.offline-visit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.offline-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.offline-section-head svg {
+  color: var(--primary);
+}
+
+.offline-visit-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.offline-visit-form input,
+.offline-visit-form select,
+.offline-visit-form textarea {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  background: #fff;
+  font: inherit;
+}
+
+.offline-visit-form textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.offline-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.offline-visit-form button,
+.offline-section-head button,
+.offline-draft-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+}
+
+.offline-section-head button:disabled,
+.offline-draft-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.offline-status-message {
+  border-radius: 8px;
+  padding: 12px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-weight: 800;
+}
+
+.offline-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.offline-metric {
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.offline-metric span {
+  display: block;
+  color: var(--muted-text);
+  font-weight: 800;
+}
+
+.offline-metric strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--primary);
+  font-size: 1.6rem;
+}
+
+.offline-draft-list {
+  display: grid;
+  gap: 12px;
+}
+
+.offline-empty-state {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.offline-empty-state svg {
+  color: var(--primary);
+  font-size: 32px;
+}
+
+.offline-draft-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.offline-draft-card span {
+  display: inline-flex;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.offline-draft-card.is-synced span {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.offline-draft-card.is-failed span {
+  background: #fef2f2;
+  color: #b42318;
+}
+
+.offline-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.offline-draft-actions button:last-child {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 1020px) {
+  .offline-clinic-hero,
+  .offline-clinic-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .offline-clinic-page {
+    width: min(100% - 22px, 1180px);
+    padding-top: 26px;
+  }
+
+  .offline-form-grid,
+  .offline-metrics,
+  .offline-draft-card {
+    grid-template-columns: 1fr;
+  }
+
+  .offline-draft-actions {
+    justify-content: stretch;
+  }
+}

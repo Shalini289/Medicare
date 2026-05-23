@@ -1,5 +1,8 @@
 const Prescription = require("../models/Prescription");
 const Notification = require("../models/Notification");
+const extractText = require("../utils/extractText");
+const analyzePrescriptionText = require("../utils/prescriptionAnalyzer");
+const fs = require("fs/promises");
 
 const getUserId = (req) => req.user.id || req.user._id;
 
@@ -39,6 +42,49 @@ exports.getPrescriptions = async (req, res) => {
     .sort({ issuedDate: -1, createdAt: -1 });
 
   res.json(prescriptions);
+};
+
+exports.analyzePrescription = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ msg: "Prescription file is required" });
+  }
+
+  const filePath = req.file.path;
+  let extractedText = "";
+
+  try {
+    extractedText = await extractText(filePath);
+  } catch (err) {
+    return res.status(400).json({
+      msg: `Prescription text could not be read: ${err.message}`,
+    });
+  } finally {
+    await fs.unlink(filePath).catch(() => {});
+  }
+
+  if (!extractedText?.trim()) {
+    return res.status(400).json({
+      msg: "No readable prescription text was found. Upload a clearer image or PDF.",
+    });
+  }
+
+  const analysis = await analyzePrescriptionText(extractedText);
+
+  res.json({
+    fileName: req.file.originalname,
+    extractedText,
+    analysis,
+  });
+};
+
+exports.handlePrescriptionUploadError = (err, req, res, next) => {
+  if (!err) return next();
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ msg: "Prescription file must be 8MB or smaller" });
+  }
+
+  res.status(400).json({ msg: err.message || "Prescription upload failed" });
 };
 
 exports.createPrescription = async (req, res) => {

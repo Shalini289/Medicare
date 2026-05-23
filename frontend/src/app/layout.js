@@ -12,6 +12,11 @@ import "../styles/pathology.css";
 import "../styles/hospitalPortal.css";
 import "../styles/findCare.css";
 import "../styles/advancedCare.css";
+import "../styles/appointmentQueue.css";
+import "../styles/prescriptionAnalyzer.css";
+import "../styles/healthEmi.css";
+import "../styles/offlineClinic.css";
+import "../styles/voiceAssistant.css";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";

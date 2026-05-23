@@ -1,0 +1,255 @@
+.queue-page {
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 48px 20px;
+}
+
+.queue-hero {
+  align-items: center;
+  background: linear-gradient(135deg, #fff2f6, #ffffff);
+  border: 1px solid #f0c8d5;
+  border-radius: 14px;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 28px;
+}
+
+.queue-hero h1 {
+  color: #28222a;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1;
+  margin: 8px 0 10px;
+}
+
+.queue-hero p,
+.queue-board__head p {
+  color: #5f5863;
+}
+
+.queue-alert {
+  background: #fdecea;
+  border: 1px solid #ffc9c9;
+  border-radius: 10px;
+  color: #b71c1c;
+  font-weight: 800;
+  margin-top: 18px;
+  padding: 12px;
+}
+
+.queue-controls {
+  background: #fff;
+  border: 1px solid #f0dbe3;
+  border-radius: 12px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1.5fr 1fr;
+  margin-top: 20px;
+  padding: 18px;
+}
+
+.queue-controls label {
+  color: #344054;
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.queue-controls select,
+.queue-controls input {
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.my-queues {
+  margin-top: 20px;
+}
+
+.my-queues h2,
+.queue-board h2 {
+  color: #28222a;
+}
+
+.my-queues > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.my-queues button {
+  background: #fffafb;
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  color: #28222a;
+  cursor: pointer;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.my-queues span {
+  color: #6f6670;
+  font-size: 13px;
+}
+
+.queue-stats {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 22px;
+}
+
+.queue-stats div,
+.queue-my-token,
+.queue-board {
+  background: #fff;
+  border: 1px solid #f0dbe3;
+  border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(69, 34, 48, 0.07);
+}
+
+.queue-stats div {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.queue-stats svg {
+  color: #c65f80;
+  font-size: 22px;
+}
+
+.queue-stats span {
+  color: #6f6670;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.queue-stats strong {
+  color: #9f3f61;
+  font-size: 28px;
+}
+
+.queue-my-token {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: auto 1fr;
+  margin-top: 20px;
+  padding: 18px;
+}
+
+.queue-my-token div {
+  background: #fff2f6;
+  border-radius: 12px;
+  display: grid;
+  min-width: 120px;
+  padding: 14px;
+  text-align: center;
+}
+
+.queue-my-token span {
+  color: #9f3f61;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.queue-my-token strong {
+  color: #28222a;
+  font-size: 34px;
+}
+
+.queue-my-token p {
+  color: #374151;
+  line-height: 1.5;
+}
+
+.queue-board {
+  margin-top: 22px;
+  padding: 20px;
+}
+
+.queue-board__head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.queue-board__head > span {
+  background: #fff2f6;
+  border-radius: 999px;
+  color: #9f3f61;
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.queue-token {
+  align-items: center;
+  border-top: 1px solid #f0dbe3;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto 1fr auto;
+  padding: 14px 0;
+}
+
+.queue-token.is-mine {
+  background: #fffafb;
+  border: 1px solid #f0c8d5;
+  border-radius: 12px;
+  margin: 10px 0;
+  padding: 14px;
+}
+
+.queue-token__number {
+  align-items: center;
+  background: #9f3f61;
+  border-radius: 999px;
+  color: white;
+  display: flex;
+  font-weight: 900;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.queue-token h3 {
+  color: #28222a;
+  margin-bottom: 3px;
+}
+
+.queue-token p,
+.queue-token span {
+  color: #6f6670;
+}
+
+.queue-token strong {
+  color: #9f3f61;
+  display: block;
+  margin-top: 4px;
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .queue-hero,
+  .queue-board__head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .queue-controls,
+  .queue-stats,
+  .queue-my-token,
+  .queue-token {
+    grid-template-columns: 1fr;
+  }
+
+  .queue-token strong {
+    text-align: left;
+  }
+}

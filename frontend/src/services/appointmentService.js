@@ -7,6 +7,12 @@ export const bookAppointment = (data) =>
 export const getMyAppointments = () =>
   api("/api/appointments/my", "GET", null, getToken());
 
+export const getAppointmentQueue = (doctorId, date) =>
+  api(`/api/appointments/queue?doctor=${doctorId}&date=${date}`, "GET", null, getToken());
+
+export const getMyAppointmentQueues = () =>
+  api("/api/appointments/queue/my", "GET", null, getToken());
+
 export const getSlots = (doctorId, date) =>
   api(`/api/appointments/slots/${doctorId}/${date}`);
 

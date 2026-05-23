@@ -249,6 +249,11 @@ exports.updateAppointmentStatus = async (req, res) => {
     return res.status(404).json({ msg: "Appointment not found" });
   }
 
+  req.app.get("io")?.emit("appointmentQueueUpdated", {
+    doctor: appointment.doctor?.toString(),
+    date: appointment.date,
+  });
+
   res.json(appointment);
 };
 

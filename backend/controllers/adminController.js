@@ -272,6 +272,10 @@ const updateAppointmentStatus = async (req, res) => {
   if (!appt) return res.status(404).json({ msg: "Appointment not found" });
   appt.status = req.body.status;
   await appt.save();
+  req.app.get("io")?.emit("appointmentQueueUpdated", {
+    doctor: appt.doctor?.toString(),
+    date: appt.date,
+  });
   res.json(appt);
 };
 
