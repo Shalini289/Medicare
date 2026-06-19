@@ -15,7 +15,7 @@ import "@/styles/dashboardHub.css";
 const moduleLinks = [
   { title: "Book doctor", href: "/doctors", text: "Find specialists and available slots." },
   { title: "Order medicine", href: "/pharmacy", text: "Search pharmacy inventory and checkout." },
-  { title: "Upload reports", href: "/reports", text: "Store and analyze medical reports." },
+  { title: "Book lab tests", href: "/lab-tests", text: "Schedule lab tests and track bookings." },
   { title: "Track vitals", href: "/vitals", text: "Log BP, sugar, pulse, oxygen, and more." },
   { title: "Lab tests", href: "/lab-tests", text: "Book home sample collection." },
   { title: "Care plans", href: "/care-plans", text: "Track daily recovery and wellness tasks." },
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         <div>
           <span className="eyebrow">Patient command center</span>
           <h1>Dashboard</h1>
-          <p>One place for appointments, alerts, care activity, prescriptions, reports, and next steps.</p>
+          <p>One place for appointments, alerts, care activity, prescriptions, lab bookings, and next steps.</p>
         </div>
 
         <Link className="btn-primary" href="/doctors">

@@ -1,6 +1,6 @@
 ﻿# MediCare
 
-MediCare is a full-stack healthcare management platform built with **Next.js**, **Express.js**, **MongoDB**, **Socket.io**, and AI-assisted report analysis. It brings patient services, doctor workflows, pathology operations, hospital bed management, pharmacy ordering, health records, and admin analytics into one role-based system.
+MediCare is a full-stack healthcare management platform built with **Next.js**, **Express.js**, **MongoDB**, **Socket.io**, and AI-assisted healthcare workflows. It brings patient services, doctor workflows, pathology operations, hospital bed management, pharmacy ordering, health records, and admin analytics into one role-based system.
 
 The project is designed as a practical healthcare portal where each user type gets only the pages and functionality they are allowed to access.
 
@@ -28,7 +28,6 @@ Patients can:
 
 - Search doctors, hospitals, labs, blood donors, and services by location.
 - Book doctor appointments.
-- Upload medical reports and view organized AI analysis.
 - Track vitals, vaccinations, prescriptions, medicine reminders, care plans, and family health records.
 - Order medicines from the pharmacy module.
 - View hospital bed availability.
@@ -61,7 +60,7 @@ Admins can:
 - Access an admin-only dashboard.
 - View live analytics from the database.
 - Manage users, doctors, medicines, orders, hospitals, staff, invoices, claims, ambulances, and departments.
-- Review extracted records across reports, lab tests, prescriptions, vitals, notifications, care plans, and other modules.
+- Review extracted records across lab tests, prescriptions, vitals, notifications, care plans, and other modules.
 
 ## Main Features
 
@@ -69,13 +68,12 @@ Admins can:
 | --- | --- |
 | Authentication | JWT login, signup, protected routes, password reset, optional 2FA settings |
 | Role Access | Separate access for patient, admin, doctor, pharmacy, pathology, and hospital users |
-| Patient Dashboard | Health summary, profile, reports, vitals, medical ID, family, reminders, prescriptions |
+| Patient Dashboard | Health summary, profile, vitals, medical ID, family, reminders, prescriptions |
 | Doctor Portal | Doctor-only dashboard, appointments, availability, notes, prescriptions, diagnosis suggestions |
 | Pathology Portal | Lab booking workflow, sample/report updates, lab test catalog management |
 | Hospital Portal | Hospital profile, bed tracking, realtime availability updates |
 | Pharmacy | Medicine listing, cart/order flow, inventory and order management for pharmacy staff |
 | Admin Analytics | Database-backed analytics and management views |
-| Medical Reports | PDF/image upload, OCR/text extraction, AI analysis, organized report display |
 | Location Search | Find doctors, hospitals, lab tests, blood donors, and services by city/location |
 | Realtime | Socket.io chat, notifications, and hospital bed updates |
 | Payments | Razorpay payment order and verification support |
@@ -100,8 +98,8 @@ Admins can:
 - Socket.io
 - JWT authentication
 - Multer file uploads
-- Tesseract.js and pdf-parse for report extraction
-- Groq API for AI-powered suggestions and report analysis
+- Tesseract.js and pdf-parse for prescription extraction
+- Groq API for AI-powered suggestions and prescription analysis
 - Razorpay integration
 - Nodemailer, Resend, SendGrid, and Twilio support
 
@@ -140,7 +138,6 @@ MongoDB Database
   |-- Hospitals
   |-- Lab tests and bookings
   |-- Medicines and orders
-  |-- Reports
   |-- Health records
   |-- Notifications
  
@@ -173,7 +170,7 @@ Backend role middleware protects sensitive APIs so users cannot access pages or 
 |   |-- models/          # Mongoose schemas
 |   |-- routes/          # Express API routes
 |   |-- services/        # Integrations and reusable services
-|   |-- uploads/         # Uploaded report files
+|   |-- uploads/         # Uploaded prescription files
 |   |-- utils/           # Helpers
 |   `-- server.js        # Express + Socket.io entry point
 |
@@ -204,7 +201,6 @@ Backend role middleware protects sensitive APIs so users cannot access pages or 
 | `/find-care` | Find hospitals, doctors, labs, blood donors, and services by location |
 | `/doctors` | Browse doctors |
 | `/booking` | Appointment booking |
-| `/reports` | Upload and analyze medical reports |
 | `/lab-tests` | Browse and book lab tests |
 | `/hospital` | Hospital bed availability |
 | `/pharmacy` | Medicine ordering and pharmacy management |
@@ -223,7 +219,6 @@ Backend role middleware protects sensitive APIs so users cannot access pages or 
 | Doctors | `/api/doctors` |
 | Doctor Portal | `/api/doctor-portal` |
 | Appointments | `/api/appointments` |
-| Reports | `/api/reports` |
 | Lab Tests | `/api/lab-tests` |
 | Hospitals | `/api/hospital` |
 | Pharmacy | `/api/pharmacy` |

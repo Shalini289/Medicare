@@ -21,12 +21,6 @@ const shortcuts = [
     label: "Start check",
   },
   {
-    title: "Upload reports",
-    text: "Store reports and review extracted insights.",
-    href: "/reports",
-    label: "Upload report",
-  },
-  {
     title: "Track vitals",
     text: "Log BP, sugar, pulse, oxygen, and temperature.",
     href: "/vitals",

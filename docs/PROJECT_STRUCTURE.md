@@ -29,7 +29,7 @@ backend/
 |-- routes/           Express route definitions
 |-- scripts/          Seed scripts
 |-- services/         Shared backend services
-|-- uploads/          Uploaded report files
+|-- uploads/          Uploaded prescription files
 |-- utils/            Reusable utilities
 `-- server.js         Express and Socket.io entry point
 ```
@@ -56,7 +56,6 @@ frontend/src/
 | Doctor Portal | `app/(protected)/doctor` | `routes/doctorPortal.js`, `controllers/doctorPortalController.js` |
 | Appointments | `app/(protected)/booking` | `routes/appointments.js`, `controllers/appointmentController.js`, `models/Appointment.js` |
 | Pharmacy | `app/(protected)/pharmacy`, `app/(protected)/orders` | `routes/pharmacy.js`, `controllers/pharmacyController.js`, `models/Medicine.js`, `models/Order.js` |
-| Reports | `app/(protected)/reports` | `routes/report.js`, `controllers/reportController.js`, `models/Report.js`, `utils/aiAnalyzer.js` |
 | AI Symptom Checker | `app/symptoms` | `routes/ai.js`, `controllers/aiController.js` |
 | Hospital Beds | `app/hospital`, `app/(protected)/hospital-portal` | `routes/hospital.js`, `controllers/hospitalController.js`, `models/Hospital.js` |
 | Lab Tests | `app/(protected)/lab-tests`, `app/(protected)/pathology` | `routes/labTests.js`, `controllers/labTestController.js`, `models/LabTest.js`, `models/LabBooking.js` |
@@ -79,7 +78,7 @@ frontend/src/
 
 | Role | Main UI | Backend Access |
 | --- | --- | --- |
-| Patient/User | `/dashboard`, `/health`, `/reports`, `/booking` | Protected user routes |
+| Patient/User | `/dashboard`, `/health`, `/booking` | Protected user routes |
 | Admin | `/admin` | `protect, admin` |
 | Doctor | `/doctor` | `protect, doctorOnly` |
 | Pharmacy | `/pharmacy` | `protect, pharmacyStaff` |

@@ -100,16 +100,14 @@ User symptoms
   -> care guidance response
 ```
 
-### Medical Report Analysis
+### Prescription Analysis
 
 ```text
-Report upload
+Prescription upload
   -> file saved
   -> PDF/image text extraction
-  -> AI report analysis
-  -> doctor-style summary
-  -> report saved in MongoDB
-  -> frontend organizes analysis into patient-friendly sections
+  -> AI prescription analysis
+  -> patient-friendly medicine, safety, and reminder guidance
 ```
 
 Important safety rule:
@@ -126,7 +124,6 @@ Major MongoDB collections include:
 - Hospitals
 - Medicines
 - Orders
-- Reports
 - LabTests
 - LabBookings
 - Staff

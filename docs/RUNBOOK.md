@@ -145,17 +145,13 @@ Restart backend after editing `.env`.
 
 Doctor profiles are now auto-created for doctor users when `/api/doctors/me/profile` or doctor portal APIs are called.
 
-### Admin Records Analysis Too Long
-
-Admin records now show report analysis as a compact preview. Full report analysis is available on `/reports`.
-
 ## Presentation Flow
 
 1. Explain the problem: fragmented healthcare workflows.
 2. Explain roles: patient, doctor, admin, pharmacy, pathology, hospital.
 3. Show patient dashboard and location search.
 4. Show appointment booking.
-5. Show medical report upload and AI doctor-style analysis.
+5. Show AI symptom checker and prescription analyzer.
 6. Show doctor portal.
 7. Show pathology and hospital portals.
 8. Show admin analytics and records.

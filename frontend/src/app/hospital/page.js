@@ -1,9 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FaMapMarkerAlt, FaPhoneAlt, FaSms } from "react-icons/fa";
 import { io } from "socket.io-client";
 import { api } from "../../utils/api";
 import { getApiUrl } from "@/utils/runtimeConfig";
+
+const cleanPhone = (phone = "") => String(phone || "").replace(/[^\d+]/g, "");
+
+const getContactPhone = (hospital) =>
+  hospital.emergencyPhone || hospital.phone || "";
 
 export default function HospitalPage() {
   const [hospitals, setHospitals] = useState([]);
@@ -123,10 +129,36 @@ export default function HospitalPage() {
       <div className="hospital-grid">
         {filteredHospitals.map(h => (
           <div key={h._id} className="hospital-card">
+            {(() => {
+              const contactPhone = getContactPhone(h);
+              const cleanContact = cleanPhone(contactPhone);
+              const smsBody = encodeURIComponent(
+                `Hello ${h.name}, I need bed availability details for ${bedType === "all" ? "available beds" : bedType} beds.`
+              );
+
+              return (
+                <>
             <div className="hospital-top">
               <h3>{h.name}</h3>
               <span className="city">{h.city}</span>
             </div>
+
+            {(h.address || contactPhone) && (
+              <div className="hospital-contact-info">
+                {h.address && (
+                  <p>
+                    <FaMapMarkerAlt aria-hidden="true" />
+                    {h.address}
+                  </p>
+                )}
+                {contactPhone && (
+                  <p>
+                    <FaPhoneAlt aria-hidden="true" />
+                    {contactPhone}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="beds">
               <div className="bed icu">
@@ -144,6 +176,26 @@ export default function HospitalPage() {
                 <strong>{h.beds?.general || 0}</strong>
               </div>
             </div>
+
+            <div className="hospital-contact-actions">
+              {cleanContact ? (
+                <>
+                  <a href={`tel:${cleanContact}`}>
+                    <FaPhoneAlt aria-hidden="true" />
+                    Call hospital
+                  </a>
+                  <a href={`sms:${cleanContact}?body=${smsBody}`}>
+                    <FaSms aria-hidden="true" />
+                    Send SMS
+                  </a>
+                </>
+              ) : (
+                <span>No contact number available</span>
+              )}
+            </div>
+                </>
+              );
+            })()}
           </div>
         ))}
       </div>

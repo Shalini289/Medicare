@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   if (!allowedTypes.has(file.mimetype)) {
-    return cb(new Error("Only PDF, PNG, JPG, and JPEG reports are allowed"));
+    return cb(new Error("Only PDF, PNG, JPG, and JPEG files are allowed"));
   }
 
   cb(null, true);

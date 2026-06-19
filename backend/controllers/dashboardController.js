@@ -7,7 +7,6 @@ const CarePlan = require("../models/CarePlan");
 const LabBooking = require("../models/LabBooking");
 const Vaccination = require("../models/Vaccination");
 const MedicalProfile = require("../models/MedicalProfile");
-const Report = require("../models/Report");
 const Notification = require("../models/Notification");
 
 const getUserId = (req) => req.user.id || req.user._id;
@@ -132,7 +131,6 @@ exports.getDashboard = async (req, res) => {
     overdueVaccines,
     completedVaccines,
     medicalProfile,
-    reportCount,
     unreadNotifications,
     latestNotifications,
   ] = await Promise.all([
@@ -157,7 +155,6 @@ exports.getDashboard = async (req, res) => {
     }),
     Vaccination.countDocuments({ user: userId, status: "completed" }),
     MedicalProfile.findOne({ user: userId }),
-    Report.countDocuments({ user: userId }),
     Notification.countDocuments({ user: userId, read: false }),
     Notification.find({ user: userId }).sort({ createdAt: -1 }).limit(5),
   ]);
@@ -172,7 +169,6 @@ exports.getDashboard = async (req, res) => {
     { label: "Care plans", value: activeCarePlans, href: "/care-plans" },
     { label: "Lab bookings", value: pendingLabBookings, href: "/lab-tests" },
     { label: "Overdue vaccines", value: overdueVaccines, href: "/vaccinations" },
-    { label: "Reports", value: reportCount, href: "/reports" },
   ];
 
   const actionItems = buildActionItems({

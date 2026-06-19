@@ -22,7 +22,6 @@ const MedicineLog = require("../models/MedicineLog");
 const Notification = require("../models/Notification");
 const Order = require("../models/Order");
 const Prescription = require("../models/Prescription");
-const Report = require("../models/Report");
 const Review = require("../models/Review");
 const Staff = require("../models/Staff");
 const User = require("../models/User");
@@ -291,7 +290,7 @@ const seedDemo = async () => {
       },
       primaryDoctor: "Dr. C. G. Dogne",
       organDonor: false,
-      notes: "Demo patient profile for report, prescription, and appointment workflows.",
+      notes: "Demo patient profile for prescription, lab booking, and appointment workflows.",
       medicalHistory: [
         {
           type: "lab",
@@ -300,7 +299,7 @@ const seedDemo = async () => {
           facility: "MediCare Lab",
           date: demoDate,
           notes: "Hemoglobin low and Widal positive; correlate clinically.",
-          attachments: ["demo-cbc-report.pdf"],
+          attachments: ["demo-lab-note.pdf"],
         },
       ],
     }),
@@ -340,16 +339,6 @@ const seedDemo = async () => {
   ]);
 
   await Promise.all([
-    upsertOne(Report, { user: users.patient._id, file: "demo-cbc-report.pdf" }, {
-      user: users.patient._id,
-      file: "demo-cbc-report.pdf",
-      extractedText: "Hemoglobin 11.2 g/dL, WBC 10900/cmm, Platelets 142,000/uL, Widal O and H 1:80.",
-      analysis: {
-        summary: "Mild anemia pattern with borderline platelet count and Widal positivity requiring clinical correlation.",
-        abnormalFindings: ["Hemoglobin low", "Platelets slightly low", "Widal positive"],
-        nextSteps: ["Review fever history", "Hydration", "Doctor follow-up"],
-      },
-    }),
     upsertOne(Prescription, { prescriptionCode: "RX-DEMO-ARJU-001" }, {
       user: users.patient._id,
       doctor: doctor._id,

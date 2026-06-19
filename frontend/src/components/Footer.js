@@ -14,7 +14,7 @@ export default function Footer() {
             <h4>Services</h4>
             <Link href="/doctors">Doctors</Link>
             <Link href="/pharmacy">Pharmacy</Link>
-            <Link href="/reports">Reports</Link>
+            <Link href="/lab-tests">Lab Tests</Link>
           </div>
 
           <div>

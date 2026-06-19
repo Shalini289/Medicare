@@ -6,7 +6,7 @@ const SERVICES = [
   { icon: "MW", title: "Mental Wellness", desc: "Confidential therapy sessions.", color: "mint", href: "/doctors" },
   { icon: "CD", title: "Cardiology", desc: "Heart specialists and diagnostics.", color: "sky", href: "/doctors" },
   { icon: "PD", title: "Paediatrics", desc: "Care for infants to teens.", color: "peach", href: "/doctors" },
-  { icon: "LB", title: "Lab Tests", desc: "Fast reports with home collection.", color: "lavender", href: "/reports" },
+  { icon: "LB", title: "Lab Tests", desc: "Home collection and lab booking workflow.", color: "lavender", href: "/lab-tests" },
   { icon: "RX", title: "Pharmacy", desc: "Order medicines online easily.", color: "mint", href: "/pharmacy" },
 ];
 

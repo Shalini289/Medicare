@@ -13,7 +13,6 @@ This file groups MediCare features by user role and product area.
 - Health EMI eligibility prediction
 - Offline clinic visit capture and sync
 - Voice-based rural assistant with speech input and spoken guidance
-- Medical report upload and AI analysis
 - Health dashboard
 - Vitals tracking
 - Medical ID
@@ -91,9 +90,7 @@ This file groups MediCare features by user role and product area.
 ## AI Features
 
 - Health-only symptom checker
-- AI medical report analysis
 - AI prescription analysis with OCR and medication safety review
-- Doctor-style report review
 - Health EMI scoring and repayment plan suggestions
 - Voice assistant backed by health-only symptom guidance
 - Diagnosis suggestion support inside doctor portal

@@ -24,9 +24,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 | Pharmacy | `/api/pharmacy` | Medicines, orders, inventory, alerts |
 | Blood Donors | `/api/blood-donors` | Donor search and donor profile |
 | Payment | `/api/payment` | Razorpay order and verification |
-| Reports | `/api/report` | Upload reports, list reports, delete reports |
 | AI | `/api/ai` | Symptom checker |
-| Risk | `/api/risk` | Report-based risk prediction |
 | Health EMI | `/api/health-emi` | EMI eligibility scoring and repayment options |
 | Reviews | `/api/review` | Doctor reviews |
 | Family | `/api/family` | Family member management |
@@ -68,15 +66,7 @@ frontend/src/utils/api.js
 
 ## Uploads
 
-Report upload:
-
-```text
-POST /api/report/upload
-Content-Type: multipart/form-data
-field: file
-```
-
-Allowed report types:
+Allowed prescription analysis upload types:
 
 ```text
 PDF, PNG, JPG, JPEG

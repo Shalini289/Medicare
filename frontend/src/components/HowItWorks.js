@@ -2,7 +2,7 @@ const STEPS = [
   { num: "01", title: "Search & discover",  desc: "Browse verified doctors by specialty or symptom.",      color: "rose" },
   { num: "02", title: "Pick a slot",        desc: "Choose from real-time available time slots.",            color: "mint" },
   { num: "03", title: "Confirm & attend",   desc: "Get instant confirmation and visit your doctor.",       color: "sky" },
-  { num: "04", title: "Follow-up care",     desc: "Access prescriptions, reports, and chat support.",      color: "lavender" },
+  { num: "04", title: "Follow-up care",     desc: "Access prescriptions, reminders, and chat support.",      color: "lavender" },
 ];
 import "../styles/howItWork.css"
 

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FaCalendarCheck,
-  FaFileMedical,
   FaHeartbeat,
   FaHospitalUser,
   FaIdCard,
@@ -30,7 +29,6 @@ const roleLabels = {
 const baseQuickLinks = [
   { href: "/medical-id", label: "Medical ID", icon: FaIdCard },
   { href: "/prescriptions", label: "Prescriptions", icon: FaNotesMedical },
-  { href: "/reports", label: "Reports", icon: FaFileMedical },
   { href: "/vitals", label: "Vitals", icon: FaHeartbeat },
   { href: "/pharmacy", label: "Medicines", icon: FaPills },
   { href: "/emergency-contacts", label: "Emergency", icon: FaHospitalUser },

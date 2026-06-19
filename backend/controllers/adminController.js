@@ -19,7 +19,6 @@ const MedicalProfile = require("../models/MedicalProfile");
 const MedicineLog = require("../models/MedicineLog");
 const Notification = require("../models/Notification");
 const Prescription = require("../models/Prescription");
-const Report = require("../models/Report");
 const Review = require("../models/Review");
 const Vaccination = require("../models/Vaccination");
 const Vital = require("../models/Vital");
@@ -184,7 +183,6 @@ const getUsers = async (req, res) => {
 
 const getAdminRecords = async (req, res) => {
   const [
-    reports,
     labTests,
     labBookings,
     bloodDonors,
@@ -199,7 +197,6 @@ const getAdminRecords = async (req, res) => {
     chats,
     doctorNotes,
   ] = await Promise.all([
-    Report.find().populate("user", "name email role").sort({ createdAt: -1 }),
     LabTest.find().sort({ name: 1 }),
     LabBooking.find()
       .populate("user", "name email role")
@@ -219,7 +216,6 @@ const getAdminRecords = async (req, res) => {
   ]);
 
   res.json({
-    reports,
     labTests,
     labBookings,
     bloodDonors,

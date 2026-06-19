@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FaBell } from "react-icons/fa";
 import { io } from "socket.io-client";
 import { getApiUrl } from "@/utils/runtimeConfig";
@@ -8,6 +8,7 @@ import { getApiUrl } from "@/utils/runtimeConfig";
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
+  const bellRef = useRef(null);
 
   const add = useCallback((text) => {
     setNotifications(prev => [
@@ -41,14 +42,39 @@ export default function NotificationBell() {
     return () => socket.disconnect();
   }, [add]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const closeOnOutsideClick = (event) => {
+      if (!bellRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
   const clearAll = () => setNotifications([]);
 
   return (
-    <div className="notif-bell">
+    <div className="notif-bell" ref={bellRef}>
       <button
         className="bell-icon"
         aria-label="Notifications"
-        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
       >
         <FaBell aria-hidden="true" />
         {notifications.length > 0 && (

@@ -57,7 +57,10 @@ export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOver
 
   if (!res.ok) {
     const message = data.msg || data.message || res.statusText || "API Error";
-    throw new Error(`${message} (${res.status} ${endpoint})`);
+    const error = new Error(message);
+    error.status = res.status;
+    error.endpoint = endpoint;
+    throw error;
   }
 
   return data;
