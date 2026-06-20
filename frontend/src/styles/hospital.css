@@ -87,6 +87,26 @@
   color: #777;
 }
 
+.hospital-contact-info {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+.hospital-contact-info p {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
+.hospital-contact-info svg {
+  color: #a64263;
+  flex: 0 0 auto;
+}
+
 /* ===== BEDS ===== */
 .beds {
   margin-top: 15px;
@@ -132,6 +152,43 @@
   color: #2e7d32;
 }
 
+.hospital-contact-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.hospital-contact-actions a,
+.hospital-contact-actions span {
+  align-items: center;
+  border-radius: 10px;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.hospital-contact-actions a:first-child {
+  background: #c85f84;
+  color: #fff;
+}
+
+.hospital-contact-actions a:last-child {
+  background: #fff2f6;
+  border: 1px solid #f0c8d5;
+  color: #a64263;
+}
+
+.hospital-contact-actions span {
+  background: #f8f8f8;
+  color: #777;
+  grid-column: 1 / -1;
+}
+
 /* ===== EMPTY ===== */
 .empty {
   text-align: center;
@@ -143,4 +200,10 @@
 .center {
   text-align: center;
   margin-top: 40px;
+}
+
+@media (max-width: 520px) {
+  .hospital-contact-actions {
+    grid-template-columns: 1fr;
+  }
 }

@@ -57,6 +57,7 @@ app.use("/api/admin", require("./routes/admin"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/medicine-reminders", require("./routes/medicineReminders"));
 app.use("/api/prescriptions", require("./routes/prescriptions"));
+app.use("/api/stored-reports", require("./routes/storedReports"));
 app.use("/api/vitals", require("./routes/vitals"));
 app.use("/api/medical-profile", require("./routes/medicalProfile"));
 app.use("/api/lab-tests", require("./routes/labTests"));

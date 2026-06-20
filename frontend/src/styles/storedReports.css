@@ -1,0 +1,244 @@
+.stored-reports-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.stored-reports-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 28px;
+}
+
+.stored-reports-hero h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.stored-reports-hero p,
+.report-list-head p,
+.stored-report-card p,
+.stored-report-card small {
+  color: var(--muted-text);
+  line-height: 1.7;
+}
+
+.stored-report-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.stored-report-stats span,
+.report-upload-panel,
+.stored-report-list-panel,
+.stored-report-card {
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+}
+
+.stored-report-stats span {
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: var(--muted-text);
+}
+
+.stored-report-stats strong {
+  display: block;
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.stored-reports-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.report-upload-panel,
+.stored-report-list-panel {
+  display: grid;
+  gap: 16px;
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.report-panel-title,
+.report-list-head,
+.stored-report-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.report-panel-title {
+  justify-content: flex-start;
+}
+
+.report-panel-title svg,
+.pdf-dropzone svg,
+.stored-report-icon svg {
+  color: var(--primary);
+}
+
+.report-upload-panel label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.report-upload-panel input,
+.report-upload-panel select,
+.report-upload-panel textarea,
+.report-list-head input {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 13px;
+  background: #fff;
+  font: inherit;
+}
+
+.report-upload-panel textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.pdf-dropzone {
+  align-items: center;
+  border: 1px dashed var(--primary);
+  border-radius: 8px;
+  cursor: pointer;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+  background: #fff7fb;
+}
+
+.pdf-dropzone input {
+  display: none;
+}
+
+.pdf-dropzone svg {
+  font-size: 34px;
+}
+
+.report-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.report-upload-panel button,
+.stored-report-actions a,
+.stored-report-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.report-upload-panel button:disabled,
+.stored-report-actions button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.report-success {
+  border-radius: 8px;
+  padding: 12px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-weight: 800;
+}
+
+.report-list-head {
+  align-items: flex-start;
+}
+
+.report-list-head input {
+  max-width: 230px;
+}
+
+.stored-report-list {
+  display: grid;
+  gap: 12px;
+}
+
+.stored-report-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.stored-report-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 8px;
+  background: #fff2f6;
+}
+
+.stored-report-card small {
+  display: block;
+  margin-top: 4px;
+}
+
+.stored-report-actions {
+  justify-content: flex-end;
+}
+
+.stored-report-actions button {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 1020px) {
+  .stored-reports-hero,
+  .stored-reports-layout,
+  .stored-report-card {
+    grid-template-columns: 1fr;
+  }
+
+  .report-list-head {
+    display: grid;
+  }
+
+  .report-list-head input {
+    max-width: none;
+  }
+
+  .stored-report-actions {
+    justify-content: stretch;
+  }
+}
+
+@media (max-width: 720px) {
+  .stored-reports-page {
+    width: min(100% - 22px, 1180px);
+    padding-top: 26px;
+  }
+
+  .stored-report-stats,
+  .report-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

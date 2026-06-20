@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { api } from "../../utils/api";
+import { api, cleanApiErrorMessage } from "../../utils/api";
 import { getToken } from "../../utils/auth";
 import "../globals.css";
 
@@ -94,7 +94,7 @@ export default function SymptomPage() {
       });
     } catch (err) {
       setResult(null);
-      setError(err.message || "Failed to analyze symptoms");
+      setError(cleanApiErrorMessage(err.message) || "Failed to analyze symptoms");
     } finally {
       setLoading(false);
     }

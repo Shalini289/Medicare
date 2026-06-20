@@ -11,6 +11,7 @@ import {
   FaVolumeUp,
 } from "react-icons/fa";
 import { checkSymptoms } from "@/services/aiService";
+import { cleanApiErrorMessage } from "@/utils/api";
 import "@/styles/voiceAssistant.css";
 
 const languages = [
@@ -150,7 +151,7 @@ export default function VoiceAssistantPage() {
       setResult(nextResult);
       speak(buildSpokenSummary(nextResult));
     } catch (err) {
-      setError(err.message || "Could not process voice request");
+      setError(cleanApiErrorMessage(err.message) || "Could not process voice request");
     } finally {
       setLoading(false);
     }

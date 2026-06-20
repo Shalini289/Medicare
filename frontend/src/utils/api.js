@@ -10,6 +10,11 @@ const getBaseUrl = () => {
   return null;
 };
 
+export const cleanApiErrorMessage = (message = "") =>
+  String(message || "")
+    .replace(/\s*\(\d{3}\s+\/api\/[^)]+\)\s*$/i, "")
+    .trim();
+
 export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOverride = null) => {
   const legacyCall = typeof optionsOrMethod === "string";
   const token =
@@ -56,7 +61,7 @@ export const api = async (endpoint, optionsOrMethod = {}, body = null, tokenOver
   }
 
   if (!res.ok) {
-    const message = data.msg || data.message || res.statusText || "API Error";
+    const message = cleanApiErrorMessage(data.msg || data.message || res.statusText || "API Error");
     const error = new Error(message);
     error.status = res.status;
     error.endpoint = endpoint;

@@ -17,6 +17,7 @@ import "../styles/prescriptionAnalyzer.css";
 import "../styles/healthEmi.css";
 import "../styles/offlineClinic.css";
 import "../styles/voiceAssistant.css";
+import "../styles/storedReports.css";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";

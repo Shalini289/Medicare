@@ -51,6 +51,7 @@ const navGroups = [
     items: [
       { label: "Profile", href: "/profile" },
       { label: "Orders", href: "/orders" },
+      { label: "Reports", href: "/reports" },
       { label: "Security", href: "/security" },
     ],
   },
