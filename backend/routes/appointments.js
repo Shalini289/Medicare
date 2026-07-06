@@ -6,6 +6,7 @@ const {
   getAppointmentQueue,
   getMyAppointmentQueues,
   getMyAppointments,
+  checkVideoCallAccess,
   getSlots,
   cancelAppointment
 } = require("../controllers/appointmentController");
@@ -15,6 +16,7 @@ const { protect } = require("../middleware/authMiddleware");
 router.post("/", protect, bookAppointment);
 router.get("/queue", protect, getAppointmentQueue);
 router.get("/queue/my", protect, getMyAppointmentQueues);
+router.get("/video-access", protect, checkVideoCallAccess);
 router.get("/my", protect, getMyAppointments);
 router.get("/slots/:doctorId/:date", getSlots);
 router.put("/cancel/:id", protect, cancelAppointment);

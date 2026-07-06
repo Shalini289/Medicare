@@ -4,6 +4,7 @@ const Appointment = require("../models/Appointment");
 const Medicine = require("../models/Medicine");
 const Order = require("../models/Order");
 const Hospital = require("../models/Hospital");
+const HospitalReview = require("../models/HospitalReview");
 const Staff = require("../models/Staff");
 const Invoice = require("../models/Invoice");
 const InsuranceClaim = require("../models/InsuranceClaim");
@@ -51,6 +52,25 @@ const parseItems = (items = []) => {
     .split(",")
     .map((name) => ({ name: name.trim(), amount: 0 }))
     .filter((item) => item.name);
+};
+
+const bedTypes = ["ICU", "oxygen", "general"];
+
+const validateBedCounts = (beds = {}, occupiedBeds = {}) => {
+  for (const type of bedTypes) {
+    const total = Number(beds[type] || 0);
+    const occupied = Number(occupiedBeds[type] || 0);
+
+    if (total < 0 || occupied < 0) {
+      return `${type} beds cannot be negative`;
+    }
+
+    if (occupied > total) {
+      return `${type} occupied beds cannot be greater than total beds`;
+    }
+  }
+
+  return "";
 };
 
 const getDashboardStats = async (req, res) => {
@@ -188,6 +208,7 @@ const getAdminRecords = async (req, res) => {
     bloodDonors,
     prescriptions,
     reviews,
+    hospitalReviews,
     notifications,
     medicalProfiles,
     vitals,
@@ -205,6 +226,7 @@ const getAdminRecords = async (req, res) => {
     BloodDonor.find().populate("user", "name email phone").sort({ updatedAt: -1 }),
     Prescription.find().populate("user doctor issuedBy", "name email specialization role").sort({ createdAt: -1 }),
     Review.find().populate("user doctor", "name email specialization").sort({ createdAt: -1 }),
+    HospitalReview.find().populate("user hospital", "name email city").sort({ createdAt: -1 }),
     Notification.find().populate("user", "name email").sort({ createdAt: -1 }),
     MedicalProfile.find().populate("user", "name email phone").sort({ updatedAt: -1 }),
     Vital.find().populate("user", "name email").sort({ recordedAt: -1 }),
@@ -221,6 +243,7 @@ const getAdminRecords = async (req, res) => {
     bloodDonors,
     prescriptions,
     reviews,
+    hospitalReviews,
     notifications,
     medicalProfiles,
     vitals,
@@ -329,11 +352,17 @@ const getHospitalsAdmin = async (req, res) => {
 };
 
 const addHospital = async (req, res) => {
+  const validationError = validateBedCounts(req.body.beds, req.body.occupiedBeds);
+  if (validationError) return res.status(400).json({ msg: validationError });
+
   const hospital = await Hospital.create(req.body);
   res.json(hospital);
 };
 
 const updateHospitalBeds = async (req, res) => {
+  const validationError = validateBedCounts(req.body.beds, req.body.occupiedBeds);
+  if (validationError) return res.status(400).json({ msg: validationError });
+
   const hospital = await Hospital.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   if (!hospital) return res.status(404).json({ msg: "Hospital not found" });
   req.app.get("io").emit("bedUpdate", hospital);

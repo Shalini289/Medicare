@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { getDoctors, getMyDoctorProfile } from "@/services/doctorService";
+import { checkVideoCallAccess } from "@/services/appointmentService";
 import "@/styles/video-call.css";
 
 const peerConfig = {
@@ -69,6 +70,8 @@ export default function VideoCallPage() {
   const [cameraOn, setCameraOn] = useState(true);
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [participantCount, setParticipantCount] = useState(0);
+  const [callAccess, setCallAccess] = useState(null);
+  const [checkingAccess, setCheckingAccess] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -225,6 +228,47 @@ export default function VideoCallPage() {
 
   useEffect(() => cleanupCall, [cleanupCall]);
 
+  const refreshCallAccess = useCallback(async () => {
+    if (!selectedDoctorId) {
+      setCallAccess(null);
+      return null;
+    }
+
+    try {
+      setCheckingAccess(true);
+      const access = await checkVideoCallAccess(selectedDoctorId);
+      setCallAccess(access);
+      setError(access.allowed ? "" : access.msg || "Video call is available only during the booked slot.");
+      return access;
+    } catch (err) {
+      const denied = {
+        allowed: false,
+        msg: err.message || "Could not verify your appointment slot.",
+      };
+      setCallAccess(denied);
+      setError(denied.msg);
+      return denied;
+    } finally {
+      setCheckingAccess(false);
+    }
+  }, [selectedDoctorId]);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      refreshCallAccess();
+    });
+  }, [refreshCallAccess]);
+
+  useEffect(() => {
+    if (joined) return undefined;
+
+    const interval = setInterval(() => {
+      refreshCallAccess();
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, [joined, refreshCallAccess]);
+
   const setupSocket = useCallback(() => {
     const socketUrl = getSocketUrl();
 
@@ -348,6 +392,13 @@ export default function VideoCallPage() {
     try {
       setConnecting(true);
       setError("");
+      setStatus("Checking your booked appointment slot...");
+
+      const access = await refreshCallAccess();
+      if (!access?.allowed) {
+        throw new Error(access?.msg || "Video call can start only during your booked appointment slot.");
+      }
+
       setStatus("Requesting camera and microphone access...");
 
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -426,7 +477,12 @@ export default function VideoCallPage() {
 
         <select
           value={selectedDoctorId}
-          onChange={(event) => setSelectedDoctorId(event.target.value)}
+          onChange={(event) => {
+            setSelectedDoctorId(event.target.value);
+            setCallAccess(null);
+            setError("");
+            setStatus("Checking appointment slot...");
+          }}
           disabled={joined}
           aria-label="Select doctor for video call"
         >
@@ -440,6 +496,13 @@ export default function VideoCallPage() {
       </section>
 
       {error && <div className="video-call-alert">{error}</div>}
+
+      {callAccess?.window && (
+        <div className={`video-call-slot ${callAccess.allowed ? "is-open" : ""}`}>
+          Booked slot: {callAccess.window.start} - {callAccess.window.end}
+          {callAccess.allowed ? " | Call is open now" : " | Call opens only in this time window"}
+        </div>
+      )}
 
       <section className="video-grid">
         <div className="video-tile">
@@ -472,8 +535,12 @@ export default function VideoCallPage() {
           </button>
 
           {!joined ? (
-            <button className="call-start" onClick={startCall} disabled={connecting || !selectedDoctorId}>
-              {connecting ? "Starting..." : "Start Video Call"}
+            <button
+              className="call-start"
+              onClick={startCall}
+              disabled={connecting || checkingAccess || !selectedDoctorId || callAccess?.allowed === false}
+            >
+              {connecting ? "Starting..." : checkingAccess ? "Checking slot..." : "Start Video Call"}
             </button>
           ) : (
             <>

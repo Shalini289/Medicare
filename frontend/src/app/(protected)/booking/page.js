@@ -6,6 +6,25 @@ import { bookAppointment, getSlots } from "@/services/appointmentService";
 import { getDoctors } from "@/services/doctorService";
 import { api } from "@/utils/api";
 
+const toDateInputValue = (value = new Date()) => {
+  const dateValue = new Date(value);
+  const year = dateValue.getFullYear();
+  const month = String(dateValue.getMonth() + 1).padStart(2, "0");
+  const day = String(dateValue.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const toMinutes = (time = "00:00") => {
+  const [hours, minutes] = String(time).split(":").map(Number);
+  return (Number.isFinite(hours) ? hours : 0) * 60 + (Number.isFinite(minutes) ? minutes : 0);
+};
+
+const getNowMinutes = (value = new Date()) => {
+  const now = new Date(value);
+  return now.getHours() * 60 + now.getMinutes();
+};
+
 const availableSlots = [
   "09:00",
   "09:30",
@@ -35,6 +54,9 @@ export default function Booking() {
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [clock, setClock] = useState(Date.now());
+  const today = toDateInputValue();
+  const currentMinutes = getNowMinutes(clock);
 
   const loadFamily = useCallback(async () => {
     const res = await api("/api/family");
@@ -46,6 +68,18 @@ export default function Booking() {
       loadFamily();
     });
   }, [loadFamily]);
+
+  useEffect(() => {
+    const interval = setInterval(() => setClock(Date.now()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (date === today && time && toMinutes(time) <= currentMinutes) {
+      setTime("");
+      setError("This time slot has already passed. Please choose a later slot.");
+    }
+  }, [currentMinutes, date, time, today]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -89,6 +123,16 @@ export default function Booking() {
 
     if (!date || !time) {
       setError("Please choose a date and time slot.");
+      return;
+    }
+
+    if (date < today) {
+      setError("Please choose today or a future date.");
+      return;
+    }
+
+    if (date === today && toMinutes(time) <= currentMinutes) {
+      setError("This time slot has already passed. Please choose a later slot.");
       return;
     }
 
@@ -148,11 +192,12 @@ export default function Booking() {
           <input
             type="date"
             value={date}
-            min={new Date().toISOString().slice(0, 10)}
+            min={today}
             onChange={(e) => {
-              setDate(e.target.value);
+              const nextDate = e.target.value;
+              setDate(nextDate);
               setTime("");
-              setError("");
+              setError(nextDate && nextDate < today ? "Please choose today or a future date." : "");
               setMessage("");
             }}
           />
@@ -163,12 +208,15 @@ export default function Booking() {
           <div className="slots">
             {availableSlots.map((slot) => {
               const booked = bookedSlots.includes(slot);
+              const pastSlot = date === today && toMinutes(slot) <= currentMinutes;
+              const unavailable = booked || pastSlot || date < today;
 
               return (
                 <button
                   key={slot}
-                  className={`slot ${time === slot ? "selected" : ""} ${booked ? "booked" : ""}`}
-                  disabled={booked}
+                  className={`slot ${time === slot ? "selected" : ""} ${unavailable ? "booked" : ""}`}
+                  disabled={unavailable}
+                  title={pastSlot ? "This time has already passed" : booked ? "Already booked" : "Available"}
                   onClick={() => {
                     setTime(slot);
                     setError("");
@@ -176,6 +224,7 @@ export default function Booking() {
                   }}
                 >
                   {slot}
+                  {pastSlot && <span>Passed</span>}
                 </button>
               );
             })}
@@ -206,7 +255,7 @@ export default function Booking() {
         <button
           className="btn-primary"
           onClick={handle}
-          disabled={loading || !selectedDoctorId || !date || !time}
+          disabled={loading || !selectedDoctorId || !date || date < today || !time}
         >
           {loading ? "Booking..." : "Confirm Booking"}
         </button>

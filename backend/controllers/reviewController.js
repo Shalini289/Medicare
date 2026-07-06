@@ -1,5 +1,7 @@
 const Review = require("../models/Review");
 const Doctor = require("../models/Doctor");
+const Hospital = require("../models/Hospital");
+const HospitalReview = require("../models/HospitalReview");
 
 const getUserId = (req) => req.user.id || req.user._id;
 
@@ -13,6 +15,23 @@ const updateDoctorRating = async (doctorId) => {
   await Doctor.findByIdAndUpdate(doctorId, {
     rating: Number(rating.toFixed(1)),
   });
+};
+
+const updateHospitalRating = async (hospitalId) => {
+  const reviews = await HospitalReview.find({ hospital: hospitalId });
+
+  const rating = reviews.length
+    ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length
+    : 0;
+
+  return Hospital.findByIdAndUpdate(
+    hospitalId,
+    {
+      rating: Number(rating.toFixed(1)),
+      reviewCount: reviews.length,
+    },
+    { new: true }
+  );
 };
 
 const addReview = async (req, res) => {
@@ -44,9 +63,51 @@ const addReview = async (req, res) => {
   res.status(201).json(populated);
 };
 
+const addHospitalReview = async (req, res) => {
+  const { hospital, rating, comment } = req.body;
+
+  if (!hospital || !rating) {
+    return res.status(400).json({ msg: "Hospital and rating are required" });
+  }
+
+  const exists = await HospitalReview.findOne({
+    user: getUserId(req),
+    hospital,
+  });
+
+  if (exists) {
+    return res.status(400).json({ msg: "Already reviewed this hospital" });
+  }
+
+  const review = await HospitalReview.create({
+    user: getUserId(req),
+    hospital,
+    rating,
+    comment,
+  });
+
+  const updatedHospital = await updateHospitalRating(hospital);
+  const populated = await review.populate("user", "name");
+
+  res.status(201).json({
+    review: populated,
+    hospital: updatedHospital,
+  });
+};
+
 const getReviews = async (req, res) => {
   const reviews = await Review.find({
     doctor: req.params.doctorId,
+  })
+    .sort({ createdAt: -1 })
+    .populate("user", "name");
+
+  res.json(reviews);
+};
+
+const getHospitalReviews = async (req, res) => {
+  const reviews = await HospitalReview.find({
+    hospital: req.params.hospitalId,
   })
     .sort({ createdAt: -1 })
     .populate("user", "name");
@@ -101,7 +162,9 @@ const getTopReviews = async (req, res) => {
 
 module.exports = {
   addReview,
+  addHospitalReview,
   getReviews,
+  getHospitalReviews,
   deleteReview,
   markHelpful,
   getTopReviews,

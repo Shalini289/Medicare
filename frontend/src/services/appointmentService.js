@@ -13,6 +13,9 @@ export const getAppointmentQueue = (doctorId, date) =>
 export const getMyAppointmentQueues = () =>
   api("/api/appointments/queue/my", "GET", null, getToken());
 
+export const checkVideoCallAccess = (doctorId) =>
+  api(`/api/appointments/video-access?doctor=${doctorId}`, "GET", null, getToken());
+
 export const getSlots = (doctorId, date) =>
   api(`/api/appointments/slots/${doctorId}/${date}`);
 

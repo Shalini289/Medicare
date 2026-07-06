@@ -160,6 +160,11 @@
 }
 
 /* ===== HEADER ===== */
+.doctor-header {
+  caret-color: transparent;
+  user-select: none;
+}
+
 .doctor-header h1 {
   font-size: 32px;
   font-weight: 600;

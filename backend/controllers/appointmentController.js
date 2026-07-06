@@ -4,8 +4,33 @@ const Notification = require("../models/Notification");
 const mongoose = require("mongoose");
 
 const AVERAGE_CONSULT_MINUTES = 15;
+const APP_TIME_ZONE = process.env.APP_TIME_ZONE || "Asia/Kolkata";
+const AVAILABLE_SLOTS = [
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+];
 
-const getToday = () => new Date().toISOString().slice(0, 10);
+const getToday = () => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+};
 
 const toMinutes = (time = "00:00") => {
   const [hours, minutes] = String(time).split(":").map(Number);
@@ -13,8 +38,41 @@ const toMinutes = (time = "00:00") => {
 };
 
 const getNowMinutes = () => {
-  const now = new Date();
-  return now.getHours() * 60 + now.getMinutes();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return Number(values.hour || 0) * 60 + Number(values.minute || 0);
+};
+
+const buildVideoAccessResponse = (appointment, doctor, nowMinutes) => {
+  const startMinutes = toMinutes(appointment.time);
+  const duration = Number(doctor.slotDurationMinutes || AVERAGE_CONSULT_MINUTES);
+  const endMinutes = startMinutes + duration;
+
+  return {
+    allowed: nowMinutes >= startMinutes && nowMinutes < endMinutes,
+    appointment: {
+      _id: appointment._id,
+      date: appointment.date,
+      time: appointment.time,
+      status: appointment.status,
+    },
+    doctor: {
+      _id: doctor._id,
+      name: doctor.name,
+      specialization: doctor.specialization,
+    },
+    window: {
+      start: appointment.time,
+      end: `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`,
+      durationMinutes: duration,
+    },
+  };
 };
 
 const buildQueue = async ({ doctorId, date, userId = "" }) => {
@@ -96,6 +154,16 @@ const bookAppointment = async (req, res) => {
 
     if (!date || !time) {
       return res.status(400).json({ msg: "Please choose a date and time slot" });
+    }
+
+    const today = getToday();
+
+    if (date < today) {
+      return res.status(400).json({ msg: "Please choose today or a future date" });
+    }
+
+    if (date === today && toMinutes(time) <= getNowMinutes()) {
+      return res.status(400).json({ msg: "This time slot has already passed" });
     }
 
     const doctorExists = await Doctor.exists({ _id: doctor });
@@ -184,12 +252,90 @@ const getMyAppointmentQueues = async (req, res) => {
   res.json(queues.filter(Boolean));
 };
 
+const checkVideoCallAccess = async (req, res) => {
+  const doctorId = req.query.doctor;
+
+  if (!doctorId || !mongoose.isValidObjectId(doctorId)) {
+    return res.status(400).json({ msg: "Valid doctor is required" });
+  }
+
+  const doctor = await Doctor.findById(doctorId).select("name specialization user slotDurationMinutes");
+
+  if (!doctor) {
+    return res.status(404).json({ msg: "Doctor not found" });
+  }
+
+  const today = getToday();
+  const nowMinutes = getNowMinutes();
+  const query = {
+    doctor: doctorId,
+    date: today,
+    status: "booked",
+  };
+
+  if (req.user.role === "doctor") {
+    if (String(doctor.user || "") !== String(req.user.id)) {
+      return res.status(403).json({ msg: "This doctor profile is not linked to your account" });
+    }
+  } else {
+    query.$or = [
+      { user: req.user.id },
+      { patient: req.user.id },
+    ];
+  }
+
+  const appointments = await Appointment.find(query).sort({ time: 1 });
+  const activeAppointment = appointments.find((appointment) => {
+    const startMinutes = toMinutes(appointment.time);
+    const endMinutes = startMinutes + Number(doctor.slotDurationMinutes || AVERAGE_CONSULT_MINUTES);
+    return nowMinutes >= startMinutes && nowMinutes < endMinutes;
+  });
+
+  if (activeAppointment) {
+    return res.json(buildVideoAccessResponse(activeAppointment, doctor, nowMinutes));
+  }
+
+  const nextAppointment = appointments.find((appointment) => toMinutes(appointment.time) > nowMinutes) || null;
+  const lastAppointment = [...appointments].reverse().find((appointment) => {
+    const endMinutes = toMinutes(appointment.time) + Number(doctor.slotDurationMinutes || AVERAGE_CONSULT_MINUTES);
+    return endMinutes <= nowMinutes;
+  }) || null;
+  const referenceAppointment = nextAppointment || lastAppointment || appointments[0] || null;
+
+  if (!referenceAppointment) {
+    return res.json({
+      allowed: false,
+      msg: req.user.role === "doctor"
+        ? "No booked appointment is scheduled for your current slot."
+        : "You can start a video call only during your booked appointment slot.",
+    });
+  }
+
+  const response = buildVideoAccessResponse(referenceAppointment, doctor, nowMinutes);
+  response.allowed = false;
+  response.msg = nextAppointment
+    ? `Video call will open at ${nextAppointment.time}.`
+    : "Your booked video call slot has already ended.";
+
+  res.json(response);
+};
+
 const getSlots = async (req, res) => {
   const { doctorId, date } = req.params;
 
-  const booked = await Appointment.find({ doctor: doctorId, date, status: "booked" });
+  if (date < getToday()) {
+    return res.status(400).json({ msg: "Please choose today or a future date" });
+  }
 
-  res.json(booked.map(b => b.time));
+  const booked = await Appointment.find({ doctor: doctorId, date, status: "booked" });
+  const unavailable = booked.map((appointment) => appointment.time);
+
+  if (date === getToday()) {
+    const nowMinutes = getNowMinutes();
+    unavailable.push(...AVAILABLE_SLOTS.filter((slot) => toMinutes(slot) <= nowMinutes));
+  }
+
+  res.json([...new Set(unavailable)]);
 };
 
 const cancelAppointment = async (req, res) => {
@@ -222,6 +368,7 @@ module.exports = {
   getAppointmentQueue,
   getMyAppointmentQueues,
   getMyAppointments,
+  checkVideoCallAccess,
   getSlots,
   cancelAppointment
 };

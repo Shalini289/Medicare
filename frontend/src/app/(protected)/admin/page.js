@@ -153,6 +153,44 @@ const getBookedTests = (booking) => {
     .join(", ");
 };
 
+const hospitalBedPairs = [
+  ["ICU", "ICU", "occupiedICU"],
+  ["oxygen", "Oxygen", "occupiedOxygen"],
+  ["general", "General", "occupiedGeneral"],
+];
+
+const hospitalNumberFields = new Set([
+  "ICU",
+  "oxygen",
+  "general",
+  "occupiedICU",
+  "occupiedOxygen",
+  "occupiedGeneral",
+]);
+
+const hospitalOccupiedLimits = {
+  occupiedICU: "ICU",
+  occupiedOxygen: "oxygen",
+  occupiedGeneral: "general",
+};
+
+const validateHospitalBedForm = (form) => {
+  for (const [totalKey, label, occupiedKey] of hospitalBedPairs) {
+    const total = Number(form[totalKey] || 0);
+    const occupied = Number(form[occupiedKey] || 0);
+
+    if (total < 0 || occupied < 0) {
+      return `${label} beds cannot be negative`;
+    }
+
+    if (occupied > total) {
+      return `${label} occupied beds cannot be greater than total beds`;
+    }
+  }
+
+  return "";
+};
+
 const renderRecordValue = (value) => {
   if (value === null || value === undefined || value === "") return "Not set";
   if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -315,6 +353,24 @@ export default function AdminDashboard() {
     await loadDashboard();
   };
 
+  const updateHospitalField = (field, value) => {
+    setHospitalForm((current) => {
+      const next = { ...current, [field]: value };
+
+      hospitalBedPairs.forEach(([totalKey, , occupiedKey]) => {
+        const total = Number(next[totalKey] || 0);
+        const occupied = Number(next[occupiedKey] || 0);
+
+        if (occupied > total) {
+          next[occupiedKey] = String(total);
+        }
+      });
+
+      return next;
+    });
+    setError("");
+  };
+
   const saveDoctor = async () => {
     if (!doctorForm.name || !doctorForm.specialization) return setError("Fill required doctor fields");
     if (editingIds.doctor) await updateDoctor(editingIds.doctor, doctorForm);
@@ -335,6 +391,9 @@ export default function AdminDashboard() {
 
   const saveHospital = async () => {
     if (!hospitalForm.name || !hospitalForm.city) return setError("Fill required hospital fields");
+    const bedError = validateHospitalBedForm(hospitalForm);
+    if (bedError) return setError(bedError);
+
     const payload = {
       name: hospitalForm.name,
       city: hospitalForm.city,
@@ -680,6 +739,15 @@ export default function AdminDashboard() {
               ]}
             />
             <RecordGroup
+              title="Hospital reviews"
+              records={records.hospitalReviews}
+              fields={[
+                ["User", (item) => getPersonName(item.user)],
+                ["Hospital", (item) => getPersonName(item.hospital)],
+                ["Rating", (item) => item.rating],
+              ]}
+            />
+            <RecordGroup
               title="Notifications"
               records={records.notifications}
               fields={[
@@ -758,9 +826,22 @@ export default function AdminDashboard() {
           <section className="admin-section">
             <h2>Bed management</h2>
             <div className="admin-form">
-              {Object.keys(emptyHospitalForm).map((field) => (
-                <input key={field} placeholder={field} value={hospitalForm[field]} onChange={(e) => setHospitalForm({ ...hospitalForm, [field]: e.target.value })} />
-              ))}
+              {Object.keys(emptyHospitalForm).map((field) => {
+                const isNumberField = hospitalNumberFields.has(field);
+                const maxField = hospitalOccupiedLimits[field];
+
+                return (
+                  <input
+                    key={field}
+                    type={isNumberField ? "number" : "text"}
+                    min={isNumberField ? "0" : undefined}
+                    max={maxField ? Number(hospitalForm[maxField] || 0) : undefined}
+                    placeholder={field}
+                    value={hospitalForm[field]}
+                    onChange={(e) => updateHospitalField(field, e.target.value)}
+                  />
+                );
+              })}
               <button onClick={saveHospital}>{editingIds.hospital ? "Update beds" : "Add hospital"}</button>
             </div>
             {hospitals.map((hospital) => {

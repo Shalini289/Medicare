@@ -28,6 +28,25 @@ const buildHospitalSummary = (hospital) => {
   };
 };
 
+const bedTypes = ["ICU", "oxygen", "general"];
+
+const validateBedCounts = (beds = {}, occupiedBeds = {}) => {
+  for (const type of bedTypes) {
+    const total = Number(beds[type] || 0);
+    const occupied = Number(occupiedBeds[type] || 0);
+
+    if (total < 0 || occupied < 0) {
+      return `${type} beds cannot be negative`;
+    }
+
+    if (occupied > total) {
+      return `${type} occupied beds cannot be greater than total beds`;
+    }
+  }
+
+  return "";
+};
+
 const getHospitals = async (req, res) => {
   res.json(await Hospital.find());
 };
@@ -67,9 +86,17 @@ const updateBeds = async (req, res) => {
     return res.status(400).json({ msg: "Hospital id and beds are required" });
   }
 
+  if (req.body.occupiedBeds) {
+    const validationError = validateBedCounts(req.body.beds, req.body.occupiedBeds);
+    if (validationError) return res.status(400).json({ msg: validationError });
+  }
+
   const hospital = await Hospital.findByIdAndUpdate(
     req.body.id,
-    { beds: req.body.beds },
+    {
+      beds: req.body.beds,
+      ...(req.body.occupiedBeds ? { occupiedBeds: req.body.occupiedBeds } : {}),
+    },
     { new: true }
   );
 
@@ -117,6 +144,11 @@ const updateMyHospital = async (req, res) => {
 
   if (!payload.name || !payload.city) {
     return res.status(400).json({ msg: "Hospital name and city are required" });
+  }
+
+  const validationError = validateBedCounts(payload.beds, payload.occupiedBeds);
+  if (validationError) {
+    return res.status(400).json({ msg: validationError });
   }
 
   await ensureHospitalProfile(req.user.id);

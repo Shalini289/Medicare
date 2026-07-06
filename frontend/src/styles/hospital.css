@@ -87,6 +87,26 @@
   color: #777;
 }
 
+.hospital-rating-summary {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.hospital-rating-summary span {
+  align-items: center;
+  color: #a64263;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 5px;
+}
+
+.hospital-rating-summary small {
+  color: #777;
+  font-size: 13px;
+}
+
 .hospital-contact-info {
   display: grid;
   gap: 8px;
@@ -187,6 +207,59 @@
   background: #f8f8f8;
   color: #777;
   grid-column: 1 / -1;
+}
+
+.hospital-rating-form {
+  border-top: 1px solid #f4d8e2;
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.hospital-rating-buttons {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.hospital-rating-buttons button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #d8c4cc;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 18px;
+  padding: 2px;
+}
+
+.hospital-rating-buttons button.active {
+  color: #c85f84;
+}
+
+.hospital-rating-form textarea {
+  border: 1px solid #f0c8d5;
+  border-radius: 10px;
+  min-height: 76px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.hospital-rating-form > button {
+  background: #c85f84;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 42px;
+}
+
+.hospital-rating-form p {
+  color: #a64263;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
 }
 
 /* ===== EMPTY ===== */

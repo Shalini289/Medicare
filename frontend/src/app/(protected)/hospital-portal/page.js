@@ -55,6 +55,23 @@ const bedTypes = [
 
 const numberValue = (value) => Number(value || 0);
 
+const getBedError = (form) => {
+  for (const [key, label] of bedTypes) {
+    const total = numberValue(form.beds[key]);
+    const occupied = numberValue(form.occupiedBeds[key]);
+
+    if (total < 0 || occupied < 0) {
+      return `${label} beds cannot be negative.`;
+    }
+
+    if (occupied > total) {
+      return `${label} occupied beds cannot be greater than total beds.`;
+    }
+  }
+
+  return "";
+};
+
 export default function HospitalPortalPage() {
   const router = useRouter();
   const [accessStatus, setAccessStatus] = useState("checking");
@@ -102,14 +119,36 @@ export default function HospitalPortalPage() {
   };
 
   const updateBed = (group, key, value) => {
-    setForm((current) => ({
-      ...current,
-      [group]: {
-        ...current[group],
-        [key]: value,
-      },
-    }));
+    setForm((current) => {
+      const next = {
+        ...current,
+        [group]: {
+          ...current[group],
+          [key]: value,
+        },
+      };
+
+      const total = numberValue(next.beds[key]);
+      const occupied = numberValue(next.occupiedBeds[key]);
+
+      if (group === "beds" && occupied > total) {
+        next.occupiedBeds = {
+          ...next.occupiedBeds,
+          [key]: String(total),
+        };
+      }
+
+      if (group === "occupiedBeds" && occupied > total) {
+        next.occupiedBeds = {
+          ...next.occupiedBeds,
+          [key]: String(total),
+        };
+      }
+
+      return next;
+    });
     setMessage("");
+    setError("");
   };
 
   const saveHospital = async (event) => {
@@ -117,6 +156,12 @@ export default function HospitalPortalPage() {
 
     if (!form.name.trim() || !form.city.trim()) {
       setError("Hospital name and city are required.");
+      return;
+    }
+
+    const bedError = getBedError(form);
+    if (bedError) {
+      setError(bedError);
       return;
     }
 
@@ -245,6 +290,7 @@ export default function HospitalPortalPage() {
                   <input
                     type="number"
                     min="0"
+                    max={numberValue(form.beds[key])}
                     value={form.occupiedBeds[key]}
                     onChange={(event) => updateBed("occupiedBeds", key, event.target.value)}
                   />
