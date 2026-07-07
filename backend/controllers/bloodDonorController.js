@@ -1,6 +1,7 @@
 const BloodDonor = require("../models/BloodDonor");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
+const { normalizePhone, validatePhone } = require("../utils/phoneValidation");
 
 const getUserId = (req) => req.user.id || req.user._id;
 
@@ -8,7 +9,7 @@ const normalizeDonor = (body) => ({
   name: body.name?.trim() || "",
   bloodGroup: body.bloodGroup,
   city: body.city?.trim() || "",
-  phone: body.phone?.trim() || "",
+  phone: normalizePhone(body.phone),
   email: body.email?.trim() || "",
   age: body.age ? Number(body.age) : undefined,
   lastDonationDate: body.lastDonationDate || undefined,
@@ -21,6 +22,9 @@ const validateDonor = (donor) => {
   if (!donor.name || !donor.bloodGroup || !donor.city || !donor.phone) {
     return "Name, blood group, city, and phone are required";
   }
+
+  const phoneError = validatePhone(donor.phone, "Phone", { required: true });
+  if (phoneError) return phoneError;
 
   if (donor.age && (donor.age < 18 || donor.age > 65)) {
     return "Donor age must be between 18 and 65";

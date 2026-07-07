@@ -9,7 +9,14 @@
 body {
   font-family: "Inter", "Poppins", sans-serif;
   background: linear-gradient(to bottom, #fff6f9, #ffffff);
+  caret-color: transparent;
   color: #2d2d2d;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  caret-color: auto;
 }
 
 /* ===== MAIN CONTAINER ===== */

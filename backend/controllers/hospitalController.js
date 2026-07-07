@@ -1,5 +1,6 @@
 const Hospital = require("../models/Hospital");
 const User = require("../models/User");
+const { normalizePhone, validatePhone } = require("../utils/phoneValidation");
 
 const buildHospitalSummary = (hospital) => {
   const beds = hospital.beds || {};
@@ -127,8 +128,8 @@ const updateMyHospital = async (req, res) => {
     name: req.body.name?.trim(),
     city: req.body.city?.trim(),
     address: req.body.address?.trim() || "",
-    phone: req.body.phone?.trim() || "",
-    emergencyPhone: req.body.emergencyPhone?.trim() || "",
+    phone: normalizePhone(req.body.phone),
+    emergencyPhone: normalizePhone(req.body.emergencyPhone),
     status: req.body.status || "active",
     beds: {
       ICU: Number(req.body.beds?.ICU || 0),
@@ -144,6 +145,12 @@ const updateMyHospital = async (req, res) => {
 
   if (!payload.name || !payload.city) {
     return res.status(400).json({ msg: "Hospital name and city are required" });
+  }
+
+  const phoneError = validatePhone(payload.phone, "Phone", { required: false }) ||
+    validatePhone(payload.emergencyPhone, "Emergency phone", { required: false });
+  if (phoneError) {
+    return res.status(400).json({ msg: phoneError });
   }
 
   const validationError = validateBedCounts(payload.beds, payload.occupiedBeds);

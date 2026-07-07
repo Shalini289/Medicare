@@ -6,6 +6,7 @@ const {
   encryptList,
   encryptString,
 } = require("../utils/fieldCrypto");
+const { normalizePhone, validatePhone } = require("../utils/phoneValidation");
 
 const getUserId = (req) => req.user.id || req.user._id;
 
@@ -25,9 +26,18 @@ const cleanContacts = (contacts = []) =>
     .map((contact) => ({
       name: contact.name?.trim() || "",
       relation: contact.relation?.trim() || "",
-      phone: contact.phone?.trim() || "",
+      phone: normalizePhone(contact.phone),
     }))
     .filter((contact) => contact.name || contact.phone);
+
+const validateContacts = (contacts = []) => {
+  for (const contact of contacts) {
+    const phoneError = validatePhone(contact.phone, "Contact phone", { required: Boolean(contact.phone) });
+    if (phoneError) return phoneError;
+  }
+
+  return "";
+};
 
 const cleanHistory = (history = []) =>
   history
@@ -144,6 +154,12 @@ exports.getMedicalProfile = async (req, res) => {
 };
 
 exports.saveMedicalProfile = async (req, res) => {
+  const contacts = cleanContacts(req.body.emergencyContacts);
+  const contactError = validateContacts(contacts);
+  if (contactError) {
+    return res.status(400).json({ msg: contactError });
+  }
+
   const profile = await MedicalProfile.findOneAndUpdate(
     { user: getUserId(req) },
     { ...normalizeProfile(req.body), user: getUserId(req) },
@@ -180,6 +196,11 @@ exports.saveEmergencyContacts = async (req, res) => {
 
   if (contacts.length === 0) {
     return res.status(400).json({ msg: "Add at least one emergency contact" });
+  }
+
+  const contactError = validateContacts(contacts);
+  if (contactError) {
+    return res.status(400).json({ msg: contactError });
   }
 
   const profile = await MedicalProfile.findOneAndUpdate(

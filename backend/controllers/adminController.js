@@ -23,6 +23,7 @@ const Prescription = require("../models/Prescription");
 const Review = require("../models/Review");
 const Vaccination = require("../models/Vaccination");
 const Vital = require("../models/Vital");
+const { normalizePhone, validatePhone } = require("../utils/phoneValidation");
 
 const makeCode = (prefix) =>
   `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -70,6 +71,14 @@ const validateBedCounts = (beds = {}, occupiedBeds = {}) => {
     }
   }
 
+  return "";
+};
+
+const validatePayloadPhone = (payload, field, label, required = false) => {
+  const phone = normalizePhone(payload[field]);
+  const phoneError = validatePhone(phone, label, { required });
+  if (phoneError) return phoneError;
+  payload[field] = phone;
   return "";
 };
 
@@ -352,18 +361,28 @@ const getHospitalsAdmin = async (req, res) => {
 };
 
 const addHospital = async (req, res) => {
-  const validationError = validateBedCounts(req.body.beds, req.body.occupiedBeds);
+  const payload = { ...req.body };
+  const phoneError = validatePayloadPhone(payload, "phone", "Phone") ||
+    validatePayloadPhone(payload, "emergencyPhone", "Emergency phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const validationError = validateBedCounts(payload.beds, payload.occupiedBeds);
   if (validationError) return res.status(400).json({ msg: validationError });
 
-  const hospital = await Hospital.create(req.body);
+  const hospital = await Hospital.create(payload);
   res.json(hospital);
 };
 
 const updateHospitalBeds = async (req, res) => {
-  const validationError = validateBedCounts(req.body.beds, req.body.occupiedBeds);
+  const payload = { ...req.body };
+  const phoneError = validatePayloadPhone(payload, "phone", "Phone") ||
+    validatePayloadPhone(payload, "emergencyPhone", "Emergency phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const validationError = validateBedCounts(payload.beds, payload.occupiedBeds);
   if (validationError) return res.status(400).json({ msg: validationError });
 
-  const hospital = await Hospital.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const hospital = await Hospital.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
   if (!hospital) return res.status(404).json({ msg: "Hospital not found" });
   req.app.get("io").emit("bedUpdate", hospital);
   res.json(hospital);
@@ -375,12 +394,20 @@ const getStaffAdmin = async (req, res) => {
 };
 
 const addStaff = async (req, res) => {
-  const staff = await Staff.create(req.body);
+  const payload = { ...req.body };
+  const phoneError = validatePayloadPhone(payload, "phone", "Staff phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const staff = await Staff.create(payload);
   res.json(staff);
 };
 
 const updateStaff = async (req, res) => {
-  const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const payload = { ...req.body };
+  const phoneError = validatePayloadPhone(payload, "phone", "Staff phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const staff = await Staff.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
   if (!staff) return res.status(404).json({ msg: "Staff member not found" });
   res.json(staff);
 };
@@ -456,12 +483,20 @@ const getAmbulancesAdmin = async (req, res) => {
 };
 
 const addAmbulance = async (req, res) => {
-  const ambulance = await Ambulance.create(req.body);
+  const payload = { ...req.body };
+  const phoneError = validatePayloadPhone(payload, "driverPhone", "Driver phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const ambulance = await Ambulance.create(payload);
   res.json(ambulance);
 };
 
 const updateAmbulance = async (req, res) => {
-  const ambulance = await Ambulance.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const payload = { ...req.body };
+  const phoneError = validatePayloadPhone(payload, "driverPhone", "Driver phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const ambulance = await Ambulance.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
   if (!ambulance) return res.status(404).json({ msg: "Ambulance not found" });
   req.app.get("io").emit("ambulanceUpdate", ambulance);
   res.json(ambulance);
@@ -478,14 +513,22 @@ const getDepartmentsAdmin = async (req, res) => {
 };
 
 const addDepartment = async (req, res) => {
-  const department = await Department.create({ ...req.body, beds: Number(req.body.beds || 0) });
+  const payload = { ...req.body, beds: Number(req.body.beds || 0) };
+  const phoneError = validatePayloadPhone(payload, "phone", "Department phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
+  const department = await Department.create(payload);
   res.json(department);
 };
 
 const updateDepartment = async (req, res) => {
+  const payload = { ...req.body, beds: Number(req.body.beds || 0) };
+  const phoneError = validatePayloadPhone(payload, "phone", "Department phone");
+  if (phoneError) return res.status(400).json({ msg: phoneError });
+
   const department = await Department.findByIdAndUpdate(
     req.params.id,
-    { ...req.body, beds: Number(req.body.beds || 0) },
+    payload,
     { new: true, runValidators: true }
   );
   if (!department) return res.status(404).json({ msg: "Department not found" });

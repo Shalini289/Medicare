@@ -234,13 +234,6 @@
   font-size: 13px;
 }
 
-.slot span {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  margin-top: 3px;
-}
-
 /* ===== STATES ===== */
 .slot:hover {
   border-color: #D4708F;

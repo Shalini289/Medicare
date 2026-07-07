@@ -57,6 +57,11 @@ export default function Booking() {
   const [clock, setClock] = useState(Date.now());
   const today = toDateInputValue();
   const currentMinutes = getNowMinutes(clock);
+  const visibleSlots = availableSlots.filter((slot) => {
+    if (!date || date > today) return true;
+    if (date < today) return false;
+    return toMinutes(slot) > currentMinutes;
+  });
 
   const loadFamily = useCallback(async () => {
     const res = await api("/api/family");
@@ -206,17 +211,16 @@ export default function Booking() {
         <div className="field">
           <label>Time Slot</label>
           <div className="slots">
-            {availableSlots.map((slot) => {
+            {visibleSlots.map((slot) => {
               const booked = bookedSlots.includes(slot);
-              const pastSlot = date === today && toMinutes(slot) <= currentMinutes;
-              const unavailable = booked || pastSlot || date < today;
+              const unavailable = booked || date < today;
 
               return (
                 <button
                   key={slot}
                   className={`slot ${time === slot ? "selected" : ""} ${unavailable ? "booked" : ""}`}
                   disabled={unavailable}
-                  title={pastSlot ? "This time has already passed" : booked ? "Already booked" : "Available"}
+                  title={booked ? "Already booked" : "Available"}
                   onClick={() => {
                     setTime(slot);
                     setError("");
@@ -224,11 +228,15 @@ export default function Booking() {
                   }}
                 >
                   {slot}
-                  {pastSlot && <span>Passed</span>}
                 </button>
               );
             })}
           </div>
+          {date === today && visibleSlots.length === 0 && (
+            <p className="field-hint">
+              No more appointment slots are available today. Please choose another date.
+            </p>
+          )}
         </div>
 
         <div className="field">

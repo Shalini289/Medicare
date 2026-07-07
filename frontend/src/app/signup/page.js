@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { register } from "@/services/authService";
+import { normalizePhone, phoneError } from "@/utils/phoneValidation";
 import "../../styles/signup.css";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,6 +57,11 @@ const validateSignup = (values) => {
     if (!values.city.trim()) {
       nextErrors.city = "City is required for hospital accounts.";
     }
+
+    const phoneValidation = phoneError(values.phone, "Phone", { required: false });
+    const emergencyPhoneValidation = phoneError(values.emergencyPhone, "Emergency phone", { required: false });
+    if (phoneValidation) nextErrors.phone = phoneValidation;
+    if (emergencyPhoneValidation) nextErrors.emergencyPhone = emergencyPhoneValidation;
   }
 
   return nextErrors;
@@ -89,7 +95,11 @@ export default function SignupPage() {
   const [serverError, setServerError] = useState("");
 
   const updateField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }));
+    const nextValue = ["phone", "emergencyPhone"].includes(field)
+      ? normalizePhone(value)
+      : value;
+
+    setForm((current) => ({ ...current, [field]: nextValue }));
     setServerError("");
 
     if (errors[field]) {
@@ -300,8 +310,12 @@ export default function SignupPage() {
                     type="tel"
                     placeholder="Reception phone"
                     value={form.phone}
+                    inputMode="numeric"
+                    maxLength={10}
+                    aria-invalid={Boolean(errors.phone)}
                     onChange={(e) => updateField("phone", e.target.value)}
                   />
+                  {errors.phone && <small>{errors.phone}</small>}
                 </label>
               </div>
 
@@ -321,8 +335,12 @@ export default function SignupPage() {
                   type="tel"
                   placeholder="Emergency contact number"
                   value={form.emergencyPhone}
+                  inputMode="numeric"
+                  maxLength={10}
+                  aria-invalid={Boolean(errors.emergencyPhone)}
                   onChange={(e) => updateField("emergencyPhone", e.target.value)}
                 />
+                {errors.emergencyPhone && <small>{errors.emergencyPhone}</small>}
               </label>
 
               <div className="signup-field-grid">

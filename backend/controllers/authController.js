@@ -4,6 +4,7 @@ const generateToken = require("../utils/generateToken");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
+const { normalizePhone, validatePhone } = require("../utils/phoneValidation");
 
 const toSafeUser = (user) => ({
   _id: user._id,
@@ -71,6 +72,15 @@ const register = async (req, res) => {
 
   const cleanName = name.trim();
   const cleanEmail = email.trim().toLowerCase();
+  const phone = normalizePhone(req.body.phone);
+  const emergencyPhone = normalizePhone(req.body.emergencyPhone);
+
+  const phoneError = validatePhone(phone, "Phone", { required: false }) ||
+    validatePhone(emergencyPhone, "Emergency phone", { required: false });
+
+  if (phoneError) {
+    return res.status(400).json({ msg: phoneError });
+  }
 
   const exists = await User.findOne({ email: cleanEmail });
   if (exists) return res.status(400).json({ msg: "User exists" });
@@ -79,7 +89,7 @@ const register = async (req, res) => {
     name: cleanName,
     email: cleanEmail,
     password,
-    phone: req.body.phone?.trim() || "",
+    phone,
     role,
   });
 
@@ -113,8 +123,8 @@ const register = async (req, res) => {
       name: req.body.hospitalName?.trim() || cleanName,
       city: req.body.city?.trim() || "",
       address: req.body.address?.trim() || "",
-      phone: req.body.phone?.trim() || "",
-      emergencyPhone: req.body.emergencyPhone?.trim() || "",
+      phone,
+      emergencyPhone,
       beds: {
         ICU: Number(req.body.ICU || 0),
         oxygen: Number(req.body.oxygen || 0),
@@ -275,14 +285,15 @@ const updateProfile = async (req, res) => {
   }
 
   const name = req.body.name?.trim();
-  const phone = req.body.phone?.trim() || "";
+  const phone = normalizePhone(req.body.phone);
 
   if (!name || name.length < 2 || !/^[a-zA-Z\s.'-]+$/.test(name)) {
     return res.status(400).json({ msg: "Enter a valid full name" });
   }
 
-  if (phone && !/^[0-9+\-\s()]{7,20}$/.test(phone)) {
-    return res.status(400).json({ msg: "Enter a valid phone number" });
+  const phoneError = validatePhone(phone, "Phone", { required: false });
+  if (phoneError) {
+    return res.status(400).json({ msg: phoneError });
   }
 
   user.name = name;
